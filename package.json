@@ -1,0 +1,15 @@
+{
+    "name": "learnhub-lms",
+    "version": "1.0.0",
+    "description": "LearnHub LMS — React frontend + Node.js/Express backend",
+    "private": true,
+    "scripts": {
+        "dev": "concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"cyan,magenta\" \"npm run dev --prefix lms-backend\" \"npm run dev --prefix lms-frontend\"",
+        "install:all": "npm install --prefix lms-backend && npm install --prefix lms-frontend",
+        "backend": "npm run dev --prefix lms-backend",
+        "frontend": "npm run dev --prefix lms-frontend"
+    },
+    "devDependencies": {
+        "concurrently": "^9.1.2"
+    }
+}

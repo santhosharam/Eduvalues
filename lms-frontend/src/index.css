@@ -1,0 +1,208 @@
+@import "tailwindcss";
+
+/* ══ VE VALUE EDUCATION DESIGN SYSTEM ═════════════════════════ */
+
+:root {
+  /* Logo-Based Palette */
+  --primary-navy: #001F3F;
+  /* Dark Navy from logo */
+  --primary-teal: #00A6C0;
+  /* Bright Teal from logo */
+  --accent-cyan: #00D2D3;
+  /* Cyan highlight */
+  --accent-orange: #FF9F43;
+  /* For variety (warmth) */
+  --bg-soft: #F4F7F9;
+  --text-main: #2D3436;
+  --text-muted: #636E72;
+
+  /* Layout */
+  --radius-sm: 12px;
+  --radius-md: 24px;
+  --radius-lg: 40px;
+  --shadow-soft: 0 10px 30px rgba(0, 166, 192, 0.08);
+  --shadow-hover: 0 15px 40px rgba(0, 166, 192, 0.15);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Quicksand', sans-serif;
+  background-color: #fff;
+  color: var(--text-main);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 700;
+  color: var(--primary-navy);
+  line-height: 1.2;
+}
+
+/* ══ COMPONENTS ═══════════════════════════════════════════════ */
+
+.section-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Playful Buttons - Updated to Teal/Navy */
+.btn-primary {
+  background: var(--primary-teal);
+  color: #fff;
+  font-weight: 700;
+  padding: 14px 32px;
+  border-radius: var(--radius-lg);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 0 rgba(0, 166, 192, 0.1);
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 166, 192, 0.3);
+  background: #008fa6;
+}
+
+.btn-secondary {
+  background: var(--primary-navy);
+  color: #fff;
+  font-weight: 700;
+  padding: 14px 32px;
+  border-radius: var(--radius-lg);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-secondary:hover {
+  background: #002a57;
+  transform: translateY(-2px);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--primary-teal);
+  font-weight: 700;
+  padding: 12px 28px;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--primary-teal);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-outline:hover {
+  background: var(--primary-teal);
+  color: #fff;
+}
+
+/* Input Fields */
+.input-field {
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+  border: 2px solid #EEE;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 15px;
+  background: #FFF;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: var(--primary-teal);
+  box-shadow: 0 0 0 4px rgba(0, 166, 192, 0.1);
+}
+
+/* Cards */
+.kids-card {
+  background: #fff;
+  border-radius: var(--radius-md);
+  border: 2px solid #F1F1F1;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.kids-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--primary-teal);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Badge Styles */
+.badge-onsite {
+  background: var(--accent-orange);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.badge-online {
+  background: var(--primary-teal);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+/* Animations */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-15px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
