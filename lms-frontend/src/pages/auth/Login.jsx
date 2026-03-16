@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import Navbar from '../../components/common/Navbar'
 import Footer from '../../components/common/Footer'
@@ -9,6 +9,7 @@ import { LogIn, Mail, Lock, Loader2, PlayCircle, Rocket, Smile } from 'lucide-re
 export default function Login() {
     const { login } = useAuth()
     const navigate = useNavigate()
+    const location = useLocation()
     const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({ email: '', password: '' })
 
@@ -22,7 +23,8 @@ export default function Login() {
                 navigate('/admin')
             } else {
                 toast.success('Ready to play! 👋')
-                navigate('/dashboard')
+                const from = location.state?.from?.pathname || '/dashboard'
+                navigate(from, { replace: true })
             }
         } catch (err) {
             toast.error(err.response?.data?.message || 'Login failed')
@@ -100,7 +102,7 @@ export default function Login() {
                         </form>
 
                         <div style={{ marginTop: 40, textAlign: 'center', fontSize: 15, color: '#888', fontWeight: 600 }}>
-                            New here? <Link to="/register" style={{ color: '#00A6C0', fontWeight: 800, textDecoration: 'none' }}>Join the fun!</Link>
+                            New here? <Link to="/register" state={{ from: location.state?.from }} style={{ color: '#00A6C0', fontWeight: 800, textDecoration: 'none' }}>Join the fun!</Link>
                         </div>
                     </div>
                 </div>

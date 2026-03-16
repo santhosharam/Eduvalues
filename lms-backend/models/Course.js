@@ -15,12 +15,13 @@ const courseSchema = new mongoose.Schema({
     lessons: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Lesson' }],
     isPublished: { type: Boolean, default: true },
     tags: [String],
+    rating: { type: Number, default: 0 },
+    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
 }, { timestamps: true })
-courseSchema.pre('save', function (next) {
+courseSchema.pre('save', async function () {
     if (!this.slug && this.title) {
         this.slug = this.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
     }
-    next()
 })
 
 module.exports = mongoose.model('Course', courseSchema)

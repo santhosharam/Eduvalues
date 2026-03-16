@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import Navbar from '../../components/common/Navbar'
 import Footer from '../../components/common/Footer'
@@ -9,6 +9,7 @@ import { User, Mail, Lock, Loader2, UserPlus, CheckCircle, Rocket, Smile } from 
 export default function Register() {
     const { register } = useAuth()
     const navigate = useNavigate()
+    const location = useLocation()
     const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({ name: '', email: '', password: '' })
 
@@ -18,7 +19,8 @@ export default function Register() {
         try {
             await register(formData)
             toast.success('Welcome to Kids LMS! 🚀')
-            navigate('/dashboard')
+            const from = location.state?.from?.pathname || '/dashboard'
+            navigate(from, { replace: true })
         } catch (err) {
             toast.error(err.response?.data?.message || 'Registration failed')
         } finally {
@@ -112,7 +114,7 @@ export default function Register() {
                         </form>
 
                         <div style={{ marginTop: 40, textAlign: 'center', fontSize: 15, color: '#888', fontWeight: 600 }}>
-                            Already have an account? <Link to="/login" style={{ color: '#00A6C0', fontWeight: 800, textDecoration: 'none' }}>Sign in here</Link>
+                            Already have an account? <Link to="/login" state={{ from: location.state?.from }} style={{ color: '#00A6C0', fontWeight: 800, textDecoration: 'none' }}>Sign in here</Link>
                         </div>
                     </div>
                 </div>

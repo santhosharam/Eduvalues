@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Navbar from '../../components/common/Navbar'
 import Footer from '../../components/common/Footer'
+import CourseCard from '../../components/course/CourseCard'
 import { getAllCourses } from '../../services/courseService'
 import {
     BookOpen, Users, Star, Brain, Palmtree,
@@ -308,7 +309,7 @@ export default function Home() {
 
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
                         gap: '32px'
                     }}>
                         {loading ? (
@@ -317,57 +318,7 @@ export default function Home() {
                                 <p style={{ marginTop: 20, color: '#001F3F', fontWeight: 700 }}>Finding adventures...</p>
                             </div>
                         ) : courses.map(course => (
-                            <div key={course._id} className="kids-card">
-                                <Link to={`/courses/${course.slug || course._id}`} style={{ textDecoration: 'none' }}>
-                                    <div style={{ height: '220px', position: 'relative' }}>
-                                        <img
-                                            src={course.thumbnail || `https://picsum.photos/seed/${course._id}/400/300`}
-                                            alt={course.title}
-                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                        />
-                                        <div style={{
-                                            position: 'absolute',
-                                            top: '16px',
-                                            right: '16px',
-                                            background: course.price === 0 ? '#1DD1A1' : '#00A6C0',
-                                            color: '#fff',
-                                            padding: '6px 14px',
-                                            borderRadius: '12px',
-                                            fontSize: '13px',
-                                            fontWeight: 800,
-                                            boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
-                                        }}>
-                                            {course.price === 0 ? 'FREE GIFT' : `₹${course.discountPrice || course.price}`}
-                                        </div>
-                                    </div>
-                                    <div style={{ padding: '28px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                                            <span style={{ fontSize: 11, fontWeight: 800, color: '#00A6C0', letterSpacing: 1, background: 'rgba(0, 166, 192, 0.1)', padding: '4px 10px', borderRadius: '6px' }}>{course.category?.toUpperCase() || 'KIDS'}</span>
-                                        </div>
-                                        <h3 style={{
-                                            fontSize: '22px',
-                                            color: '#333',
-                                            marginBottom: '16px',
-                                            lineHeight: 1.3,
-                                            height: '58px',
-                                            overflow: 'hidden',
-                                            display: '-webkit-box',
-                                            WebkitLineClamp: 2,
-                                            WebkitBoxOrient: 'vertical'
-                                        }}>{course.title}</h3>
-
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 24 }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                                <Users size={16} color="#00A6C0" />
-                                                <span style={{ fontSize: 13, fontWeight: 700, color: '#666' }}>{course.enrolledCount || 0} Learners</span>
-                                            </div>
-                                            <div style={{ display: 'flex' }}>
-                                                {[...Array(5)].map((_, i) => <Star key={i} size={14} fill="#00A6C0" color="#00A6C0" />)}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Link>
-                            </div>
+                            <CourseCard key={course._id} course={course} />
                         ))}
                     </div>
                 </div>

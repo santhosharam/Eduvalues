@@ -53,7 +53,11 @@ export default function MyCourses() {
                                     <p style={{ color: '#64748b', fontSize: 13, marginBottom: 12 }}>by {e.course?.instructor}</p>
                                     <ProgressBar percent={e.progress || 0} />
                                 </div>
-                                <Link to={`/dashboard/lesson/${e.course?.lessons?.[0]}`} className="btn-primary" style={{ padding: '9px 20px', fontSize: 13, flexShrink: 0 }}>
+                                <Link 
+                                    to={`/dashboard/lesson/${e.lastWatched || (e.course?.lessons?.[0]?._id || e.course?.lessons?.[0])}`} 
+                                    className="btn-primary" 
+                                    style={{ padding: '9px 20px', fontSize: 13, flexShrink: 0 }}
+                                >
                                     {e.isCompleted ? 'Review' : 'Continue'}
                                 </Link>
                             </div>

@@ -79,14 +79,15 @@ export default function Navbar() {
 
                     {user ? (
                         <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-                            {user.role === 'admin' && (
-                                <Link to="/admin" className="btn-primary" style={{ padding: '10px 24px', fontSize: 13, background: '#001F3F' }}>
-                                    Admin Hub
-                                </Link>
+                            {!location.pathname.startsWith('/dashboard/lesson') && (
+                                <>
+                                    {user.role === 'admin' && (
+                                        <Link to="/admin" className="btn-primary" style={{ padding: '10px 24px', fontSize: 13, background: '#001F3F' }}>
+                                            Admin Hub
+                                        </Link>
+                                    )}
+                                </>
                             )}
-                            <Link to="/dashboard" className="btn-secondary" style={{ padding: '10px 24px', fontSize: 14 }}>
-                                Hello, {user.name.split(' ')[0]}
-                            </Link>
                             <button onClick={logout} style={{ background: 'none', border: 'none', color: '#ff4d4d', cursor: 'pointer', padding: 10, fontWeight: 700 }}>
                                 Logout
                             </button>
@@ -117,10 +118,14 @@ export default function Navbar() {
                         ))}
                         {user ? (
                             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                                {user.role === 'admin' && (
-                                    <Link to="/admin" onClick={() => setMenuOpen(false)} className="btn-primary" style={{ background: '#001F3F' }}>Admin Hub</Link>
+                                {!location.pathname.startsWith('/dashboard/lesson') && (
+                                    <>
+                                        {user.role === 'admin' && (
+                                            <Link to="/admin" onClick={() => setMenuOpen(false)} className="btn-primary" style={{ background: '#001F3F' }}>Admin Hub</Link>
+                                        )}
+                                        <Link to="/dashboard" onClick={() => setMenuOpen(false)} className="btn-secondary">Dashboard</Link>
+                                    </>
                                 )}
-                                <Link to="/dashboard" onClick={() => setMenuOpen(false)} className="btn-secondary">Dashboard</Link>
                                 <button onClick={logout} className="btn-outline">Logout</button>
                             </div>
                         ) : (

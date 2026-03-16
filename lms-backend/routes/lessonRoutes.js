@@ -3,6 +3,7 @@ const router = express.Router()
 const Lesson = require('../models/Lesson')
 const Course = require('../models/Course')
 const { protect, adminOnly } = require('../middleware/authMiddleware')
+const { checkLessonAccess } = require('../middleware/enrollmentMiddleware')
 
 // GET /api/lessons/course/:courseId
 router.get('/course/:courseId', protect, async (req, res) => {
@@ -13,7 +14,7 @@ router.get('/course/:courseId', protect, async (req, res) => {
 })
 
 // GET /api/lessons/:id
-router.get('/:id', protect, async (req, res) => {
+router.get('/:id', protect, checkLessonAccess, async (req, res) => {
     try {
         const lesson = await Lesson.findById(req.params.id)
         if (!lesson) return res.status(404).json({ message: 'Lesson not found' })

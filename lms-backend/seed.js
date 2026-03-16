@@ -35,40 +35,43 @@ const seedData = async () => {
         // 3. Create Courses
         const courses = [
             {
-                title: 'Complete Web Development Bootcamp 2024',
-                description: 'Learn HTML, CSS, JS, React, Node and MongoDB from scratch. This comprehensive course covers everything you need to become a full-stack developer.',
-                shortDescription: 'Master modern full-stack web development.',
-                category: 'Development',
+                title: 'Character Builders: Essential Life Values for Kids',
+                description: 'A character education course designed for children that teaches important life values such as kindness, honesty, responsibility, respect, perseverance, empathy, gratitude, courage, integrity, and humility through engaging stories and activities.',
+                shortDescription: 'Learn kindness, honesty, courage, gratitude, and responsibility through engaging stories.',
+                category: 'Values',
                 level: 'beginner',
-                price: 4999,
-                discountPrice: 499,
-                instructor: 'Dr. Angela Yu',
-                duration: '65h',
-                thumbnail: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80',
-            },
-            {
-                title: 'Mastering UI/UX Design with Figma',
-                description: 'Design beautiful, user-centered interfaces. Learn typography, color theory, and advanced prototyping in Figma.',
-                shortDescription: 'Learn professional UI/UX design patterns.',
-                category: 'Design',
-                level: 'intermediate',
-                price: 2999,
-                discountPrice: 299,
-                instructor: 'Gary Simon',
-                duration: '12h',
-                thumbnail: 'https://images.unsplash.com/photo-1586717791821-3f44a563cc4c?auto=format&fit=crop&w=800&q=80',
+                price: 500,
+                discountPrice: 500,
+                instructor: 'Santhosh Ram',
+                duration: '10 Lessons',
+                thumbnail: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=800&q=80',
             }
         ];
 
         for (const c of courses) {
             const course = await Course.create(c);
 
-            // Add a few lessons to each
-            const lessons = [
-                { title: 'Introduction to the Course', content: 'In this lesson we cover the basics.', isFree: true, order: 1, course: course._id },
-                { title: 'Setting up Environment', content: 'Install Node.js and VS Code.', isFree: false, order: 2, course: course._id },
-                { title: 'Your First Project', content: 'Building a simple Hello World.', isFree: false, order: 3, course: course._id }
-            ];
+            // Add lessons based on course title
+            let lessons = [];
+            if (c.title === 'Character Builders: Essential Life Values for Kids') {
+                const values = [
+                    'Kindness', 'Honesty', 'Responsibility', 'Respect', 'Perseverance',
+                    'Empathy', 'Gratitude', 'Courage', 'Integrity', 'Humility'
+                ];
+                lessons = values.map((val, idx) => ({
+                    title: val,
+                    content: `<h3>Exploring ${val}</h3><p>This lesson teaches children about the importance of ${val.toLowerCase()} in their daily lives through stories and interactive play.</p>`,
+                    isFree: idx === 0, // First one free
+                    order: idx + 1,
+                    course: course._id
+                }));
+            } else {
+                lessons = [
+                    { title: 'Introduction to the Course', content: 'In this lesson we cover the basics.', isFree: true, order: 1, course: course._id },
+                    { title: 'Setting up Environment', content: 'Install Node.js and VS Code.', isFree: false, order: 2, course: course._id },
+                    { title: 'Your First Project', content: 'Building a simple Hello World.', isFree: false, order: 3, course: course._id }
+                ];
+            }
 
             const createdLessons = await Lesson.insertMany(lessons);
             course.lessons = createdLessons.map(l => l._id);

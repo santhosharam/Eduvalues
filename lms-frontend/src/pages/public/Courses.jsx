@@ -176,7 +176,11 @@ export default function Courses() {
                                         <button className="btn-primary" onClick={() => { setSearchTerm(''); setLevelFilter(''); setCategoryFilter('') }}>Clear Filters</button>
                                     </div>
                                 ) : (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                                    <div style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                                        gap: '32px'
+                                    }}>
                                         {courses.map(course => <CourseCard key={course._id} course={course} />)}
                                     </div>
                                 )}
@@ -190,7 +194,7 @@ export default function Courses() {
 
             <style>{`
                 @media (max-width: 1024px) {
-                    .courses-grid { 
+                    .courses-grid {
                         grid-template-columns: 1fr !important;
                     }
                     aside { 

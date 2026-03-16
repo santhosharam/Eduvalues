@@ -82,7 +82,7 @@ export default function CourseDetail() {
                         <h1 style={{ fontSize: 'clamp(32px, 5vw, 54px)', fontWeight: 'bold', marginBottom: 24, color: '#fff', lineHeight: 1.1 }}>{course.title}</h1>
                         <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: 18, lineHeight: 1.7, marginBottom: 36, maxWidth: 640, fontWeight: 600 }}>{course.description}</p>
 
-                        <div style={{ display: 'flex', gap: 40, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', gap: 40, alignItems: 'center', flexWrap: 'wrap', marginBottom: 40 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                                 <Star size={20} color="#00A6C0" fill="#00A6C0" />
                                 <span style={{ fontWeight: 800, fontSize: 18 }}>4.9</span>
@@ -92,6 +92,12 @@ export default function CourseDetail() {
                                 <Users size={20} color="#00A6C0" /> 2.5k Enrolled
                             </div>
                         </div>
+
+                        {!isEnrolled && (
+                            <Link to={`/checkout/${course._id}`} className="btn-primary" style={{ height: 64, padding: '0 48px', fontSize: 18, borderRadius: 20 }}>
+                                Buy Now
+                            </Link>
+                        )}
                     </div>
 
                     {/* Preview Image Frame */}
@@ -128,14 +134,14 @@ export default function CourseDetail() {
                 <div style={{ flex: 1 }}>
                     <div style={{ marginBottom: 64 }}>
                         <h2 style={{ fontSize: 32, marginBottom: 32, display: 'flex', alignItems: 'center', gap: 16 }}>
-                            <Brain size={32} color="#00A6C0" /> What'll You Learn?
+                            <Brain size={32} color="#00A6C0" /> Why This Course?
                         </h2>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
                             {[
                                 { t: 'Develop integrity & moral reasoning', i: Shield, c: '#1DD1A1' },
-                                { t: 'Critical Thinking with fun puzzles', i: Brain, c: '#FF9F43' },
-                                { t: 'Community service & social awareness', i: Heart, c: '#00A6C0' },
-                                { t: 'Self-confidence & creative expression', i: Sparkles, c: '#00D2D3' }
+                                { t: 'Critical Thinking with fun stories', i: Brain, c: '#FF9F43' },
+                                { t: 'Empathy & social awareness', i: Heart, c: '#00A6C0' },
+                                { t: 'Courage & creative expression', i: Sparkles, c: '#00D2D3' }
                             ].map(({ t, i: Icon, c }) => (
                                 <div key={t} style={{ background: '#F4F7F9', padding: '24px', borderRadius: '24px', display: 'flex', alignItems: 'center', gap: 16 }}>
                                     <div style={{ width: 44, height: 44, borderRadius: '12px', background: `${c}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -150,12 +156,12 @@ export default function CourseDetail() {
                     {/* Learning Path */}
                     <div style={{ marginBottom: 64 }}>
                         <h2 style={{ fontSize: 32, marginBottom: 32, display: 'flex', alignItems: 'center', gap: 16 }}>
-                            <Rocket size={32} color="#FF9F43" /> Your Journey
+                            <Rocket size={32} color="#FF9F43" /> Course Journey
                         </h2>
                         <div style={{ border: '3px solid #F4F7F9', borderRadius: '32px', overflow: 'hidden' }}>
                             {(course.lessons || []).length === 0 ? (
                                 <div style={{ padding: 48, textAlign: 'center', color: '#888' }}>
-                                    No activities added to this playground yet.
+                                    No lessons added to this journey yet.
                                 </div>
                             ) : course.lessons.map((lesson, idx) => (
                                 <div key={lesson._id} style={{
@@ -183,13 +189,13 @@ export default function CourseDetail() {
                                             {idx + 1}
                                         </div>
                                         <div>
-                                            <div style={{ fontSize: 18, fontWeight: 800, color: '#2D3436' }}>{lesson.title}</div>
-                                            <div style={{ fontSize: 13, color: '#888', marginTop: 4 }}>Adventure Duration: {lesson.duration || '15:00'}</div>
+                                            <div style={{ fontSize: 18, fontWeight: 800, color: '#2D3436' }}>Lesson {idx + 1} - {lesson.title}</div>
+                                            <div style={{ fontSize: 13, color: '#888', marginTop: 4 }}>{lesson.description || 'Values Exploration'}</div>
                                         </div>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                                        {lesson.freePreview ? (
-                                            <span style={{ background: '#1DD1A1', color: '#fff', padding: '6px 14px', borderRadius: '10px', fontSize: 11, fontWeight: 800 }}>PLAY FREE</span>
+                                        {lesson.isFree ? (
+                                            <span style={{ background: '#1DD1A1', color: '#fff', padding: '6px 14px', borderRadius: '10px', fontSize: 11, fontWeight: 800 }}>FREE PREVIEW</span>
                                         ) : (
                                             <div style={{ width: 44, height: 44, background: '#F1F1F1', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                 <Lock size={18} color="#999" />
@@ -199,6 +205,41 @@ export default function CourseDetail() {
                                 </div>
                             ))}
                         </div>
+                    </div>
+
+                    {/* Reviews Section */}
+                    <div style={{ marginBottom: 64 }}>
+                        <h2 style={{ fontSize: 32, marginBottom: 32, display: 'flex', alignItems: 'center', gap: 16 }}>
+                            <Users size={32} color="#00A6C0" /> Student Reviews
+                        </h2>
+                        
+                        {(course.reviews || []).length === 0 ? (
+                            <div style={{ padding: '32px', background: '#F4F7F9', borderRadius: '32px', border: '2px solid #EEE' }}>
+                                <div style={{ display: 'flex', gap: 4, marginBottom: 12 }}>
+                                    {[...Array(5)].map((_, i) => <Star key={i} size={20} fill="#F59E0B" color="#F59E0B" />)}
+                                </div>
+                                <p style={{ fontSize: 18, color: '#444', fontStyle: 'italic', lineHeight: 1.6 }}>
+                                    "A wonderful course that helped my child understand kindness."
+                                </p>
+                                <div style={{ marginTop: 16, fontWeight: 700, color: '#888' }}>— Sarah M., Parent</div>
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                                {course.reviews.map(review => (
+                                    <div key={review._id} style={{ padding: '32px', background: '#F4F7F9', borderRadius: '32px', border: '2px solid #EEE' }}>
+                                        <div style={{ display: 'flex', gap: 4, marginBottom: 12 }}>
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star key={i} size={20} fill={i < review.rating ? "#F59E0B" : "none"} color="#F59E0B" />
+                                            ))}
+                                        </div>
+                                        <p style={{ fontSize: 18, color: '#444', fontStyle: 'italic', lineHeight: 1.6 }}>
+                                            "{review.comment}"
+                                        </p>
+                                        <div style={{ marginTop: 16, fontWeight: 700, color: '#888' }}>— {review.student?.name || 'Anonymous Student'}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -215,27 +256,29 @@ export default function CourseDetail() {
                         textAlign: 'center'
                     }}>
                         <div style={{ fontSize: 56, fontWeight: 900, color: '#00A6C0', marginBottom: 12 }}>
-                            {course.price === 0 ? 'FREE' : `₹${course.discountPrice || course.price}`}
+                            ₹{course.discountPrice || course.price}
                         </div>
-                        <p style={{ fontSize: 15, color: '#888', fontWeight: 600, marginBottom: 32 }}>Unlimited access to this playground!</p>
+                        <p style={{ fontSize: 15, color: '#888', fontWeight: 600, marginBottom: 32 }}>Give your child the gift of values!</p>
 
-                        {isEnrolled ? (
-                            <Link to={`/dashboard/lesson/${course.lessons?.[0]?._id}`} className="btn-secondary" style={{ width: '100%', height: 64, borderRadius: 20 }}>
-                                Continue Play
-                            </Link>
+                        {!isEnrolled ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                <Link to={`/checkout/${course._id}`} className="btn-primary" style={{ width: '100%', height: 64, borderRadius: 20 }}>
+                                    Buy Now
+                                </Link>
+                            </div>
                         ) : (
-                            <Link to={user ? `/checkout/${course._id}` : `/register?redirect=/courses/${slug}`} className="btn-primary" style={{ width: '100%', height: 64, borderRadius: 20 }}>
-                                Start Adventure
+                            <Link to={`/dashboard/lesson/${course.lessons?.[0]?._id}`} className="btn-secondary" style={{ width: '100%', height: 64, borderRadius: 20 }}>
+                                Start adventure
                             </Link>
                         )}
 
                         <div style={{ marginTop: 40, textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 20 }}>
-                            <h4 style={{ fontSize: 18, fontWeight: 800, color: '#2D3436' }}>This journey includes:</h4>
+                            <h4 style={{ fontSize: 18, fontWeight: 800, color: '#2D3436' }}>This course includes:</h4>
                             {[
-                                { text: 'Lifetime access to playground', icon: Sparkles },
-                                { text: 'Fun quizzes & puzzles', icon: Brain },
-                                { text: 'Golden Completion Award', icon: Trophy },
-                                { text: 'Watch on any kids device', icon: PlayCircle }
+                                { text: 'Full lifetime access', icon: Sparkles },
+                                { text: '10 Life-changing lessons', icon: Brain },
+                                { text: 'Certificate of completion', icon: Trophy },
+                                { text: 'Access on mobile and web', icon: PlayCircle }
                             ].map(({ text, icon: Icon }) => (
                                 <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 14, color: '#555', fontWeight: 600 }}>
                                     <Icon size={18} color="#FF9F43" /> {text}

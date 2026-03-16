@@ -3,7 +3,20 @@ const Enrollment = require('../models/Enrollment')
 // GET /api/enrollments/my
 exports.getMyEnrollments = async (req, res) => {
     try {
-        const enrollments = await Enrollment.find({ student: req.user._id }).populate('course')
+        const Enrollment = require('../models/Enrollment')
+        const Progress = require('../models/Progress')
+        
+        let enrollments = await Enrollment.find({ student: req.user._id }).populate('course').lean()
+        
+        // Add progress info to lean objects
+        for (let e of enrollments) {
+            const p = await Progress.findOne({ student: req.user._id, course: e.course?._id })
+            if (p) {
+                e.lastWatched = p.lastWatched
+                e.completedLessons = p.completedLessons
+            }
+        }
+        
         res.json({ enrollments })
     } catch (err) {
         res.status(500).json({ message: err.message })

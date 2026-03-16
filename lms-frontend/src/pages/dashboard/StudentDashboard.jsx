@@ -110,7 +110,11 @@ export default function StudentDashboard() {
                                                 <span style={{ fontSize: 15, fontWeight: 800, color: '#00A6C0' }}>{e.progress || 0}%</span>
                                             </div>
                                         </div>
-                                        <Link to={`/dashboard/lesson/${(e.course?.lessons || [])[0]?._id}`} className="btn-primary" style={{ borderRadius: 16, height: 54, padding: '0 32px' }}>
+                                        <Link 
+                                            to={`/dashboard/lesson/${e.lastWatched || (e.course?.lessons?.[0]?._id || e.course?.lessons?.[0])}`} 
+                                            className="btn-primary" 
+                                            style={{ borderRadius: 16, height: 54, padding: '0 32px' }}
+                                        >
                                             Resume <PlayCircle size={20} />
                                         </Link>
                                     </div>

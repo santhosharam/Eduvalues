@@ -20,7 +20,17 @@ exports.getCourses = async (req, res) => {
 // GET /api/courses/:slug
 exports.getCourseBySlug = async (req, res) => {
     try {
-        const course = await Course.findOne({ slug: req.params.slug }).populate('lessons')
+        let course = await Course.findOne({ slug: req.params.slug })
+            .populate('lessons')
+            .populate({ path: 'reviews', populate: { path: 'student', select: 'name' } })
+
+        // Fallback to ID if not found by slug
+        if (!course && req.params.slug.match(/^[0-9a-fA-F]{24}$/)) {
+            course = await Course.findById(req.params.slug)
+                .populate('lessons')
+                .populate({ path: 'reviews', populate: { path: 'student', select: 'name' } })
+        }
+
         if (!course) return res.status(404).json({ message: 'Course not found' })
         res.json({ course })
     } catch (err) {
@@ -31,7 +41,9 @@ exports.getCourseBySlug = async (req, res) => {
 // GET /api/courses/id/:id
 exports.getCourseById = async (req, res) => {
     try {
-        const course = await Course.findById(req.params.id).populate('lessons')
+        const course = await Course.findById(req.params.id)
+            .populate('lessons')
+            .populate({ path: 'reviews', populate: { path: 'student', select: 'name' } })
         if (!course) return res.status(404).json({ message: 'Course not found' })
         res.json({ course })
     } catch (err) {
