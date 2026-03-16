@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, useContext } from 'react'
-import api from '../services/api'
+import { supabase } from '../services/supabaseClient'
 
 const AuthContext = createContext()
 
@@ -8,33 +8,87 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        const token = localStorage.getItem('lms_token')
-        if (token) {
-            api.get('/auth/me')
-                .then(res => setUser(res.data.user))
-                .catch(() => localStorage.removeItem('lms_token'))
-                .finally(() => setLoading(false))
-        } else {
+        // Check active sessions and sets the user
+        const getSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession()
+            if (session) {
+                // Map supabase session to your user object
+                setUser({
+                    id: session.user.id,
+                    email: session.user.email,
+                    name: session.user.user_metadata?.full_name || session.user.email,
+                    role: session.user.user_metadata?.role || 'student'
+                })
+            }
             setLoading(false)
         }
+
+        getSession()
+
+        // Listen for changes on auth state
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (session) {
+                setUser({
+                    id: session.user.id,
+                    email: session.user.email,
+                    name: session.user.user_metadata?.full_name || session.user.email,
+                    role: session.user.user_metadata?.role || 'student'
+                })
+            } else {
+                setUser(null)
+            }
+        })
+
+        return () => subscription.unsubscribe()
     }, [])
 
     const login = async (email, password) => {
-        const { data } = await api.post('/auth/login', { email, password })
-        localStorage.setItem('lms_token', data.token)
-        setUser(data.user)
-        return data.user
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        })
+        
+        if (error) throw error
+
+        const userObj = {
+            id: data.user.id,
+            email: data.user.email,
+            name: data.user.user_metadata?.full_name || data.user.email,
+            role: data.user.user_metadata?.role || 'student'
+        }
+        setUser(userObj)
+        return userObj
     }
 
     const register = async (name, email, password) => {
-        const { data } = await api.post('/auth/register', { name, email, password })
-        localStorage.setItem('lms_token', data.token)
-        setUser(data.user)
-        return data.user
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: {
+                    full_name: name,
+                    role: 'student' // Default role
+                }
+            }
+        })
+
+        if (error) throw error
+        
+        // Supabase often requires email verification by default. 
+        // If data.session is null, it means verification is pending.
+        const userObj = data.user ? {
+            id: data.user.id,
+            email: data.user.email,
+            name: data.user.user_metadata?.full_name || name,
+            role: 'student'
+        } : null
+
+        if (data.session) setUser(userObj)
+        return userObj
     }
 
-    const logout = () => {
-        localStorage.removeItem('lms_token')
+    const logout = async () => {
+        await supabase.auth.signOut()
         setUser(null)
     }
 
