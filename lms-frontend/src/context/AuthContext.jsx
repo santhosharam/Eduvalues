@@ -8,38 +8,15 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        // Check active sessions and sets the user
-        const getSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (session) {
-                // Map supabase session to your user object
-                setUser({
-                    id: session.user.id,
-                    email: session.user.email,
-                    name: session.user.user_metadata?.full_name || session.user.email,
-                    role: session.user.user_metadata?.role || 'student'
-                })
-            }
-            setLoading(false)
-        }
-
-        getSession()
-
-        // Listen for changes on auth state
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            if (session) {
-                setUser({
-                    id: session.user.id,
-                    email: session.user.email,
-                    name: session.user.user_metadata?.full_name || session.user.email,
-                    role: session.user.user_metadata?.role || 'student'
-                })
-            } else {
-                setUser(null)
-            }
+        // --- Guest Mode Activated ---
+        // We set a default user so the app works without login
+        setUser({
+            id: 'guest-123',
+            email: 'guest@eduvalues.com',
+            name: 'Guest Adventurer',
+            role: 'admin' // Give admin access so they can see everything
         })
-
-        return () => subscription.unsubscribe()
+        setLoading(false)
     }, [])
 
     const login = async (email, password) => {

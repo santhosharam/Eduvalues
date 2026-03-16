@@ -472,7 +472,7 @@ export default function Home() {
                             <p style={{ fontSize: 20, color: 'rgba(255,255,255,0.85)', fontWeight: 600 }}>Join thousands of families building a brighter future through play.</p>
                         </div>
                         <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
-                            <Link to="/register" style={{
+                            <Link to="/courses" style={{
                                 background: '#fff',
                                 color: '#001F3F',
                                 padding: '24px 56px',
@@ -483,7 +483,7 @@ export default function Home() {
                                 transition: 'all 0.3s ease',
                                 boxShadow: '0 10px 0 rgba(0,0,0,0.05)'
                             }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-5px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
-                                Get Started <Rocket size={24} style={{ marginLeft: 10 }} />
+                                Explore Courses <Rocket size={24} style={{ marginLeft: 10 }} />
                             </Link>
                         </div>
                     </div>

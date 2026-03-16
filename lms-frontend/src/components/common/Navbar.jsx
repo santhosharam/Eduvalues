@@ -77,26 +77,6 @@ export default function Navbar() {
                         </Link>
                     ))}
 
-                    {user ? (
-                        <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-                            {!location.pathname.startsWith('/dashboard/lesson') && (
-                                <>
-                                    {user.role === 'admin' && (
-                                        <Link to="/admin" className="btn-primary" style={{ padding: '10px 24px', fontSize: 13, background: '#001F3F' }}>
-                                            Admin Hub
-                                        </Link>
-                                    )}
-                                </>
-                            )}
-                            <button onClick={logout} style={{ background: 'none', border: 'none', color: '#ff4d4d', cursor: 'pointer', padding: 10, fontWeight: 700 }}>
-                                Logout
-                            </button>
-                        </div>
-                    ) : (
-                        <Link to="/login" className="btn-primary" style={{ padding: '12px 30px', fontSize: 14 }}>
-                            Sign In
-                        </Link>
-                    )}
                 </nav>
 
                 {/* Mobile Toggle */}
@@ -116,21 +96,7 @@ export default function Navbar() {
                         {navLinks.map(({ to, label }) => (
                             <Link key={to} to={to} onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: '#555', fontSize: 18, fontWeight: 700 }}>{label}</Link>
                         ))}
-                        {user ? (
-                            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                                {!location.pathname.startsWith('/dashboard/lesson') && (
-                                    <>
-                                        {user.role === 'admin' && (
-                                            <Link to="/admin" onClick={() => setMenuOpen(false)} className="btn-primary" style={{ background: '#001F3F' }}>Admin Hub</Link>
-                                        )}
-                                        <Link to="/dashboard" onClick={() => setMenuOpen(false)} className="btn-secondary">Dashboard</Link>
-                                    </>
-                                )}
-                                <button onClick={logout} className="btn-outline">Logout</button>
-                            </div>
-                        ) : (
-                            <Link to="/login" onClick={() => setMenuOpen(false)} className="btn-primary">Sign In</Link>
-                        )}
+                        {/* Auth buttons removed - Login no longer required */}
                     </div>
                 </div>
             )}

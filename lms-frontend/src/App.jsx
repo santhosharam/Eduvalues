@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/common/ProtectedRoute'
@@ -72,11 +72,11 @@ export default function App() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/verify/:code" element={<CertificateVerify />} />
 
-          {/* ── Auth ───────────────────────────────── */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
+          {/* ── Auth (Redirected - Login removed) ── */}
+          <Route path="/login" element={<Navigate to="/" replace />} />
+          <Route path="/admin/login" element={<Navigate to="/" replace />} />
+          <Route path="/register" element={<Navigate to="/" replace />} />
+          <Route path="/forgot-password" element={<Navigate to="/" replace />} />
 
           {/* ── Protected (student) ────────────────── */}
           <Route element={<ProtectedRoute />}>
