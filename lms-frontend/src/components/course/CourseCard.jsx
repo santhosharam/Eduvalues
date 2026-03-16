@@ -12,7 +12,7 @@ export default function CourseCard({ course }) {
 
     return (
         <div className="kids-card" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <Link to={`/courses/${course.slug || course._id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <Link to={`/courses/${course.slug || course.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%' }}>
                 {/* Image Section */}
                 <div style={{ position: 'relative', height: '220px', overflow: 'hidden' }}>
                     <img
@@ -90,10 +90,10 @@ export default function CourseCard({ course }) {
                                 onClick={(e) => {
                                     e.preventDefault()
                                     e.stopPropagation()
-                                    navigate(`/checkout/${course._id}`)
+                                    navigate(`/courses/${course.slug || course.id}`)
                                 }}
                             >
-                                Buy Now
+                                Start Now
                             </button>
                         </div>
                     </div>

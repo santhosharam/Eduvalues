@@ -21,14 +21,23 @@ export const getAllCourses = async (params = {}) => {
 }
 
 export const getCourseBySlug = async (slug) => {
-    const { data, error } = await supabase
+    // 1. Get the course
+    const { data: course, error } = await supabase
         .from('courses')
         .select('*')
         .or(`slug.eq.${slug},id.eq.${slug}`) // Attempt both slug and id
         .single()
     
     if (error) throw error
-    return { data: { course: data } }
+
+    // 2. Get the lessons for this course
+    const { data: lessons } = await supabase
+        .from('lessons')
+        .select('*')
+        .eq('course_id', course.id)
+        .order('order', { ascending: true })
+
+    return { data: { course: { ...course, lessons: lessons || [] } } }
 }
 
 export const getCategories = async () => {

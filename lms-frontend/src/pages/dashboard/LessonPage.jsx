@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import Navbar from '../../components/common/Navbar'
-import { markLessonComplete } from '../../services/progressService'
-import api from '../../services/api'
+import { getLessonById, getLessonsByCourseId } from '../../services/lessonService'
 import toast from 'react-hot-toast'
 import DOMPurify from 'dompurify'
 import { CheckCircle, FileText, ArrowLeft, Sparkles, Heart, Rocket, Brain, Trophy } from 'lucide-react'
 import ReviewForm from '../../components/course/ReviewForm'
+
+// Dummy for now
+const markLessonComplete = async () => ({ data: { percent: 100 } })
 
 export default function LessonPage() {
     const { lessonId } = useParams()
@@ -19,42 +21,28 @@ export default function LessonPage() {
     const [selectedOption, setSelectedOption] = useState(null)
     const [coursePercent, setCoursePercent] = useState(0)
 
-    const kindnessGame = {
-        question: "Maya sees Mr. Jenkins looking sad and his garden is full of weeds. What should she do?",
-        options: [
-            { text: "Go home and play video games", correct: false, feedback: "Oh no! That doesn't help Mr. Jenkins smile. 🎮" },
-            { text: "Help him pull weeds and plant flowers", correct: true, feedback: "YES! You're a Kindness Superhero! 🌸✨" },
-            { text: "Wait for someone else to do it", correct: false, feedback: "Maya wants to be the one to plant seeds of joy! 🌱" }
-        ]
-    }
-
     useEffect(() => {
         setLoading(true)
-        api.get(`/lessons/${lessonId}`)
-            .then(r => {
-                setLesson(r.data.lesson)
-                // Also check if already completed
-                api.get(`/progress/${r.data.lesson.course}`)
-                    .then(pr => {
-                        setCoursePercent(pr.data.progress.percent || 0)
-                        if (pr.data.progress.completedLessons.includes(lessonId)) {
-                            setCompleted(true)
-                            setGameWon(true)
-                        }
-                    })
+        getLessonById(lessonId)
+            .then(res => {
+                const lessonData = res.data.lesson
+                setLesson(lessonData)
+                // For now, let's treat everyone as having 0% progress on start
+                // but allow them to "win" games to complete
+                setCoursePercent(0)
             })
-            .catch(() => toast.error('Could not load lesson'))
+            .catch(() => toast.error('Could not load adventure!'))
             .finally(() => setLoading(false))
     }, [lessonId])
 
     useEffect(() => {
-        if (lesson?.course) {
-            api.get(`/lessons/course/${lesson.course}`)
+        if (lesson?.course_id) {
+            getLessonsByCourseId(lesson.course_id)
                 .then(res => {
                     const lessons = res.data.lessons
-                    const currentIndex = lessons.findIndex(l => String(l._id) === String(lessonId))
+                    const currentIndex = lessons.findIndex(l => String(l.id) === String(lessonId))
                     if (currentIndex !== -1 && currentIndex < lessons.length - 1) {
-                        setNextLessonId(lessons[currentIndex + 1]._id)
+                        setNextLessonId(lessons[currentIndex + 1].id)
                     } else {
                         setNextLessonId(null)
                     }

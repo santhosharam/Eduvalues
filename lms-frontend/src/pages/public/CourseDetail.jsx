@@ -93,10 +93,17 @@ export default function CourseDetail() {
                             </div>
                         </div>
 
-                        {!isEnrolled && (
-                            <Link to={`/checkout/${course._id}`} className="btn-primary" style={{ height: 64, padding: '0 48px', fontSize: 18, borderRadius: 20 }}>
-                                Buy Now
+                        {course.lessons?.length > 0 ? (
+                            <Link
+                                to={`/dashboard/lesson/${course.lessons[0].id || course.lessons[0]}`}
+                                className="btn-primary" style={{ height: 64, padding: '0 48px', fontSize: 18, borderRadius: 20 }}
+                            >
+                                🚀 Start Learning!
                             </Link>
+                        ) : (
+                            <div className="btn-primary" style={{ height: 64, padding: '0 48px', fontSize: 18, borderRadius: 20, opacity: 0.8, cursor: 'default' }}>
+                                📚 Coming Soon!
+                            </div>
                         )}
                     </div>
 
@@ -164,7 +171,7 @@ export default function CourseDetail() {
                                     No lessons added to this journey yet.
                                 </div>
                             ) : course.lessons.map((lesson, idx) => (
-                                <div key={lesson._id} style={{
+                                <div key={lesson.id} style={{
                                     padding: '24px 32px',
                                     background: idx % 2 === 0 ? '#fff' : '#F4F7F9',
                                     display: 'flex',
@@ -260,16 +267,20 @@ export default function CourseDetail() {
                         </div>
                         <p style={{ fontSize: 15, color: '#888', fontWeight: 600, marginBottom: 32 }}>Give your child the gift of values!</p>
 
-                        {!isEnrolled ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                                <Link to={`/checkout/${course._id}`} className="btn-primary" style={{ width: '100%', height: 64, borderRadius: 20 }}>
-                                    Buy Now
-                                </Link>
-                            </div>
-                        ) : (
-                            <Link to={`/dashboard/lesson/${course.lessons?.[0]?._id}`} className="btn-secondary" style={{ width: '100%', height: 64, borderRadius: 20 }}>
-                                Start adventure
+                        {course.lessons?.length > 0 ? (
+                            <Link
+                                to={`/dashboard/lesson/${course.lessons[0].id || course.lessons[0]}`}
+                                className="btn-primary"
+                                style={{ width: '100%', height: 64, borderRadius: 20 }}
+                            >
+                                🚀 Start Learning!
                             </Link>
+                        ) : (
+                            <div
+                                style={{ width: '100%', height: 64, borderRadius: 20, background: '#00A6C0', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 18 }}
+                            >
+                                📚 Coming Soon!
+                            </div>
                         )}
 
                         <div style={{ marginTop: 40, textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 20 }}>

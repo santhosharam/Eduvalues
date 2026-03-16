@@ -97,9 +97,9 @@ export default function StudentDashboard() {
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                                 {inProgress.map(e => (
-                                    <div key={e._id} style={{ background: '#fff', padding: 32, borderRadius: '40px', border: '2px solid #F1F1F1', display: 'grid', gridTemplateColumns: '160px 1fr auto', gap: 32, alignItems: 'center' }}>
+                                    <div key={e.id} style={{ background: '#fff', padding: 32, borderRadius: '40px', border: '2px solid #F1F1F1', display: 'grid', gridTemplateColumns: '160px 1fr auto', gap: 32, alignItems: 'center' }}>
                                         <div style={{ height: 100, borderRadius: '20px', overflow: 'hidden' }}>
-                                            <img src={e.course?.thumbnail || `https://picsum.photos/seed/${e.course?._id}/300/200`} alt={e.course?.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            <img src={e.course?.thumbnail || `https://picsum.photos/seed/${e.course?.id}/300/200`} alt={e.course?.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         </div>
                                         <div>
                                             <h4 style={{ fontSize: 20, fontWeight: 800, color: '#333', marginBottom: 16 }}>{e.course?.title}</h4>
@@ -111,7 +111,7 @@ export default function StudentDashboard() {
                                             </div>
                                         </div>
                                         <Link 
-                                            to={`/dashboard/lesson/${e.lastWatched || (e.course?.lessons?.[0]?._id || e.course?.lessons?.[0])}`} 
+                                            to={`/dashboard/lesson/${e.lastWatched || (e.course?.lessons?.[0]?.id || e.course?.lessons?.[0])}`} 
                                             className="btn-primary" 
                                             style={{ borderRadius: 16, height: 54, padding: '0 32px' }}
                                         >
