@@ -7,7 +7,8 @@
         "dev": "concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"cyan,magenta\" \"npm run dev --prefix lms-backend\" \"npm run dev --prefix lms-frontend\"",
         "install:all": "npm install --prefix lms-backend && npm install --prefix lms-frontend",
         "backend": "npm run dev --prefix lms-backend",
-        "frontend": "npm run dev --prefix lms-frontend"
+        "frontend": "npm run dev --prefix lms-frontend",
+        "build": "npm run build --prefix lms-frontend"
     },
     "devDependencies": {
         "concurrently": "^9.1.2"
