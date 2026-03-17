@@ -74,12 +74,12 @@ export default function Contact() {
 
             {/* --- CONTACT FORM SECTION --- */}
             <section style={{ padding: '80px 24px 120px', background: '#fff' }}>
-                <div className="section-container" style={{
+                <div className="section-container contact-grid" style={{
                     display: 'grid',
                     gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
                     gap: '80px',
                     alignItems: 'center'
-                }} className="contact-grid">
+                }}>
 
                     {/* Left side: Overlapping Images */}
                     <div style={{ position: 'relative', height: '540px' }} className="image-stack">

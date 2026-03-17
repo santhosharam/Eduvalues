@@ -1,84 +1,25 @@
-import { supabase } from './supabaseClient'
+import api from './api'
 
 export const getAllCourses = async (params = {}) => {
-    let query = supabase.from('courses').select('*')
-
-    if (params.search) {
-        query = query.ilike('title', `%${params.search}%`)
-    }
-    if (params.level) {
-        query = query.eq('level', params.level)
-    }
-    if (params.category) {
-        query = query.eq('category', params.category)
-    }
-
-    const { data, error } = await query
-    if (error) throw error
-    
-    // Mimic the axios response structure { data: { courses: [...] } }
-    return { data: { courses: data || [] } }
+    const res = await api.get('/courses', { params })
+    return res
 }
 
 export const getCourseBySlug = async (slug) => {
-    // 1. Get the course
-    const { data: course, error } = await supabase
-        .from('courses')
-        .select('*')
-        .or(`slug.eq.${slug},id.eq.${slug}`) // Attempt both slug and id
-        .single()
-    
-    if (error) throw error
+    const res = await api.get(`/courses/${slug}`)
+    return res
+}
 
-    // 2. Get the lessons for this course
-    const { data: lessons } = await supabase
-        .from('lessons')
-        .select('*')
-        .eq('course_id', course.id)
-        .order('order', { ascending: true })
-
-    return { data: { course: { ...course, lessons: lessons || [] } } }
+export const getCourseById = async (id) => {
+    const res = await api.get(`/courses/id/${id}`)
+    return res
 }
 
 export const getCategories = async () => {
-    const { data, error } = await supabase
-        .from('courses')
-        .select('category')
-    
-    if (error) throw error
-    const uniqueCategories = [...new Set(data.map(item => item.category).filter(Boolean))]
-    return { data: uniqueCategories }
+    const res = await api.get('/courses/categories')
+    return res
 }
 
-export const createCourse = async (data) => {
-    const { data: result, error } = await supabase
-        .from('courses')
-        .insert([data])
-        .select()
-        .single()
-    
-    if (error) throw error
-    return { data: result }
-}
-
-export const updateCourse = async (id, data) => {
-    const { data: result, error } = await supabase
-        .from('courses')
-        .update(data)
-        .eq('id', id)
-        .select()
-        .single()
-    
-    if (error) throw error
-    return { data: result }
-}
-
-export const deleteCourse = async (id) => {
-    const { error } = await supabase
-        .from('courses')
-        .delete()
-        .eq('id', id)
-    
-    if (error) throw error
-    return { data: { success: true } }
-}
+export const createCourse = (data) => api.post('/courses', data)
+export const updateCourse = (id, data) => api.put(`/courses/${id}`, data)
+export const deleteCourse = (id) => api.delete(`/courses/${id}`)

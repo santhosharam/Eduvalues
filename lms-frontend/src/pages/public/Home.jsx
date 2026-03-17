@@ -68,7 +68,10 @@ export default function Home() {
     useEffect(() => {
         setLoading(true)
         getAllCourses({ limit: 4 })
-            .then(res => setCourses(res.data.courses || []))
+            .then(res => {
+                console.log('Fetched Courses:', res.data.courses)
+                setCourses(res.data.courses || [])
+            })
             .catch(() => setCourses([]))
             .finally(() => setLoading(false))
     }, [])

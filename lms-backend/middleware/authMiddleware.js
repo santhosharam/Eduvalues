@@ -3,7 +3,15 @@ const User = require('../models/User')
 
 exports.protect = async (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1]
-    if (!token) return res.status(401).json({ message: 'Not authorized, no token' })
+    
+    // Guest Mode Bypass
+    if (!token) {
+        // Automatically assign the first admin user for development/guest access
+        req.user = await User.findOne({ role: 'admin' })
+        if (req.user) return next()
+        return res.status(401).json({ message: 'No admin user found for guest access' })
+    }
+
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         req.user = await User.findById(decoded.id).select('-password')

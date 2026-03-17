@@ -121,7 +121,7 @@ export default function Dashboard() {
                         ].map((item, i) => (
                             <div key={i} style={{ padding: '16px', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.04)' }}>
                                 <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>{item.label}</div>
-                                <div style={{ fontSize: 24, fontWeight: 900, color: '#fff', marginTop: 4, color: item.color }}>{item.value}</div>
+                                <div style={{ fontSize: 24, fontWeight: 900, marginTop: 4, color: item.color }}>{item.value}</div>
                             </div>
                         ))}
                     </div>

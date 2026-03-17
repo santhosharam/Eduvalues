@@ -22,6 +22,7 @@ export default function CourseDetail() {
 
     useEffect(() => {
         setLoading(true)
+        console.log('CourseDetail Fetching Slug:', slug)
         getCourseBySlug(slug)
             .then(res => setCourse(res.data.course))
             .catch(() => setCourse(null))
@@ -95,7 +96,7 @@ export default function CourseDetail() {
 
                         {course.lessons?.length > 0 ? (
                             <Link
-                                to={`/dashboard/lesson/${course.lessons[0].id || course.lessons[0]}`}
+                                to={`/dashboard/lesson/${course.lessons[0]._id || course.lessons[0]}`}
                                 className="btn-primary" style={{ height: 64, padding: '0 48px', fontSize: 18, borderRadius: 20 }}
                             >
                                 🚀 Start Learning!
@@ -171,7 +172,7 @@ export default function CourseDetail() {
                                     No lessons added to this journey yet.
                                 </div>
                             ) : course.lessons.map((lesson, idx) => (
-                                <div key={lesson.id} style={{
+                                <div key={lesson._id} style={{
                                     padding: '24px 32px',
                                     background: idx % 2 === 0 ? '#fff' : '#F4F7F9',
                                     display: 'flex',
@@ -269,7 +270,7 @@ export default function CourseDetail() {
 
                         {course.lessons?.length > 0 ? (
                             <Link
-                                to={`/dashboard/lesson/${course.lessons[0].id || course.lessons[0]}`}
+                                to={`/dashboard/lesson/${course.lessons[0]._id || course.lessons[0]}`}
                                 className="btn-primary"
                                 style={{ width: '100%', height: 64, borderRadius: 20 }}
                             >

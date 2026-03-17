@@ -17,6 +17,13 @@ const courseSchema = new mongoose.Schema({
     tags: [String],
     rating: { type: Number, default: 0 },
     reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
+    finalQuiz: [{
+        question: { type: String, required: true },
+        options: [{
+            text: { type: String, required: true },
+            correct: { type: Boolean, default: false },
+        }]
+    }]
 }, { timestamps: true })
 courseSchema.pre('save', async function () {
     if (!this.slug && this.title) {

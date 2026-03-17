@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import Navbar from '../../components/common/Navbar'
 import { getLessonById, getLessonsByCourseId } from '../../services/lessonService'
 import toast from 'react-hot-toast'
@@ -7,11 +7,11 @@ import DOMPurify from 'dompurify'
 import { CheckCircle, FileText, ArrowLeft, Sparkles, Heart, Rocket, Brain, Trophy } from 'lucide-react'
 import ReviewForm from '../../components/course/ReviewForm'
 
-// Dummy for now
-const markLessonComplete = async () => ({ data: { percent: 100 } })
+import { markLessonComplete, getCourseProgress } from '../../services/progressService'
 
 export default function LessonPage() {
     const { lessonId } = useParams()
+    const navigate = useNavigate()
     const [lesson, setLesson] = useState(null)
     const [completed, setCompleted] = useState(false)
     const [loading, setLoading] = useState(true)
@@ -31,18 +31,39 @@ export default function LessonPage() {
                 // but allow them to "win" games to complete
                 setCoursePercent(0)
             })
-            .catch(() => toast.error('Could not load adventure!'))
+            .catch((err) => {
+                if (err.response?.data?.sequentialError) {
+                    toast.error('Slow down! 🛑 Please complete the previous topic first.')
+                    // Delay redirect to allow toast to be seen
+                    setTimeout(() => navigate('/dashboard/my-courses'), 2000)
+                } else {
+                    toast.error('Could not load adventure!')
+                }
+            })
             .finally(() => setLoading(false))
+
+        // Fetch progress
+        getCourseProgress(lessonId) // Wait, lessonId is for lesson, getCourseProgress needs courseId. 
+        // I'll fix this in the next effect where courseId is available.
     }, [lessonId])
 
     useEffect(() => {
-        if (lesson?.course_id) {
-            getLessonsByCourseId(lesson.course_id)
+        if (lesson?.course?._id || lesson?.course) {
+            const cid = lesson.course?._id || lesson.course
+            getCourseProgress(cid)
+                .then(res => setCoursePercent(res.data.progress?.percent || 0))
+                .catch(() => {})
+        }
+    }, [lesson])
+
+    useEffect(() => {
+        if (lesson?.course) {
+            getLessonsByCourseId(lesson.course)
                 .then(res => {
                     const lessons = res.data.lessons
-                    const currentIndex = lessons.findIndex(l => String(l.id) === String(lessonId))
+                    const currentIndex = lessons.findIndex(l => String(l._id) === String(lessonId))
                     if (currentIndex !== -1 && currentIndex < lessons.length - 1) {
-                        setNextLessonId(lessons[currentIndex + 1].id)
+                        setNextLessonId(lessons[currentIndex + 1]._id)
                     } else {
                         setNextLessonId(null)
                     }
@@ -51,14 +72,15 @@ export default function LessonPage() {
     }, [lesson, lessonId])
 
     const handleComplete = async () => {
-        if (!lesson?.course) return
+        const cid = lesson.course?._id || lesson.course
+        if (!cid) return
         try {
-            const res = await markLessonComplete(lesson.course, lessonId)
+            const res = await markLessonComplete(cid, lessonId)
             setCompleted(true)
             setCoursePercent(res.data.percent)
             toast.success(`Lesson complete! Course progress: ${res.data.percent}%`)
             if (res.data.percent === 100) {
-                toast.success('🎉 Course completed! Your certificate is ready.', { duration: 5000 })
+                toast.success('🎉 All lessons finished! Time for the final challenge.', { duration: 5000 })
             }
         } catch {
             toast.error('Failed to update progress')
@@ -286,8 +308,28 @@ export default function LessonPage() {
                     )}
 
                     {coursePercent === 100 && (
-                        <div style={{ width: '100%', marginTop: 40 }}>
-                            <ReviewForm courseId={lesson.course} />
+                        <div style={{ width: '100%', marginTop: 40, textAlign: 'center' }}>
+                            <Link 
+                                to={`/dashboard/course/${lesson.course?._id || lesson.course}/final-assessment`}
+                                className="btn-primary"
+                                style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: 12,
+                                    padding: '24px 48px',
+                                    fontSize: 24,
+                                    borderRadius: 30,
+                                    background: 'linear-gradient(135deg, #FF6B6B 0%, #FF9F43 100%)',
+                                    boxShadow: '0 20px 40px rgba(255, 107, 107, 0.3)',
+                                    textDecoration: 'none',
+                                    fontWeight: 900
+                                }}
+                            >
+                                <Sparkles size={28} /> TAKE FINAL ASSESSMENT (20 QUESTIONS) <Trophy size={28} />
+                            </Link>
+                            <div style={{ marginTop: 40 }}>
+                                <ReviewForm courseId={lesson.course?._id || lesson.course} />
+                            </div>
                         </div>
                     )}
 

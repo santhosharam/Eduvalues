@@ -3,11 +3,12 @@ const Course = require('../models/Course')
 // GET /api/courses
 exports.getCourses = async (req, res) => {
     try {
-        const { category, level, limit, all } = req.query
+        const { category, level, limit, all, search } = req.query
         const filter = {}
         if (!all) filter.isPublished = true
         if (category) filter.category = category
-        if (level) filter.level = level
+        if (level) filter.level = level.toLowerCase()
+        if (search) filter.title = { $regex: search, $options: 'i' }
         const query = Course.find(filter).populate('lessons', 'title duration isFree').sort('-createdAt')
         if (limit) query.limit(parseInt(limit))
         const courses = await query
@@ -20,20 +21,37 @@ exports.getCourses = async (req, res) => {
 // GET /api/courses/:slug
 exports.getCourseBySlug = async (req, res) => {
     try {
-        let course = await Course.findOne({ slug: req.params.slug })
+        const { slug } = req.params
+        console.log(`[DEBUG] Received course slug/id request: "${slug}"`)
+
+        // Attempt to match by slug (case-insensitive) or by ID if it's a valid ObjectID
+        const isObjectId = slug.match(/^[0-9a-fA-F]{24}$/)
+        
+        let query = {
+            $or: [
+                { slug: { $regex: new RegExp(`^${slug.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') } }
+            ]
+        }
+        
+        if (isObjectId) {
+            query.$or.push({ _id: slug })
+        }
+
+        console.log(`[DEBUG] Mongo query: ${JSON.stringify(query)}`)
+
+        let course = await Course.findOne(query)
             .populate('lessons')
             .populate({ path: 'reviews', populate: { path: 'student', select: 'name' } })
 
-        // Fallback to ID if not found by slug
-        if (!course && req.params.slug.match(/^[0-9a-fA-F]{24}$/)) {
-            course = await Course.findById(req.params.slug)
-                .populate('lessons')
-                .populate({ path: 'reviews', populate: { path: 'student', select: 'name' } })
+        if (!course) {
+            console.log(`[DEBUG] Course not found in database for identifier: "${slug}"`)
+            return res.status(404).json({ message: 'Course not found' })
         }
-
-        if (!course) return res.status(404).json({ message: 'Course not found' })
+        
+        console.log(`[DEBUG] Successfully found course: "${course.title}" (ID: ${course._id})`)
         res.json({ course })
     } catch (err) {
+        console.error(`[DEBUG] Backend error in getCourseBySlug: ${err.stack}`)
         res.status(500).json({ message: err.message })
     }
 }

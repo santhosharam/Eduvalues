@@ -34,27 +34,92 @@ exports.markLessonComplete = async (req, res) => {
         const total = course.lessons.length
         const percent = total > 0 ? Math.round((progress.completedLessons.length / total) * 100) : 0
 
-        // Auto-complete enrollment
+        // Auto-complete enrollment (REMOVED - now requires final assessment)
         await Enrollment.findOneAndUpdate(
             { student: studentId, course: courseId },
-            { progress: percent, ...(percent === 100 && { isCompleted: true, completedAt: new Date() }) }
+            { progress: percent }
         )
 
-        // Auto-generate certificate on completion
-        if (percent === 100) {
+        res.json({ percent, completedLessons: progress.completedLessons })
+    } catch (err) {
+        res.status(500).json({ message: err.message })
+    }
+}
+
+// POST /api/progress/:courseId/final-assessment
+exports.submitFinalAssessment = async (req, res) => {
+    try {
+        const { courseId } = req.params
+        const { answers } = req.body // Array of selected option indices
+        const studentId = req.user._id
+
+        const course = await Course.findById(courseId)
+        if (!course) return res.status(404).json({ message: 'Course not found' })
+
+        if (!course.finalQuiz || course.finalQuiz.length === 0) {
+            return res.status(400).json({ message: 'Final assessment not available for this course' })
+        }
+
+        // Check if all lessons are completed first
+        const progress = await Progress.findOne({ student: studentId, course: courseId })
+        if (!progress || progress.completedLessons.length < course.lessons.length) {
+            return res.status(400).json({ message: 'Please complete all lessons before taking the final assessment' })
+        }
+
+        // Calculate score
+        let score = 0
+        course.finalQuiz.forEach((q, idx) => {
+            const correctIdx = q.options.findIndex(o => o.correct)
+            if (answers[idx] === correctIdx) {
+                score++
+            }
+        })
+
+        const totalQuestions = course.finalQuiz.length
+        const passPercentage = 70 // 70% to pass
+        const userPercentage = (score / totalQuestions) * 100
+
+        if (userPercentage >= passPercentage) {
+            // Mark enrollment as completed
+            await Enrollment.findOneAndUpdate(
+                { student: studentId, course: courseId },
+                { isCompleted: true, completedAt: new Date(), progress: 100 }
+            )
+
+            // Generate certificate
             const exists = await Certificate.findOne({ student: studentId, course: courseId })
+            let certificateId = exists?._id
             if (!exists) {
-                await Certificate.create({
+                const newCert = await Certificate.create({
                     student: studentId,
                     course: courseId,
                     uniqueCode: uuidv4().slice(0, 12).toUpperCase(),
-                    certificateUrl: '', // Cloudinary URL would go here
+                    certificateUrl: '', // In production, upload buffer from generateCertificatePDF
                     issuedAt: new Date(),
                 })
+                certificateId = newCert._id
             }
-        }
 
-        res.json({ percent, completedLessons: progress.completedLessons })
+            // Mock Email Notification
+            console.log(`Email sent to ${req.user.email}: Congratulations on passing the final assessment!`)
+
+            res.json({ 
+                success: true, 
+                score, 
+                totalQuestions, 
+                percentage: userPercentage,
+                message: 'Congratulations! You passed the final assessment.',
+                certificateId
+            })
+        } else {
+            res.json({ 
+                success: false, 
+                score, 
+                totalQuestions, 
+                percentage: userPercentage,
+                message: 'You did not pass the final assessment. Please try again.' 
+            })
+        }
     } catch (err) {
         res.status(500).json({ message: err.message })
     }

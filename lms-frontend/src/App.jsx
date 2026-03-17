@@ -25,6 +25,8 @@ import StudentDashboard from './pages/dashboard/StudentDashboard'
 import MyCourses from './pages/dashboard/MyCourses'
 import LessonPage from './pages/dashboard/LessonPage'
 import Certificates from './pages/dashboard/Certificates'
+import FinalAssessment from './pages/dashboard/FinalAssessment'
+import Congratulations from './pages/dashboard/Congratulations'
 
 // ── Payment pages (removed - no checkout required) ─────────────────────────
 // import Checkout from './pages/payment/Checkout'
@@ -84,6 +86,8 @@ export default function App() {
             <Route path="/dashboard/my-courses" element={<MyCourses />} />
             <Route path="/dashboard/lesson/:lessonId" element={<LessonPage />} />
             <Route path="/dashboard/certificates" element={<Certificates />} />
+            <Route path="/dashboard/course/:courseId/final-assessment" element={<FinalAssessment />} />
+            <Route path="/dashboard/course/:courseId/congratulations" element={<Congratulations />} />
             <Route path="/checkout/:courseId" element={<Navigate to="/courses" replace />} />
             <Route path="/payment/confirmation" element={<Navigate to="/courses" replace />} />
 

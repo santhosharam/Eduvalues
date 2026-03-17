@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
         // --- Guest Mode Activated ---
         // We set a default user so the app works without login
         setUser({
-            id: 'guest-123',
+            _id: '660000000000000000000001', // Standardized hex ID
             email: 'guest@eduvalues.com',
             name: 'Guest Adventurer',
             role: 'admin' // Give admin access so they can see everything

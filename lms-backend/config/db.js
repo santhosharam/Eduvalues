@@ -40,6 +40,7 @@ const connectDB = async () => {
                         title: 'Character Builders: Essential Life Values for Kids',
                         description: 'A character education course designed for children that teaches important life values such as kindness, honesty, responsibility, respect, perseverance, empathy, gratitude, courage, integrity, and humility through engaging stories and activities.',
                         shortDescription: 'Learn kindness, honesty, courage, gratitude, and responsibility through engaging stories.',
+                        slug: 'essential-life-values-for-kids',
                         category: 'Values',
                         level: 'beginner',
                         price: 500,

@@ -124,9 +124,9 @@ export default function Courses() {
                                 value={levelFilter}
                                 onChange={e => setLevelFilter(e.target.value)}>
                                 <option value="">All Skills</option>
-                                <option value="Beginner">Beginner (3-6 yrs)</option>
-                                <option value="Intermediate">Intermediate (7-10 yrs)</option>
-                                <option value="Expert">Expert (11+ yrs)</option>
+                                <option value="beginner">Beginner (3-6 yrs)</option>
+                                <option value="intermediate">Intermediate (7-10 yrs)</option>
+                                <option value="advanced">Expert (11+ yrs)</option>
                             </select>
                         </div>
 
