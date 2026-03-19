@@ -5,7 +5,6 @@ import { getLessonById, getLessonsByCourseId } from '../../services/lessonServic
 import toast from 'react-hot-toast'
 import DOMPurify from 'dompurify'
 import { CheckCircle, FileText, ArrowLeft, Sparkles, Heart, Rocket, Brain, Trophy } from 'lucide-react'
-import ReviewForm from '../../components/course/ReviewForm'
 import { supabase } from '../../supabaseClient'
 
 import { markLessonComplete, getCourseProgress } from '../../services/progressService'
@@ -14,13 +13,11 @@ export default function LessonPage() {
     const { lessonId } = useParams()
     const navigate = useNavigate()
     const [lesson, setLesson] = useState(null)
-    const [completed, setCompleted] = useState(false)
     const [loading, setLoading] = useState(true)
     const [gameWon, setGameWon] = useState(false)
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
     const [nextLessonId, setNextLessonId] = useState(null)
     const [selectedOption, setSelectedOption] = useState(null)
-    const [coursePercent, setCoursePercent] = useState(0)
     const [isLastLesson, setIsLastLesson] = useState(false)
     const [quizQuestions, setQuizQuestions] = useState([])
     const [quizAnswers, setQuizAnswers] = useState({})
@@ -34,9 +31,6 @@ export default function LessonPage() {
             .then(async res => {
                 const lessonData = res.data.lesson
                 setLesson(lessonData)
-                // For now, let's treat everyone as having 0% progress on start
-                // but allow them to "win" games to complete
-                setCoursePercent(0)
 
                 console.log('Lesson ID:', lessonId)
                 // Fetch lesson quiz questions from Supabase
@@ -70,7 +64,7 @@ export default function LessonPage() {
     useEffect(() => {
         if (lesson?.course_id) {
             getCourseProgress(lesson.course_id)
-                .then(res => setCoursePercent(res.data.progress?.percent || 0))
+                .then(res => {})
                 .catch(() => {})
         }
     }, [lesson])
@@ -92,18 +86,6 @@ export default function LessonPage() {
         }
     }, [lesson, lessonId])
 
-    const handleComplete = async () => {
-        setCompleted(true)
-        toast.success('Lesson complete! 🎉')
-        if (nextLessonId) {
-            setTimeout(() => {
-                navigate(`/dashboard/lesson/${nextLessonId}`)
-            }, 1000)
-        } else {
-            setCoursePercent(100)
-            toast.success('🎉 All lessons finished! Time for the final challenge.', { duration: 5000 })
-        }
-    }
 
     if (loading) return (
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -287,88 +269,73 @@ export default function LessonPage() {
                     )}
                 </div>
 
-                {/* Mark Complete / Footer Navigation */}
+                {/* Adaptive Footer Navigation */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, marginBottom: 80 }}>
-                    <button
-                        onClick={handleComplete}
-                        disabled={completed || (quizQuestions.length > 0 && !quizPassed)}
-                        className={completed ? 'btn-secondary' : 'btn-primary'}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: 12,
-                            width: '100%',
-                            maxWidth: 400,
-                            height: 72,
-                            fontSize: 20,
-                            fontWeight: 900,
-                            borderRadius: '25px',
-                            boxShadow: (completed || (quizQuestions.length > 0 && !quizPassed)) ? 'none' : '0 15px 30px rgba(0, 166, 192, 0.3)',
-                            transform: (completed || (quizQuestions.length > 0 && !quizPassed)) ? 'none' : 'scale(1.05)',
-                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                            opacity: (quizQuestions.length > 0 && !quizPassed && !completed) ? 0.5 : 1
-                        }}
-                    >
-                        {completed
-                            ? <><CheckCircle size={24} /> Adventure Completed!</>
-                            : <><Trophy size={24} /> {quizPassed || quizQuestions.length === 0 ? 'Finish & Unlock Next Level' : 'Win Challenge to Unlock'}</>}
-                    </button>
-
-                    {completed && nextLessonId && (
-                        <Link
-                            to={`/dashboard/lesson/${nextLessonId}`}
-                            className="btn-primary"
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: 12,
-                                width: '100%',
-                                maxWidth: 400,
-                                height: 72,
-                                fontSize: 20,
-                                fontWeight: 900,
-                                borderRadius: '25px',
-                                background: '#1DD1A1',
-                                border: 'none',
-                                textDecoration: 'none',
-                                boxShadow: '0 15px 30px rgba(29, 209, 161, 0.3)',
-                                animation: 'pulse 2s infinite'
-                            }}
-                        >
-                            <Rocket size={24} /> Start Next Adventure!
-                        </Link>
+                    {(quizPassed || quizQuestions.length === 0) && (
+                        <>
+                            {!isLastLesson ? (
+                                nextLessonId && (
+                                    <Link
+                                        to={`/dashboard/lesson/${nextLessonId}`}
+                                        className="btn-primary"
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: 12,
+                                            width: '100%',
+                                            maxWidth: 400,
+                                            height: 72,
+                                            fontSize: 22,
+                                            fontWeight: 900,
+                                            borderRadius: '25px',
+                                            background: '#1DD1A1',
+                                            border: 'none',
+                                            textDecoration: 'none',
+                                            boxShadow: '0 15px 30px rgba(29, 209, 161, 0.3)',
+                                            animation: 'pulse 2s infinite',
+                                            color: '#fff'
+                                        }}
+                                    >
+                                        <Rocket size={24} /> Next Lesson →
+                                    </Link>
+                                )
+                            ) : (
+                                <div style={{ width: '100%', textAlign: 'center' }}>
+                                    <div style={{ marginBottom: 16, fontSize: 18, fontWeight: 800, color: '#001F3F' }}>
+                                        🎓 You have completed all lessons!
+                                    </div>
+                                    <Link
+                                        to={`/dashboard/course/${lesson.course_id}/final-exam`}
+                                        className="btn-primary"
+                                        style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: 12,
+                                            padding: '24px 48px',
+                                            fontSize: 22,
+                                            borderRadius: 30,
+                                            background: 'linear-gradient(135deg, #FF6B6B 0%, #FF9F43 100%)',
+                                            boxShadow: '0 20px 40px rgba(255, 107, 107, 0.3)',
+                                            textDecoration: 'none',
+                                            fontWeight: 900,
+                                            color: '#fff'
+                                        }}
+                                    >
+                                        <Sparkles size={28} /> TAKE FINAL EXAM (20 QUESTIONS) <Trophy size={28} />
+                                    </Link>
+                                </div>
+                            )}
+                        </>
                     )}
 
-                    {isLastLesson && completed && quizPassed && (
-                        <div style={{ width: '100%', marginTop: 40, textAlign: 'center' }}>
-                            <div style={{ marginBottom: 16, fontSize: 18, fontWeight: 800, color: '#001F3F' }}>
-                                🎓 You have completed all 10 lessons!
-                            </div>
-                            <Link
-                                to={`/dashboard/course/${lesson.course_id}/final-exam`}
-                                className="btn-primary"
-                                style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: 12,
-                                    padding: '24px 48px',
-                                    fontSize: 22,
-                                    borderRadius: 30,
-                                    background: 'linear-gradient(135deg, #FF6B6B 0%, #FF9F43 100%)',
-                                    boxShadow: '0 20px 40px rgba(255, 107, 107, 0.3)',
-                                    textDecoration: 'none',
-                                    fontWeight: 900,
-                                    color: '#fff'
-                                }}
-                            >
-                                <Sparkles size={28} /> TAKE FINAL EXAM (20 QUESTIONS) <Trophy size={28} />
-                            </Link>
-                        </div>
+                    {(!quizPassed && quizQuestions.length > 0) && (
+                        <p style={{ color: '#888', fontWeight: 800, fontSize: 16, background: '#fff', padding: '12px 24px', borderRadius: 15, border: '2px solid #F1F1F1' }}>
+                            Finish the challenge to unlock the next level! 🗝️
+                        </p>
                     )}
-
-                    <p style={{ color: '#888', fontWeight: 600, fontSize: 15 }}>You're doing great! Keep gathering seeds of kindness. 🌱</p>
+                    
+                    <p style={{ color: '#888', fontWeight: 600, fontSize: 15, marginTop: 10 }}>You're doing great! Keep gathering seeds of kindness. 🌱</p>
                 </div>
             </div>
         </div>
