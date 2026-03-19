@@ -21,6 +21,7 @@ export default function LessonPage() {
     const [nextLessonId, setNextLessonId] = useState(null)
     const [selectedOption, setSelectedOption] = useState(null)
     const [coursePercent, setCoursePercent] = useState(0)
+    const [isLastLesson, setIsLastLesson] = useState(false)
     const [quizQuestions, setQuizQuestions] = useState([])
     const [quizAnswers, setQuizAnswers] = useState({})
     const [quizSubmitted, setQuizSubmitted] = useState(false)
@@ -79,9 +80,11 @@ export default function LessonPage() {
                     const lessons = res.data.lessons
                     const currentIndex = lessons.findIndex(l => String(l._id) === String(lessonId))
                     if (currentIndex !== -1 && currentIndex < lessons.length - 1) {
-                        setNextLessonId(lessons[currentIndex + 1]._id)
+                        setNextLessonId(lessons[currentIndex + 1].id || lessons[currentIndex + 1]._id)
+                        setIsLastLesson(false)
                     } else {
                         setNextLessonId(null)
+                        setIsLastLesson(true)
                     }
                 })
         }
@@ -336,29 +339,30 @@ export default function LessonPage() {
                         </Link>
                     )}
 
-                    {coursePercent === 100 && (
+                    {isLastLesson && completed && quizPassed && (
                         <div style={{ width: '100%', marginTop: 40, textAlign: 'center' }}>
-                            <Link 
-                                to={`/dashboard/course/${lesson.course?._id || lesson.course}/final-assessment`}
+                            <div style={{ marginBottom: 16, fontSize: 18, fontWeight: 800, color: '#001F3F' }}>
+                                🎓 You have completed all 10 lessons!
+                            </div>
+                            <Link
+                                to={`/dashboard/course/${lesson.course_id}/final-exam`}
                                 className="btn-primary"
                                 style={{
                                     display: 'inline-flex',
                                     alignItems: 'center',
                                     gap: 12,
                                     padding: '24px 48px',
-                                    fontSize: 24,
+                                    fontSize: 22,
                                     borderRadius: 30,
                                     background: 'linear-gradient(135deg, #FF6B6B 0%, #FF9F43 100%)',
                                     boxShadow: '0 20px 40px rgba(255, 107, 107, 0.3)',
                                     textDecoration: 'none',
-                                    fontWeight: 900
+                                    fontWeight: 900,
+                                    color: '#fff'
                                 }}
                             >
-                                <Sparkles size={28} /> TAKE FINAL ASSESSMENT (20 QUESTIONS) <Trophy size={28} />
+                                <Sparkles size={28} /> TAKE FINAL EXAM (20 QUESTIONS) <Trophy size={28} />
                             </Link>
-                            <div style={{ marginTop: 40 }}>
-                                <ReviewForm courseId={lesson.course?._id || lesson.course} />
-                            </div>
                         </div>
                     )}
 
