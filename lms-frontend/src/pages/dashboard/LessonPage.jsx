@@ -4,21 +4,15 @@ import Navbar from '../../components/common/Navbar'
 import { getLessonById, getLessonsByCourseId } from '../../services/lessonService'
 import toast from 'react-hot-toast'
 import DOMPurify from 'dompurify'
-import { CheckCircle, FileText, ArrowLeft, Sparkles, Heart, Rocket, Brain, Trophy } from 'lucide-react'
+import { CheckCircle, FileText, ArrowLeft, Sparkles, Heart, Rocket, Brain, Trophy, Lock, PlayCircle, BookOpen } from 'lucide-react'
 import { supabase } from '../../supabaseClient'
-
-import { markLessonComplete, getCourseProgress } from '../../services/progressService'
-import { Lock, ChevronRight, PlayCircle, BookOpen } from 'lucide-react'
 
 export default function LessonPage() {
     const { lessonId } = useParams()
     const navigate = useNavigate()
     const [lesson, setLesson] = useState(null)
     const [loading, setLoading] = useState(true)
-    const [gameWon, setGameWon] = useState(false)
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
     const [nextLessonId, setNextLessonId] = useState(null)
-    const [selectedOption, setSelectedOption] = useState(null)
     const [isLastLesson, setIsLastLesson] = useState(false)
     const [quizQuestions, setQuizQuestions] = useState([])
     const [quizAnswers, setQuizAnswers] = useState({})
@@ -37,8 +31,8 @@ export default function LessonPage() {
             .then(async res => {
                 const lessonData = res.data.lesson
                 setLesson(lessonData)
+                console.log('Lesson loaded:', lessonData)
 
-                console.log('Lesson ID:', lessonId)
                 // Fetch lesson quiz questions from Supabase
                 const { data: quizData, error: quizError } = await supabase
                     .from('quizzes')
@@ -47,39 +41,22 @@ export default function LessonPage() {
                     .eq('is_final_exam', false)
                     .order('order_index', { ascending: true })
 
-                console.log('Quiz error:', quizError)
                 console.log('Quiz data:', quizData)
                 setQuizQuestions(quizData || [])
             })
             .catch((err) => {
-                if (err.response?.data?.sequentialError) {
-                    toast.error('Slow down! 🛑 Please complete the previous topic first.')
-                    // Delay redirect to allow toast to be seen
-                    setTimeout(() => navigate('/dashboard/my-courses'), 2000)
-                } else {
-                    toast.error('Could not load adventure!')
-                }
+                toast.error('Could not load adventure!')
+                console.error(err)
             })
             .finally(() => setLoading(false))
-
-        // Fetch progress
-        getCourseProgress(lessonId) // Wait, lessonId is for lesson, getCourseProgress needs courseId. 
-        // I'll fix this in the next effect where courseId is available.
     }, [lessonId])
-
-    useEffect(() => {
-        if (lesson?.course_id) {
-            getCourseProgress(lesson.course_id)
-                .then(res => {})
-                .catch(() => {})
-        }
-    }, [lesson])
 
     useEffect(() => {
         if (lesson?.course_id) {
             getLessonsByCourseId(lesson.course_id)
                 .then(res => {
                     const lessons = res.data.lessons
+                    console.log('Curriculum fetched:', lessons)
                     setAllCourseLessons(lessons)
                     const currentIndex = lessons.findIndex(l => String(l._id) === String(lessonId))
                     if (currentIndex !== -1 && currentIndex < lessons.length - 1) {
@@ -93,10 +70,17 @@ export default function LessonPage() {
         }
     }, [lesson, lessonId])
 
+    useEffect(() => {
+        if (lessonId && completedLessons.includes(String(lessonId))) {
+            setQuizPassed(true)
+        } else {
+            setQuizPassed(false)
+        }
+    }, [lessonId, completedLessons])
 
     if (loading) return (
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ width: 40, height: 40, border: '3px solid rgba(99,102,241,0.2)', borderTop: '3px solid #6366f1', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            <div style={{ width: 40, height: 40, border: '3px solid rgba(0,166,192,0.2)', borderTop: '3px solid #00A6C0', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
         </div>
     )
 
@@ -107,10 +91,8 @@ export default function LessonPage() {
         </div>
     )
 
-    // Sanitize lesson HTML content to prevent XSS
-    const safeContent = lesson.content
-        ? DOMPurify.sanitize(lesson.content, { USE_PROFILES: { html: true } })
-        : null
+    const safeContent = lesson.content ? DOMPurify.sanitize(lesson.content) : null
+
     return (
         <div style={{ minHeight: '100vh', display: 'flex', background: '#F8FAFB' }}>
             {/* Sidebar (Desktop) */}
@@ -195,7 +177,7 @@ export default function LessonPage() {
                 <div style={{ padding: 24, background: '#F8FAFB', borderTop: '2px solid #F1F1F1' }}>
                     <div style={{ fontSize: 12, fontWeight: 800, color: '#00A6C0', marginBottom: 8, textAlign: 'center' }}>CURRICULUM PROGRESS</div>
                     <div style={{ width: '100%', height: 8, background: '#eee', borderRadius: 4, overflow: 'hidden' }}>
-                        <div style={{ width: `${(completedLessons.length / allCourseLessons.length) * 100}%`, height: '100%', background: '#1DD1A1', transition: 'width 0.5s ease' }} />
+                        <div style={{ width: `${(completedLessons.length / (allCourseLessons.length || 1)) * 100}%`, height: '100%', background: '#1DD1A1', transition: 'width 0.5s ease' }} />
                     </div>
                     <div style={{ fontSize: 11, fontWeight: 700, color: '#888', marginTop: 8, textAlign: 'center' }}>
                         {completedLessons.length} / {allCourseLessons.length} Completed
@@ -212,7 +194,7 @@ export default function LessonPage() {
                     <div className="mobile-progress-bar" style={{ display: 'none', height: 6, background: '#eee', width: '100%', position: 'sticky', top: 0, zIndex: 50 }}>
                         <div style={{ 
                             height: '100%', 
-                            width: `${(completedLessons.length / allCourseLessons.length) * 100}%`, 
+                            width: `${(completedLessons.length / (allCourseLessons.length || 1)) * 100}%`, 
                             background: 'linear-gradient(to right, #1DD1A1, #00A6C0)',
                             transition: 'width 0.5s ease'
                         }} />

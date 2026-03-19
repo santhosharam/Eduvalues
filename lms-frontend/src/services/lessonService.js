@@ -17,7 +17,7 @@ export const getLessonById = async (id) => {
 }
 
 export const getLessonsByCourseId = async (courseId) => {
-    const { data, error } = await supabase.from('lessons').select('*').eq('course_id', courseId).order('order', { ascending: true })
+    const { data, error } = await supabase.from('lessons').select('*').eq('course_id', courseId).order('order_index', { ascending: true })
     if (error) throw error
     const lessons = (data || []).map(normalizeLesson)
     return { data: { lessons } }
