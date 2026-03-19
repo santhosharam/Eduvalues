@@ -1,15 +1,17 @@
-import api from './api'
+import { supabase } from '../supabaseClient'
 
 export const getLessonById = async (id) => {
-    const res = await api.get(`/lessons/${id}`)
-    return res
+    const { data, error } = await supabase.from('lessons').select('*').eq('id', id).single()
+    if (error) throw error
+    return { data: { lesson: data } }
 }
 
 export const getLessonsByCourseId = async (courseId) => {
-    const res = await api.get(`/lessons/course/${courseId}`)
-    return res
+    const { data, error } = await supabase.from('lessons').select('*').eq('course_id', courseId).order('order', { ascending: true })
+    if (error) throw error
+    return { data: { lessons: data } }
 }
 
-export const createLesson = (data) => api.post('/lessons', data)
-export const updateLesson = (id, data) => api.put(`/lessons/${id}`, data)
-export const deleteLesson = (id) => api.delete(`/lessons/${id}`)
+export const createLesson = (data) => supabase.from('lessons').insert([data]).select().single()
+export const updateLesson = (id, data) => supabase.from('lessons').update(data).eq('id', id).select().single()
+export const deleteLesson = (id) => supabase.from('lessons').delete().eq('id', id)

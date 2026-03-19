@@ -1,25 +1,51 @@
-import api from './api'
+import { supabase } from '../supabaseClient'
 
 export const getAllCourses = async (params = {}) => {
-    const res = await api.get('/courses', { params })
-    return res
+    let query = supabase.from('courses').select('*')
+    
+    if (params.category) query = query.eq('category', params.category)
+    if (params.level) query = query.eq('level', params.level)
+    if (params.limit) query = query.limit(params.limit)
+    if (params.search) query = query.ilike('title', `%${params.search}%`)
+    
+    const { data, error } = await query.order('created_at', { ascending: false })
+    if (error) throw error
+    const courses = (data || []).map(c => ({ ...c, _id: c.id }))
+    return { data: { courses } }
 }
 
 export const getCourseBySlug = async (slug) => {
-    const res = await api.get(`/courses/${slug}`)
-    return res
+    let query = supabase.from('courses').select('*, lessons(*)')
+    
+    // Check if it looks like a Supabase UUID or Slug
+    const isUuid = slug.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
+    
+    if (isUuid) {
+        query = query.or(`slug.eq.${slug},id.eq.${slug}`)
+    } else {
+        query = query.eq('slug', slug)
+    }
+
+    const { data, error } = await query.single()
+    if (error) throw error
+    const course = { ...data, _id: data.id }
+    return { data: { course } }
 }
 
 export const getCourseById = async (id) => {
-    const res = await api.get(`/courses/id/${id}`)
-    return res
+    const { data, error } = await supabase.from('courses').select('*, lessons(*)').eq('id', id).single()
+    if (error) throw error
+    const course = { ...data, _id: data.id }
+    return { data: { course: data } }
 }
 
 export const getCategories = async () => {
-    const res = await api.get('/courses/categories')
-    return res
+    const { data, error } = await supabase.from('courses').select('category')
+    if (error) throw error
+    const categories = [...new Set(data.map(item => item.category))]
+    return { data: { categories } }
 }
 
-export const createCourse = (data) => api.post('/courses', data)
-export const updateCourse = (id, data) => api.put(`/courses/${id}`, data)
-export const deleteCourse = (id) => api.delete(`/courses/${id}`)
+export const createCourse = (data) => supabase.from('courses').insert([data]).select().single()
+export const updateCourse = (id, data) => supabase.from('courses').update(data).eq('id', id).select().single()
+export const deleteCourse = (id) => supabase.from('courses').delete().eq('id', id)

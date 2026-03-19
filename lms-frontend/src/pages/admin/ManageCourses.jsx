@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
-import api from '../../services/api';
+import { getAllCourses, createCourse, updateCourse, deleteCourse } from '../../services/courseService';
 import toast from 'react-hot-toast';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminTable from '../../components/admin/AdminTable';
 import AdminModal from '../../components/admin/AdminModal';
 import AdminForm from '../../components/admin/AdminForm';
-import { Plus, Edit, Trash2, BookOpen, ExternalLink, Video } from 'lucide-react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
 
 const EMPTY_COURSE = {
-    title: '', category: '', instructor: '', duration: '', price: 0,
-    discountPrice: '', level: 'beginner', thumbnail: '', shortDescription: '', description: ''
+    title: '', category: '', instructor: '', duration: '',
+    level: 'beginner', thumbnail: '', shortDescription: '', description: ''
 };
 
 const FORM_FIELDS = [
@@ -17,8 +17,6 @@ const FORM_FIELDS = [
     { name: 'category', label: 'Category', placeholder: 'e.g. Web Development', required: true },
     { name: 'instructor', label: 'Lead Instructor', placeholder: 'e.g. Dr. Jane Smith', required: true },
     { name: 'duration', label: 'Total Duration', placeholder: 'e.g. 15h 45m', required: true },
-    { name: 'price', label: 'Base Price (₹)', type: 'number', required: true },
-    { name: 'discountPrice', label: 'Offer Price (₹)', type: 'number' },
     {
         name: 'level', label: 'Skill Level', type: 'select',
         options: [
@@ -43,7 +41,7 @@ export default function ManageCourses() {
     const fetchCourses = async () => {
         setLoading(true);
         try {
-            const r = await api.get('/courses?all=true');
+            const r = await getAllCourses({ all: true });
             setCourses(r.data.courses || []);
         } catch { toast.error('Failed to sync courses'); }
         finally { setLoading(false); }
@@ -54,24 +52,25 @@ export default function ManageCourses() {
     const handleSave = async (data) => {
         setActionLoading(true);
         try {
+            const { price, discountPrice, ...payload } = data;
             if (editCourse) {
-                await api.put(`/courses/${editCourse._id}`, data);
+                await updateCourse(editCourse._id, payload);
                 toast.success('Course parameters updated.');
             } else {
-                await api.post('/courses', data);
+                await createCourse(payload);
                 toast.success('New course added to catalog.');
             }
             setShowModal(false);
             fetchCourses();
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Transaction failed');
+            toast.error(err.message || 'Transaction failed');
         } finally { setActionLoading(false); }
     };
 
     const handleDelete = async (id) => {
         if (!window.confirm('IRREVERSIBLE ACTION: Are you sure you want to purge this course and all associated lessons?')) return;
         try {
-            await api.delete(`/courses/${id}`);
+            await deleteCourse(id);
             toast.success('Course purged successfully.');
             fetchCourses();
         } catch { toast.error('Access denied or system error'); }
@@ -113,7 +112,7 @@ export default function ManageCourses() {
 
             {/* Courses Data Grid */}
             <AdminTable
-                headers={['Metadata', 'Categorization', 'Commercials', 'Status']}
+                headers={['Metadata', 'Categorization', 'Status']}
                 loading={loading}
                 data={courses}
                 renderRow={(course) => (
@@ -144,10 +143,6 @@ export default function ManageCourses() {
                             }}>
                                 {course.level}
                             </div>
-                        </td>
-                        <td style={{ padding: '20px 32px' }}>
-                            <div style={{ fontSize: 15, color: '#00A6C0', fontWeight: 900 }}>₹{course.discountPrice || course.price}</div>
-                            {course.discountPrice && <div style={{ fontSize: 11, color: '#475569', textDecoration: 'line-through' }}>₹{course.price}</div>}
                         </td>
                         <td style={{ padding: '20px 32px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
