@@ -147,7 +147,7 @@ export default function Home() {
                             Nurturing integrity, creativity, and leadership through interactive playgrounds.
                         </p>
                         <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-                            <Link to="/courses" className="btn-primary" style={{ height: 64, padding: '0 48px', fontSize: 20, boxShadow: '0 15px 30px rgba(0, 166, 192, 0.4)' }}>
+                            <Link to="/dashboard/lesson/24d4a5a9-aa50-4ae0-b13b-5960692c5079" className="btn-primary" style={{ height: 64, padding: '0 48px', fontSize: 20, boxShadow: '0 15px 30px rgba(0, 166, 192, 0.4)', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 Start Adventure <Play size={20} fill="#fff" />
                             </Link>
                             <Link to="/blog" className="btn-outline" style={{ height: 64, padding: '0 48px', fontSize: 20, color: '#fff', borderColor: '#fff' }}>
