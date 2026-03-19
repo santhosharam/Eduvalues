@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../../supabaseClient'
 import Navbar from '../../components/common/Navbar'
 import toast from 'react-hot-toast'
-import { Sparkles, Trophy, Award, Printer, Download, ArrowLeft, Loader2, Heart, CheckCircle, RefreshCcw } from 'lucide-react'
+import { Sparkles, Trophy, Award, Printer, Download, ArrowLeft, Loader2, Heart, CheckCircle, RefreshCcw, Compass } from 'lucide-react'
 
 export default function FinalExamPage() {
     const { courseId } = useParams()
@@ -194,11 +194,21 @@ export default function FinalExamPage() {
         <div style={{ minHeight: '100vh', background: '#F8FAFB', paddingBottom: 100 }}>
             <Navbar />
             
-            <div style={{ background: '#001F3F', color: '#fff', padding: '60px 24px', textAlign: 'center' }}>
-                <div className="section-container">
-                    <Trophy size={64} color="#FFD700" style={{ marginBottom: 20 }} />
-                    <h1 style={{ fontSize: 'clamp(32px, 5vw, 42px)', fontWeight: 900 }}>Final Moral Compass Challenge 🧭</h1>
-                    <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.8)', marginTop: 10 }}>Score at least 15/20 correctly to earn your certificate!</p>
+            <div style={{ background: '#001F3F', color: '#fff', padding: '80px 24px', textAlign: 'center' }}>
+                <div className="section-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                        <Compass size={48} color="#00D2D3" className="animate-float" />
+                        <Trophy size={64} color="#FFD700" />
+                        <Compass size={48} color="#00D2D3" style={{ animationDelay: '2s' }} className="animate-float" />
+                    </div>
+                    <div>
+                        <h1 style={{ fontSize: 'clamp(32px, 5vw, 42px)', fontWeight: 900, color: '#FFFFFF', marginBottom: 12 }}>
+                            Final Moral Compass Challenge
+                        </h1>
+                        <p style={{ fontSize: 20, color: 'rgba(255,255,255,0.9)', fontWeight: 700, maxWidth: 600, margin: '0 auto' }}>
+                            Score at least 15/20 correctly to earn your certificate! 🧭
+                        </p>
+                    </div>
                 </div>
             </div>
 
