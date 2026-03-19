@@ -88,18 +88,15 @@ export default function LessonPage() {
     }, [lesson, lessonId])
 
     const handleComplete = async () => {
-        const cid = lesson.course?._id || lesson.course
-        if (!cid) return
-        try {
-            const res = await markLessonComplete(cid, lessonId)
-            setCompleted(true)
-            setCoursePercent(res.data.percent)
-            toast.success(`Lesson complete! Course progress: ${res.data.percent}%`)
-            if (res.data.percent === 100) {
-                toast.success('🎉 All lessons finished! Time for the final challenge.', { duration: 5000 })
-            }
-        } catch {
-            toast.error('Failed to update progress')
+        setCompleted(true)
+        toast.success('Lesson complete! 🎉')
+        if (nextLessonId) {
+            setTimeout(() => {
+                navigate(`/dashboard/lesson/${nextLessonId}`)
+            }, 1000)
+        } else {
+            setCoursePercent(100)
+            toast.success('🎉 All lessons finished! Time for the final challenge.', { duration: 5000 })
         }
     }
 
