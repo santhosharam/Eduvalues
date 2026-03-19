@@ -97,7 +97,9 @@ export default function CourseCard({ course }) {
                                 e.stopPropagation();
                                 if (course.lessons && course.lessons.length > 0) {
                                     const firstLesson = course.lessons[0];
-                                    const lessonId = firstLesson.id || firstLesson._id || firstLesson;
+                                    const lessonId = typeof firstLesson === 'object' 
+                                        ? (firstLesson.id || firstLesson._id) 
+                                        : firstLesson;
                                     navigate(`/dashboard/lesson/${lessonId}`);
                                 } else {
                                     navigate(`/courses/${course.slug || course._id}`);
