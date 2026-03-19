@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import api from '../../services/api';
+import { getAllCourses } from '../../services/courseService';
+import { getLessonsByCourseId, createLesson, updateLesson, deleteLesson } from '../../services/lessonService';
 import toast from 'react-hot-toast';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminTable from '../../components/admin/AdminTable';
 import AdminModal from '../../components/admin/AdminModal';
 import AdminForm from '../../components/admin/AdminForm';
-import { Plus, Edit, Trash2, Video, BookOpen, Layers, ChevronRight, Play } from 'lucide-react';
+import { Plus, Edit, Trash2, Video, BookOpen, Layers, ChevronRight } from 'lucide-react';
 
 const EMPTY_LESSON = { title: '', description: '', videoUrl: '', content: '', order: 1, isFree: false };
 
@@ -26,15 +27,14 @@ export default function ManageLessons() {
     const [showModal, setShowModal] = useState(false);
     const [editLesson, setEditLesson] = useState(null);
 
-    // Initial Fetch for course context
     useEffect(() => {
-        api.get('/courses?all=true').then(r => setCourses(r.data.courses || []));
+        getAllCourses({ all: true }).then(r => setCourses(r.data.courses || []));
     }, []);
 
     const fetchLessons = async (courseId) => {
         setLoading(true);
         try {
-            const r = await api.get(`/lessons/course/${courseId}`);
+            const r = await getLessonsByCourseId(courseId);
             setLessons(r.data.lessons || []);
         } catch { toast.error('Failed to sync curriculum data'); }
         finally { setLoading(false); }
@@ -49,22 +49,24 @@ export default function ManageLessons() {
         setActionLoading(true);
         try {
             if (editLesson) {
-                await api.put(`/lessons/${editLesson._id}`, data);
+                await updateLesson(editLesson._id, data);
                 toast.success('Lesson content revised.');
             } else {
-                await api.post('/lessons', { ...data, course: selectedCourse._id });
+                // IMPORTANT: When creating for Supabase, use 'course_id' field
+                await createLesson({ ...data, course_id: selectedCourse._id });
                 toast.success('Lesson appended to curriculum.');
             }
             setShowModal(false);
             fetchLessons(selectedCourse._id);
-        } catch { toast.error('Critical write error'); }
-        finally { setActionLoading(false); }
+        } catch (err) {
+            toast.error(err.message || 'Critical write error');
+        } finally { setActionLoading(false); }
     };
 
     const handleDelete = async (id) => {
         if (!window.confirm('IRREVERSIBLE: Purge this instructional asset?')) return;
         try {
-            await api.delete(`/lessons/${id}`);
+            await deleteLesson(id);
             toast.success('Asset purged.');
             fetchLessons(selectedCourse._id);
         } catch { toast.error('Deletion restricted'); }
