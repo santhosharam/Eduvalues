@@ -31,22 +31,25 @@ export default function LessonPage() {
     useEffect(() => {
         setLoading(true)
         getLessonById(lessonId)
-            .then(res => {
+            .then(async res => {
                 const lessonData = res.data.lesson
                 setLesson(lessonData)
                 // For now, let's treat everyone as having 0% progress on start
                 // but allow them to "win" games to complete
                 setCoursePercent(0)
 
+                console.log('Lesson ID:', lessonId)
                 // Fetch lesson quiz questions from Supabase
-                supabase.from('quizzes')
+                const { data: quizData, error: quizError } = await supabase
+                    .from('quizzes')
                     .select('*')
                     .eq('lesson_id', lessonId)
                     .eq('is_final_exam', false)
                     .order('order_index', { ascending: true })
-                    .then(({ data: quizData }) => {
-                        setQuizQuestions(quizData || [])
-                    })
+
+                console.log('Quiz error:', quizError)
+                console.log('Quiz data:', quizData)
+                setQuizQuestions(quizData || [])
             })
             .catch((err) => {
                 if (err.response?.data?.sequentialError) {
@@ -65,17 +68,16 @@ export default function LessonPage() {
     }, [lessonId])
 
     useEffect(() => {
-        if (lesson?.course?._id || lesson?.course) {
-            const cid = lesson.course?._id || lesson.course
-            getCourseProgress(cid)
+        if (lesson?.course_id) {
+            getCourseProgress(lesson.course_id)
                 .then(res => setCoursePercent(res.data.progress?.percent || 0))
                 .catch(() => {})
         }
     }, [lesson])
 
     useEffect(() => {
-        if (lesson?.course) {
-            getLessonsByCourseId(lesson.course)
+        if (lesson?.course_id) {
+            getLessonsByCourseId(lesson.course_id)
                 .then(res => {
                     const lessons = res.data.lessons
                     const currentIndex = lessons.findIndex(l => String(l._id) === String(lessonId))
