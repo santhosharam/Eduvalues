@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 import DOMPurify from 'dompurify'
 import { CheckCircle, FileText, ArrowLeft, Sparkles, Heart, Rocket, Brain, Trophy } from 'lucide-react'
 import ReviewForm from '../../components/course/ReviewForm'
+import { supabase } from '../../supabaseClient'
 
 import { markLessonComplete, getCourseProgress } from '../../services/progressService'
 
@@ -20,6 +21,11 @@ export default function LessonPage() {
     const [nextLessonId, setNextLessonId] = useState(null)
     const [selectedOption, setSelectedOption] = useState(null)
     const [coursePercent, setCoursePercent] = useState(0)
+    const [quizQuestions, setQuizQuestions] = useState([])
+    const [quizAnswers, setQuizAnswers] = useState({})
+    const [quizSubmitted, setQuizSubmitted] = useState(false)
+    const [quizScore, setQuizScore] = useState(0)
+    const [quizPassed, setQuizPassed] = useState(false)
 
     useEffect(() => {
         setLoading(true)
@@ -30,6 +36,16 @@ export default function LessonPage() {
                 // For now, let's treat everyone as having 0% progress on start
                 // but allow them to "win" games to complete
                 setCoursePercent(0)
+
+                // Fetch lesson quiz questions from Supabase
+                supabase.from('quizzes')
+                    .select('*')
+                    .eq('lesson_id', lessonId)
+                    .eq('is_final_exam', false)
+                    .order('order_index', { ascending: true })
+                    .then(({ data: quizData }) => {
+                        setQuizQuestions(quizData || [])
+                    })
             })
             .catch((err) => {
                 if (err.response?.data?.sequentialError) {
@@ -187,66 +203,82 @@ export default function LessonPage() {
                             </div>
                         </div>
                     )}
-                    {/* Values Challenge Mini-Game */}
-                    {lesson.quiz?.length > 0 && !completed && (
-                        <div style={{ marginTop: 60, padding: 40, background: '#FFF5F5', borderRadius: 40, border: '4px solid #FF6B6B', textAlign: 'center' }}>
+                    {/* Dynamic Quiz Challenge */}
+                    {quizQuestions.length > 0 && !quizPassed && (
+                        <div style={{ marginTop: 60, padding: 40, background: '#FFF5F5', borderRadius: 40, border: '4px solid #FF6B6B' }}>
                             <div style={{ background: '#FF6B6B', color: '#fff', padding: '8px 24px', borderRadius: 15, display: 'inline-block', fontWeight: 800, fontSize: 14, marginBottom: 24 }}>
-                                MINI-GAME: {lesson.title.toUpperCase()} CHALLENGE ({currentQuestionIndex + 1}/{lesson.quiz.length}) 🎮
-                            </div>
-                            <h3 style={{ fontSize: 24, fontWeight: 900, color: '#001F3F', marginBottom: 32, lineHeight: 1.4 }}>
-                                {lesson.quiz[currentQuestionIndex].question}
-                            </h3>
-
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                                {lesson.quiz[currentQuestionIndex].options.map((opt, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => {
-                                            setSelectedOption(i);
-                                            if (opt.correct) {
-                                                toast.success(opt.feedback || "Great job!", { icon: '✨' });
-                                                
-                                                // Wait a bit before moving to next question or winning
-                                                setTimeout(() => {
-                                                    setSelectedOption(null);
-                                                    if (currentQuestionIndex < lesson.quiz.length - 1) {
-                                                        setCurrentQuestionIndex(prev => prev + 1);
-                                                    } else {
-                                                        setGameWon(true);
-                                                        toast.success("AMAZING! You passed all challenges! 🏆", { duration: 4000 });
-                                                    }
-                                                }, 1500);
-                                            } else {
-                                                toast.error(opt.feedback || "Try again!");
-                                                setTimeout(() => setSelectedOption(null), 1000);
-                                            }
-                                        }}
-                                        style={{
-                                            padding: '20px 32px',
-                                            borderRadius: 20,
-                                            border: selectedOption === i ? (opt.correct ? '3px solid #1DD1A1' : '3px solid #FF6B6B') : '3px solid #F1F1F1',
-                                            background: '#fff',
-                                            fontSize: 18,
-                                            fontWeight: 700,
-                                            color: '#001F3F',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.2s',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            gap: 12,
-                                            pointerEvents: selectedOption !== null ? 'none' : 'auto'
-                                        }}
-                                    >
-                                        {opt.text}
-                                        {selectedOption === i && (opt.correct ? ' ✅' : ' ❌')}
-                                    </button>
-                                ))}
+                                QUIZ: {lesson.title.toUpperCase()} CHALLENGE 🎮
                             </div>
 
-                            {gameWon && (
-                                <div style={{ marginTop: 32, color: '#1DD1A1', fontWeight: 800, fontSize: 18 }}>
-                                    ✨ ALL LEVELS UNLOCKED! Finish below to continue. ✨
+                            {quizQuestions.map((q, index) => (
+                                <div key={q.id} style={{ marginBottom: 32 }}>
+                                    <h4 style={{ fontSize: 18, fontWeight: 800, color: '#001F3F', marginBottom: 16 }}>
+                                        {index + 1}. {q.question}
+                                    </h4>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                        {['a', 'b', 'c', 'd'].map(opt => {
+                                            const isSelected = quizAnswers[q.id] === opt
+                                            const isCorrect = quizSubmitted && opt === q.correct_answer
+                                            const isWrong = quizSubmitted && isSelected && opt !== q.correct_answer
+                                            return (
+                                                <button
+                                                    key={opt}
+                                                    onClick={() => !quizSubmitted && setQuizAnswers(prev => ({ ...prev, [q.id]: opt }))}
+                                                    style={{
+                                                        padding: '16px 24px',
+                                                        borderRadius: 16,
+                                                        border: isCorrect ? '3px solid #1DD1A1' : isWrong ? '3px solid #FF6B6B' : isSelected ? '3px solid #00A6C0' : '3px solid #F1F1F1',
+                                                        background: isCorrect ? '#E8FDF5' : isWrong ? '#FFF0F0' : isSelected ? '#E0F7FA' : '#fff',
+                                                        fontSize: 16,
+                                                        fontWeight: 700,
+                                                        color: '#001F3F',
+                                                        cursor: quizSubmitted ? 'default' : 'pointer',
+                                                        textAlign: 'left'
+                                                    }}
+                                                >
+                                                    {opt.toUpperCase()}. {q[`option_${opt}`]}
+                                                    {isCorrect && ' ✅'}
+                                                    {isWrong && ' ❌'}
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+                            ))}
+
+                            {!quizSubmitted ? (
+                                <button
+                                    onClick={() => {
+                                        const score = quizQuestions.filter(q => quizAnswers[q.id] === q.correct_answer).length
+                                        setQuizScore(score)
+                                        setQuizSubmitted(true)
+                                        if (score === quizQuestions.length) {
+                                            setQuizPassed(true)
+                                            toast.success('Perfect score! 🏆 Next lesson unlocked!', { duration: 3000 })
+                                        } else if (score >= Math.ceil(quizQuestions.length * 0.6)) {
+                                            setQuizPassed(true)
+                                            toast.success(`You passed with ${score}/${quizQuestions.length}! 🎉`, { duration: 3000 })
+                                        } else {
+                                            toast.error(`You got ${score}/${quizQuestions.length}. Try again!`)
+                                        }
+                                    }}
+                                    disabled={Object.keys(quizAnswers).length < quizQuestions.length}
+                                    style={{ marginTop: 24, padding: '16px 40px', background: '#FF6B6B', color: '#fff', border: 'none', borderRadius: 20, fontWeight: 900, fontSize: 18, cursor: 'pointer', opacity: Object.keys(quizAnswers).length < quizQuestions.length ? 0.5 : 1 }}
+                                >
+                                    Submit Quiz 🚀
+                                </button>
+                            ) : !quizPassed ? (
+                                <button
+                                    onClick={() => { setQuizAnswers({}); setQuizSubmitted(false); setQuizScore(0) }}
+                                    style={{ marginTop: 24, padding: '16px 40px', background: '#00A6C0', color: '#fff', border: 'none', borderRadius: 20, fontWeight: 900, fontSize: 18, cursor: 'pointer' }}
+                                >
+                                    Try Again 🔄
+                                </button>
+                            ) : null}
+
+                            {quizSubmitted && (
+                                <div style={{ marginTop: 24, fontWeight: 800, fontSize: 18, color: quizPassed ? '#1DD1A1' : '#FF6B6B', textAlign: 'center' }}>
+                                    {quizPassed ? `✨ Quiz Passed! ${quizScore}/${quizQuestions.length} correct!` : `Score: ${quizScore}/${quizQuestions.length} — Try again!`}
                                 </div>
                             )}
                         </div>
@@ -257,7 +289,7 @@ export default function LessonPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, marginBottom: 80 }}>
                     <button
                         onClick={handleComplete}
-                        disabled={completed || (lesson.quiz?.length > 0 && !gameWon)}
+                        disabled={completed || (quizQuestions.length > 0 && !quizPassed)}
                         className={completed ? 'btn-secondary' : 'btn-primary'}
                         style={{
                             display: 'flex',
@@ -270,15 +302,15 @@ export default function LessonPage() {
                             fontSize: 20,
                             fontWeight: 900,
                             borderRadius: '25px',
-                            boxShadow: (completed || (lesson.quiz?.length > 0 && !gameWon)) ? 'none' : '0 15px 30px rgba(0, 166, 192, 0.3)',
-                            transform: (completed || (lesson.quiz?.length > 0 && !gameWon)) ? 'none' : 'scale(1.05)',
+                            boxShadow: (completed || (quizQuestions.length > 0 && !quizPassed)) ? 'none' : '0 15px 30px rgba(0, 166, 192, 0.3)',
+                            transform: (completed || (quizQuestions.length > 0 && !quizPassed)) ? 'none' : 'scale(1.05)',
                             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                            opacity: (lesson.quiz?.length > 0 && !gameWon && !completed) ? 0.5 : 1
+                            opacity: (quizQuestions.length > 0 && !quizPassed && !completed) ? 0.5 : 1
                         }}
                     >
                         {completed
                             ? <><CheckCircle size={24} /> Adventure Completed!</>
-                            : <><Trophy size={24} /> {gameWon || !lesson.quiz?.length ? 'Finish & Unlock Next Level' : 'Win Challenge to Unlock'}</>}
+                            : <><Trophy size={24} /> {quizPassed || quizQuestions.length === 0 ? 'Finish & Unlock Next Level' : 'Win Challenge to Unlock'}</>}
                     </button>
 
                     {completed && nextLessonId && (
