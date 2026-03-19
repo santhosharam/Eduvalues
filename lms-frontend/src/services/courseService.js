@@ -1,7 +1,29 @@
 import { supabase } from '../supabaseClient'
 
+const normalizeLesson = (l) => {
+    if (!l) return null
+    return {
+        ...l,
+        _id: l.id,
+        videoUrl: l.video_url || l.videoUrl,
+        isFree: l.is_free !== undefined ? l.is_free : l.isFree
+    }
+}
+
+const normalizeCourse = (c) => {
+    if (!c) return null
+    return {
+        ...c,
+        _id: c.id,
+        shortDescription: c.short_description || c.shortDescription,
+        discountPrice: c.discount_price || c.discountPrice,
+        isPublished: c.is_published !== undefined ? c.is_published : c.isPublished,
+        lessons: (c.lessons || []).map(normalizeLesson)
+    }
+}
+
 export const getAllCourses = async (params = {}) => {
-    let query = supabase.from('courses').select('*')
+    let query = supabase.from('courses').select('*, lessons(*)')
     
     if (params.category) query = query.eq('category', params.category)
     if (params.level) query = query.eq('level', params.level)
@@ -10,7 +32,7 @@ export const getAllCourses = async (params = {}) => {
     
     const { data, error } = await query.order('created_at', { ascending: false })
     if (error) throw error
-    const courses = (data || []).map(c => ({ ...c, _id: c.id }))
+    const courses = (data || []).map(normalizeCourse)
     return { data: { courses } }
 }
 
@@ -28,15 +50,13 @@ export const getCourseBySlug = async (slug) => {
 
     const { data, error } = await query.single()
     if (error) throw error
-    const course = { ...data, _id: data.id }
-    return { data: { course } }
+    return { data: { course: normalizeCourse(data) } }
 }
 
 export const getCourseById = async (id) => {
     const { data, error } = await supabase.from('courses').select('*, lessons(*)').eq('id', id).single()
     if (error) throw error
-    const course = { ...data, _id: data.id }
-    return { data: { course: data } }
+    return { data: { course: normalizeCourse(data) } }
 }
 
 export const getCategories = async () => {

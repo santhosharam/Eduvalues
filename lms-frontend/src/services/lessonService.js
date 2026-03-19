@@ -1,16 +1,25 @@
 import { supabase } from '../supabaseClient'
 
+const normalizeLesson = (l) => {
+    if (!l) return null
+    return {
+        ...l,
+        _id: l.id,
+        videoUrl: l.video_url || l.videoUrl,
+        isFree: l.is_free !== undefined ? l.is_free : l.isFree
+    }
+}
+
 export const getLessonById = async (id) => {
     const { data, error } = await supabase.from('lessons').select('*').eq('id', id).single()
     if (error) throw error
-    const lesson = { ...data, _id: data.id }
-    return { data: { lesson } }
+    return { data: { lesson: normalizeLesson(data) } }
 }
 
 export const getLessonsByCourseId = async (courseId) => {
     const { data, error } = await supabase.from('lessons').select('*').eq('course_id', courseId).order('order', { ascending: true })
     if (error) throw error
-    const lessons = (data || []).map(l => ({ ...l, _id: l.id }))
+    const lessons = (data || []).map(normalizeLesson)
     return { data: { lessons } }
 }
 

@@ -5,10 +5,13 @@ export default function CourseCard({ course }) {
     const navigate = useNavigate()
     if (!course) return null
 
-    const priceDisplay = course.price === 0 ? 'Free' : `₹${course.discountPrice || course.price}`
+    // ✅ Normalize snake_case from Supabase to camelCase
+    const lessons = course.lessons || []
+    const shortDescription = course.short_description || course.shortDescription || 'Nurturing integrity and leadership through play.'
+    const discountPrice = course.discount_price || course.discountPrice
+    const priceDisplay = course.price === 0 ? 'Free' : `₹${discountPrice || course.price}`
     const rating = course.rating || 0
     const reviewsCount = course.reviews?.length || 0
-    const shortDescription = course.shortDescription || 'Nurturing integrity and leadership through play.'
 
     return (
         <div className="kids-card" style={{ height: '100%', display: 'flex', flexDirection: 'column', cursor: 'pointer' }} onClick={() => navigate(`/courses/${course.slug || course._id}`)}>
@@ -95,11 +98,8 @@ export default function CourseCard({ course }) {
                             style={{ height: '44px', padding: '0 16px', fontSize: '12px', borderRadius: '12px', display: 'flex', alignItems: 'center', border: 'none', cursor: 'pointer' }}
                             onClick={(e) => {
                                 e.stopPropagation();
-                                if (course.lessons && course.lessons.length > 0) {
-                                    const firstLesson = course.lessons[0];
-                                    const lessonId = typeof firstLesson === 'object' 
-                                        ? (firstLesson.id || firstLesson._id) 
-                                        : firstLesson;
+                                if (lessons.length > 0) {
+                                    const lessonId = lessons[0].id || lessons[0]._id;
                                     navigate(`/dashboard/lesson/${lessonId}`);
                                 } else {
                                     navigate(`/courses/${course.slug || course._id}`);
