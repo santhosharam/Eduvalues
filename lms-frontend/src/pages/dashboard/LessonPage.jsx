@@ -8,6 +8,7 @@ import { CheckCircle, FileText, ArrowLeft, Sparkles, Heart, Rocket, Brain, Troph
 import { supabase } from '../../supabaseClient'
 
 import { markLessonComplete, getCourseProgress } from '../../services/progressService'
+import { Lock, ChevronRight, PlayCircle, BookOpen } from 'lucide-react'
 
 export default function LessonPage() {
     const { lessonId } = useParams()
@@ -24,6 +25,11 @@ export default function LessonPage() {
     const [quizSubmitted, setQuizSubmitted] = useState(false)
     const [quizScore, setQuizScore] = useState(0)
     const [quizPassed, setQuizPassed] = useState(false)
+    const [allCourseLessons, setAllCourseLessons] = useState([])
+    const [completedLessons, setCompletedLessons] = useState(() => {
+        const saved = localStorage.getItem('completedLessons')
+        return saved ? JSON.parse(saved) : []
+    })
 
     useEffect(() => {
         setLoading(true)
@@ -74,6 +80,7 @@ export default function LessonPage() {
             getLessonsByCourseId(lesson.course_id)
                 .then(res => {
                     const lessons = res.data.lessons
+                    setAllCourseLessons(lessons)
                     const currentIndex = lessons.findIndex(l => String(l._id) === String(lessonId))
                     if (currentIndex !== -1 && currentIndex < lessons.length - 1) {
                         setNextLessonId(lessons[currentIndex + 1].id || lessons[currentIndex + 1]._id)
@@ -104,240 +111,241 @@ export default function LessonPage() {
     const safeContent = lesson.content
         ? DOMPurify.sanitize(lesson.content, { USE_PROFILES: { html: true } })
         : null
-
     return (
-        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F8FAFB', position: 'relative', overflow: 'hidden' }}>
-            <Navbar />
-
-            {/* Decorative Floating Elements */}
-            <div style={{ position: 'absolute', top: '150px', left: '5%', opacity: 0.1, pointerEvents: 'none' }}><Sparkles size={120} color="#FF9F43" /></div>
-            <div style={{ position: 'absolute', bottom: '100px', right: '5%', opacity: 0.1, pointerEvents: 'none' }}><Heart size={150} color="#FF6B6B" /></div>
-            <div style={{ position: 'absolute', top: '40%', right: '8%', opacity: 0.1, pointerEvents: 'none' }}><Rocket size={100} color="#00A6C0" /></div>
-
-            <div style={{ flex: 1, padding: '40px 24px', maxWidth: 1000, margin: '0 auto', width: '100%', position: 'relative', zIndex: 1 }}>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 40 }}>
-                    <Link to="/courses" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: '#001F3F', textDecoration: 'none', fontSize: 15, fontWeight: 700, background: '#fff', padding: '10px 20px', borderRadius: 15, boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
-                        <ArrowLeft size={18} /> Exit Adventure
-                    </Link>
-                    <div style={{ background: '#00A6C0', color: '#fff', padding: '10px 24px', borderRadius: 20, fontWeight: 800, fontSize: 14, boxShadow: '0 10px 20px rgba(0,166,192,0.2)' }}>
-                        LEVEL: EXPLORER 🌟
+        <div style={{ minHeight: '100vh', display: 'flex', background: '#F8FAFB' }}>
+            {/* Sidebar (Desktop) */}
+            <aside className="lesson-sidebar" style={{
+                width: 320,
+                background: '#fff',
+                borderRight: '2px solid #F1F1F1',
+                height: '100vh',
+                position: 'fixed',
+                left: 0,
+                top: 0,
+                overflowY: 'auto',
+                zIndex: 100,
+                display: 'flex',
+                flexDirection: 'column'
+            }}>
+                <div style={{ padding: '32px 24px', borderBottom: '2px solid #F8FAFB' }}>
+                    <div onClick={() => navigate('/courses')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, color: '#64748b', marginBottom: 20, fontSize: 13, fontWeight: 700 }}>
+                        <ArrowLeft size={16} /> EXIT COURSE
+                    </div>
+                    {/* Character Builders Curriculum Header */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                        <div style={{ width: 40, height: 40, background: '#00A6C0', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                            <BookOpen size={20} />
+                        </div>
+                        <h2 style={{ fontSize: 18, color: '#001F3F', fontWeight: 900, lineHeight: 1.2 }}>Character Builders curriculum</h2>
                     </div>
                 </div>
 
-                <div style={{ textAlign: 'center', marginBottom: 60 }}>
-                    <div style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: 80,
-                        height: 80,
-                        background: '#fff',
-                        borderRadius: '24px',
-                        marginBottom: 24,
-                        boxShadow: '0 15px 35px rgba(0,0,0,0.08)',
-                        transform: 'rotate(-5deg)'
-                    }}>
-                        <Brain size={40} color="#00A6C0" />
-                    </div>
-                    <h1 style={{ fontSize: 'clamp(32px, 6vw, 48px)', fontWeight: 900, color: '#001F3F', fontFamily: '"Fredoka", sans-serif', marginBottom: 16 }}>{lesson.title} Adventure</h1>
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
-                        <span style={{ background: '#FF9F43', color: '#fff', padding: '6px 16px', borderRadius: '30px', fontSize: '13px', fontWeight: 800 }}>STORY TIME 📖</span>
-                        <span style={{ background: '#1DD1A1', color: '#fff', padding: '6px 16px', borderRadius: '30px', fontSize: '13px', fontWeight: 800 }}>VALUE: {lesson.title.toUpperCase()} ❤️</span>
-                    </div>
+                <div style={{ flex: 1, padding: 12 }}>
+                    {allCourseLessons.map((l, idx) => {
+                        const isCurrent = String(l._id) === String(lessonId)
+                        const isCompleted = completedLessons.includes(String(l._id))
+                        // Unlock logic: lesson 1 is always unlocked. n is unlocked if n-1 is completed.
+                        const isUnlocked = idx === 0 || completedLessons.includes(String(allCourseLessons[idx - 1]?._id))
+                        
+                        return (
+                            <div 
+                                key={l._id}
+                                onClick={() => isUnlocked && navigate(`/dashboard/lesson/${l._id}`)}
+                                style={{
+                                    padding: '16px 20px',
+                                    borderRadius: 16,
+                                    marginBottom: 8,
+                                    cursor: isUnlocked ? 'pointer' : 'default',
+                                    background: isCurrent ? '#E0F7FA' : isUnlocked ? 'transparent' : '#f8fafb',
+                                    border: isCurrent ? '2px solid #00A6C0' : '2px solid transparent',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 12,
+                                    opacity: isUnlocked ? 1 : 0.6,
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                <div style={{ 
+                                    width: 32, 
+                                    height: 32, 
+                                    borderRadius: 10, 
+                                    background: isCompleted ? '#1DD1A1' : isCurrent ? '#00A6C0' : '#f1f1f1',
+                                    color: isCompleted || isCurrent ? '#fff' : '#888',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: 14,
+                                    fontWeight: 900
+                                }}>
+                                    {isCompleted ? <CheckCircle size={16} /> : idx + 1}
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: 14, fontWeight: 800, color: isCurrent ? '#001F3F' : '#64748b' }}>{l.title}</div>
+                                    <div style={{ fontSize: 11, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', marginTop: 2 }}>
+                                        {isCurrent ? 'Viewing' : isCompleted ? 'Completed' : isUnlocked ? 'Next Adventure' : 'Locked'}
+                                    </div>
+                                </div>
+                                {!isUnlocked && <Lock size={14} color="#ccc" />}
+                                {isCurrent && <PlayCircle size={14} color="#00A6C0" />}
+                            </div>
+                        )
+                    })}
                 </div>
 
-                {/* Main Content Area */}
-                <div style={{
-                    background: '#fff',
-                    padding: '60px 40px',
-                    borderRadius: '40px',
-                    boxShadow: '0 30px 60px rgba(0,0,0,0.05)',
-                    border: '2px solid #F1F1F1',
-                    marginBottom: 40,
-                    position: 'relative'
-                }}>
-                    {/* Corner Decoration */}
-                    <div style={{ position: 'absolute', top: -15, right: 30, background: '#FF6B6B', color: '#fff', padding: '8px 20px', borderRadius: '12px', fontWeight: 800, fontSize: 12, transform: 'rotate(5deg)' }}>
-                        LET'S LEARN! ✨
+                <div style={{ padding: 24, background: '#F8FAFB', borderTop: '2px solid #F1F1F1' }}>
+                    <div style={{ fontSize: 12, fontWeight: 800, color: '#00A6C0', marginBottom: 8, textAlign: 'center' }}>CURRICULUM PROGRESS</div>
+                    <div style={{ width: '100%', height: 8, background: '#eee', borderRadius: 4, overflow: 'hidden' }}>
+                        <div style={{ width: `${(completedLessons.length / allCourseLessons.length) * 100}%`, height: '100%', background: '#1DD1A1', transition: 'width 0.5s ease' }} />
+                    </div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#888', marginTop: 8, textAlign: 'center' }}>
+                        {completedLessons.length} / {allCourseLessons.length} Completed
+                    </div>
+                </div>
+            </aside>
+
+            {/* Main Content Area */}
+            <main style={{ flex: 1, marginLeft: 320, transition: 'margin-left 0.3s' }} className="main-content-layout">
+                <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F8FAFB', position: 'relative', overflow: 'hidden' }}>
+                    <Navbar />
+
+                    {/* Top Progress Bar (Mobile) */}
+                    <div className="mobile-progress-bar" style={{ display: 'none', height: 6, background: '#eee', width: '100%', position: 'sticky', top: 0, zIndex: 50 }}>
+                        <div style={{ 
+                            height: '100%', 
+                            width: `${(completedLessons.length / allCourseLessons.length) * 100}%`, 
+                            background: 'linear-gradient(to right, #1DD1A1, #00A6C0)',
+                            transition: 'width 0.5s ease'
+                        }} />
                     </div>
 
-                    {/* Content */}
-                    <div className="lesson-content">
-                        {safeContent && (
-                            <div dangerouslySetInnerHTML={{ __html: safeContent }} />
-                        )}
-                    </div>
+                    <div style={{ flex: 1, padding: '40px 24px', maxWidth: 900, margin: '0 auto', width: '100%', position: 'relative', zIndex: 1 }}>
+                        <div style={{ textAlign: 'center', marginBottom: 60 }}>
+                            <div style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: 80,
+                                height: 80,
+                                background: '#fff',
+                                borderRadius: '24px',
+                                marginBottom: 24,
+                                boxShadow: '0 15px 35px rgba(0,0,0,0.08)',
+                                transform: 'rotate(-5deg)'
+                            }}>
+                                <Brain size={40} color="#00A6C0" />
+                            </div>
+                            <h1 style={{ fontSize: 'clamp(32px, 6vw, 42px)', fontWeight: 900, color: '#001F3F', fontFamily: '"Fredoka", sans-serif', marginBottom: 16 }}>{lesson.title} Adventure</h1>
+                        </div>
 
-                    {/* Resources */}
-                    {lesson.resources?.length > 0 && (
-                        <div style={{ marginTop: 60, padding: 32, background: '#F8FAFB', borderRadius: 30, border: '2px dashed #D1D5DB' }}>
-                            <h3 style={{ marginBottom: 20, fontSize: 18, fontWeight: 800, color: '#001F3F', display: 'flex', alignItems: 'center', gap: 12 }}>
-                                <FileText size={24} color="#00A6C0" /> Adventure Loot (Resources)
-                            </h3>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
-                                {lesson.resources.map((r, i) => (
-                                    <a key={i} href={r.url} download style={{ display: 'flex', alignItems: 'center', gap: 12, color: '#001F3F', textDecoration: 'none', fontSize: 15, fontWeight: 700, padding: '16px', borderRadius: 16, background: '#fff', boxShadow: '0 4px 10px rgba(0,0,0,0.03)', transition: 'transform 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
-                                        <div style={{ width: 36, height: 36, background: '#E0F2F1', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <FileText size={18} color="#00A6C0" />
+                        {/* Main Content Area */}
+                        <div style={{ background: '#fff', padding: '60px 40px', borderRadius: '40px', boxShadow: '0 30px 60px rgba(0,0,0,0.05)', border: '2px solid #F1F1F1', marginBottom: 40, position: 'relative' }}>
+                            <div className="lesson-content">
+                                {safeContent && <div dangerouslySetInnerHTML={{ __html: safeContent }} />}
+                            </div>
+
+                            {/* Quiz Challenge */}
+                            {quizQuestions.length > 0 && !quizPassed && (
+                                <div style={{ marginTop: 60, padding: 40, background: '#FFF5F5', borderRadius: 40, border: '4px solid #FF6B6B' }}>
+                                    <div style={{ background: '#FF6B6B', color: '#fff', padding: '8px 24px', borderRadius: 15, display: 'inline-block', fontWeight: 800, fontSize: 14, marginBottom: 24 }}>
+                                        QUIZ: {lesson.title.toUpperCase()} CHALLENGE 🎮
+                                    </div>
+
+                                    {quizQuestions.map((q, idx) => (
+                                        <div key={q.id} style={{ marginBottom: 32 }}>
+                                            <h4 style={{ fontSize: 18, fontWeight: 800, color: '#001F3F', marginBottom: 16 }}>{idx + 1}. {q.question}</h4>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                                {['a', 'b', 'c', 'd'].map(opt => {
+                                                    const isSelected = quizAnswers[q.id] === opt
+                                                    const isCorrect = quizSubmitted && opt === q.correct_answer
+                                                    const isWrong = quizSubmitted && isSelected && opt !== q.correct_answer
+                                                    return (
+                                                        <button
+                                                            key={opt}
+                                                            onClick={() => !quizSubmitted && setQuizAnswers(prev => ({ ...prev, [q.id]: opt }))}
+                                                            style={{
+                                                                padding: '16px 24px',
+                                                                borderRadius: 16,
+                                                                border: isCorrect ? '3px solid #1DD1A1' : isWrong ? '3px solid #FF6B6B' : isSelected ? '3px solid #00A6C0' : '3px solid #F1F1F1',
+                                                                background: isCorrect ? '#E8FDF5' : isWrong ? '#FFF0F0' : isSelected ? '#E0F7FA' : '#fff',
+                                                                fontSize: 16,
+                                                                fontWeight: 700,
+                                                                color: '#001F3F',
+                                                                cursor: quizSubmitted ? 'default' : 'pointer',
+                                                                textAlign: 'left'
+                                                            }}
+                                                        >
+                                                            {opt.toUpperCase()}. {q[`option_${opt}`]}
+                                                        </button>
+                                                    )
+                                                })}
+                                            </div>
                                         </div>
-                                        {r.name}
-                                    </a>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                    {/* Dynamic Quiz Challenge */}
-                    {quizQuestions.length > 0 && !quizPassed && (
-                        <div style={{ marginTop: 60, padding: 40, background: '#FFF5F5', borderRadius: 40, border: '4px solid #FF6B6B' }}>
-                            <div style={{ background: '#FF6B6B', color: '#fff', padding: '8px 24px', borderRadius: 15, display: 'inline-block', fontWeight: 800, fontSize: 14, marginBottom: 24 }}>
-                                QUIZ: {lesson.title.toUpperCase()} CHALLENGE 🎮
-                            </div>
+                                    ))}
 
-                            {quizQuestions.map((q, index) => (
-                                <div key={q.id} style={{ marginBottom: 32 }}>
-                                    <h4 style={{ fontSize: 18, fontWeight: 800, color: '#001F3F', marginBottom: 16 }}>
-                                        {index + 1}. {q.question}
-                                    </h4>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                        {['a', 'b', 'c', 'd'].map(opt => {
-                                            const isSelected = quizAnswers[q.id] === opt
-                                            const isCorrect = quizSubmitted && opt === q.correct_answer
-                                            const isWrong = quizSubmitted && isSelected && opt !== q.correct_answer
-                                            return (
-                                                <button
-                                                    key={opt}
-                                                    onClick={() => !quizSubmitted && setQuizAnswers(prev => ({ ...prev, [q.id]: opt }))}
-                                                    style={{
-                                                        padding: '16px 24px',
-                                                        borderRadius: 16,
-                                                        border: isCorrect ? '3px solid #1DD1A1' : isWrong ? '3px solid #FF6B6B' : isSelected ? '3px solid #00A6C0' : '3px solid #F1F1F1',
-                                                        background: isCorrect ? '#E8FDF5' : isWrong ? '#FFF0F0' : isSelected ? '#E0F7FA' : '#fff',
-                                                        fontSize: 16,
-                                                        fontWeight: 700,
-                                                        color: '#001F3F',
-                                                        cursor: quizSubmitted ? 'default' : 'pointer',
-                                                        textAlign: 'left'
-                                                    }}
-                                                >
-                                                    {opt.toUpperCase()}. {q[`option_${opt}`]}
-                                                    {isCorrect && ' ✅'}
-                                                    {isWrong && ' ❌'}
-                                                </button>
-                                            )
-                                        })}
-                                    </div>
-                                </div>
-                            ))}
-
-                            {!quizSubmitted ? (
-                                <button
-                                    onClick={() => {
-                                        const score = quizQuestions.filter(q => quizAnswers[q.id] === q.correct_answer).length
-                                        setQuizScore(score)
-                                        setQuizSubmitted(true)
-                                        if (score === quizQuestions.length) {
-                                            setQuizPassed(true)
-                                            toast.success('Perfect score! 🏆 Next lesson unlocked!', { duration: 3000 })
-                                        } else if (score >= Math.ceil(quizQuestions.length * 0.6)) {
-                                            setQuizPassed(true)
-                                            toast.success(`You passed with ${score}/${quizQuestions.length}! 🎉`, { duration: 3000 })
-                                        } else {
-                                            toast.error(`You got ${score}/${quizQuestions.length}. Try again!`)
-                                        }
-                                    }}
-                                    disabled={Object.keys(quizAnswers).length < quizQuestions.length}
-                                    style={{ marginTop: 24, padding: '16px 40px', background: '#FF6B6B', color: '#fff', border: 'none', borderRadius: 20, fontWeight: 900, fontSize: 18, cursor: 'pointer', opacity: Object.keys(quizAnswers).length < quizQuestions.length ? 0.5 : 1 }}
-                                >
-                                    Submit Quiz 🚀
-                                </button>
-                            ) : !quizPassed ? (
-                                <button
-                                    onClick={() => { setQuizAnswers({}); setQuizSubmitted(false); setQuizScore(0) }}
-                                    style={{ marginTop: 24, padding: '16px 40px', background: '#00A6C0', color: '#fff', border: 'none', borderRadius: 20, fontWeight: 900, fontSize: 18, cursor: 'pointer' }}
-                                >
-                                    Try Again 🔄
-                                </button>
-                            ) : null}
-
-                            {quizSubmitted && (
-                                <div style={{ marginTop: 24, fontWeight: 800, fontSize: 18, color: quizPassed ? '#1DD1A1' : '#FF6B6B', textAlign: 'center' }}>
-                                    {quizPassed ? `✨ Quiz Passed! ${quizScore}/${quizQuestions.length} correct!` : `Score: ${quizScore}/${quizQuestions.length} — Try again!`}
+                                    {!quizSubmitted ? (
+                                        <button onClick={() => {
+                                            const score = quizQuestions.filter(q => quizAnswers[q.id] === q.correct_answer).length
+                                            setQuizScore(score)
+                                            setQuizSubmitted(true)
+                                            if (score >= Math.ceil(quizQuestions.length * 0.6)) {
+                                                setQuizPassed(true)
+                                                const newCompleted = [...new Set([...completedLessons, lessonId])]
+                                                setCompletedLessons(newCompleted)
+                                                localStorage.setItem('completedLessons', JSON.stringify(newCompleted))
+                                                toast.success('Passed! Current lesson recorded in your map! 🧭', { duration: 3000 })
+                                            } else {
+                                                toast.error(`Scored ${score}/${quizQuestions.length}. Review and try again!`)
+                                            }
+                                        }} disabled={Object.keys(quizAnswers).length < quizQuestions.length} className="btn-primary" style={{ marginTop: 24, padding: '16px 40px', background: '#FF6B6B', width: '100%', borderRadius: 20, fontSize: 18, fontWeight: 900 }}>
+                                            Submit Challenge 🚀
+                                        </button>
+                                    ) : !quizPassed ? (
+                                        <button onClick={() => { setQuizSubmitted(false); setQuizAnswers({}); setQuizScore(0) }} className="btn-primary" style={{ marginTop: 24, padding: '16px 40px', background: '#00A6C0', width: '100%', borderRadius: 20, fontSize: 18, fontWeight: 900 }}>
+                                            Try Again 🔄
+                                        </button>
+                                    ) : null}
                                 </div>
                             )}
                         </div>
-                    )}
-                </div>
 
-                {/* Adaptive Footer Navigation */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, marginBottom: 80 }}>
-                    {(quizPassed || quizQuestions.length === 0) && (
-                        <>
-                            {!isLastLesson ? (
-                                nextLessonId && (
-                                    <Link
-                                        to={`/dashboard/lesson/${nextLessonId}`}
-                                        className="btn-primary"
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            gap: 12,
-                                            width: '100%',
-                                            maxWidth: 400,
-                                            height: 72,
-                                            fontSize: 22,
-                                            fontWeight: 900,
-                                            borderRadius: '25px',
-                                            background: '#1DD1A1',
-                                            border: 'none',
-                                            textDecoration: 'none',
-                                            boxShadow: '0 15px 30px rgba(29, 209, 161, 0.3)',
-                                            animation: 'pulse 2s infinite',
-                                            color: '#fff'
-                                        }}
-                                    >
-                                        <Rocket size={24} /> Next Lesson →
-                                    </Link>
-                                )
-                            ) : (
-                                <div style={{ width: '100%', textAlign: 'center' }}>
-                                    <div style={{ marginBottom: 16, fontSize: 18, fontWeight: 800, color: '#001F3F' }}>
-                                        🎓 You have completed all lessons!
-                                    </div>
-                                    <Link
-                                        to={`/dashboard/course/${lesson.course_id}/final-exam`}
-                                        className="btn-primary"
-                                        style={{
-                                            display: 'inline-flex',
-                                            alignItems: 'center',
-                                            gap: 12,
-                                            padding: '24px 48px',
-                                            fontSize: 22,
-                                            borderRadius: 30,
-                                            background: 'linear-gradient(135deg, #FF6B6B 0%, #FF9F43 100%)',
-                                            boxShadow: '0 20px 40px rgba(255, 107, 107, 0.3)',
-                                            textDecoration: 'none',
-                                            fontWeight: 900,
-                                            color: '#fff'
-                                        }}
-                                    >
-                                        <Sparkles size={28} /> TAKE FINAL EXAM (20 QUESTIONS) <Trophy size={28} />
-                                    </Link>
-                                </div>
+                        {/* Adaptive Footer Navigation */}
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, marginBottom: 80 }}>
+                            {(quizPassed || quizQuestions.length === 0) && (
+                                <>
+                                    {!isLastLesson ? (
+                                        nextLessonId && (
+                                            <Link to={`/dashboard/lesson/${nextLessonId}`} className="btn-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, width: '100%', maxWidth: 400, height: 72, fontSize: 22, fontWeight: 900, borderRadius: '25px', background: '#1DD1A1', boxShadow: '0 15px 30px rgba(29, 209, 161, 0.3)', animation: 'pulse 2s infinite', color: '#fff', textDecoration: 'none' }}>
+                                                <Rocket size={24} /> Next Lesson →
+                                            </Link>
+                                        )
+                                    ) : (
+                                        <div style={{ width: '100%', textAlign: 'center' }}>
+                                            <div style={{ marginBottom: 16, fontSize: 18, fontWeight: 800, color: '#001F3F' }}>
+                                                🎓 You have completed all lessons!
+                                            </div>
+                                            <Link to={`/dashboard/course/${lesson.course_id}/final-exam`} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '24px 48px', fontSize: 22, borderRadius: 30, background: 'linear-gradient(135deg, #FF6B6B 0%, #FF9F43 100%)', boxShadow: '0 20px 40px rgba(255, 107, 107, 0.3)', fontWeight: 900, color: '#fff', textDecoration: 'none' }}>
+                                                <Sparkles size={28} /> TAKE FINAL EXAM (20 QUESTIONS) <Trophy size={28} />
+                                            </Link>
+                                        </div>
+                                    )}
+                                </>
                             )}
-                        </>
-                    )}
-
-                    {(!quizPassed && quizQuestions.length > 0) && (
-                        <p style={{ color: '#888', fontWeight: 800, fontSize: 16, background: '#fff', padding: '12px 24px', borderRadius: 15, border: '2px solid #F1F1F1' }}>
-                            Finish the challenge to unlock the next level! 🗝️
-                        </p>
-                    )}
-                    
-                    <p style={{ color: '#888', fontWeight: 600, fontSize: 15, marginTop: 10 }}>You're doing great! Keep gathering seeds of kindness. 🌱</p>
+                            {(!quizPassed && quizQuestions.length > 0) && (
+                                <p style={{ color: '#888', fontWeight: 800, fontSize: 16 }}>Finish the challenge to unlock the next level! 🗝️</p>
+                            )}
+                            <p style={{ color: '#888', fontWeight: 600, fontSize: 15, marginTop: 10 }}>You're doing great! Keep gathering seeds of kindness. 🌱</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </main>
+
+            <style>{`
+                @media (max-width: 1024px) {
+                    .lesson-sidebar { display: none !important; }
+                    .main-content-layout { margin-left: 0 !important; }
+                    .mobile-progress-bar { display: block !important; }
+                }
+            `}</style>
         </div>
     )
 }
