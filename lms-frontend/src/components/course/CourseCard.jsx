@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Star, BookOpen } from 'lucide-react'
 
 export default function CourseCard({ course }) {
@@ -90,14 +90,22 @@ export default function CourseCard({ course }) {
                         >
                             Details
                         </button>
-                        <Link 
-                            to="/dashboard/lesson/24d4a5a9-aa50-4ae0-b13b-5960692c5079"
-                            className="btn-primary" 
-                            style={{ height: '44px', padding: '0 16px', fontSize: '12px', borderRadius: '12px', textDecoration: 'none', display: 'flex', alignItems: 'center' }}
-                            onClick={(e) => e.stopPropagation()}
+                        <button
+                            className="btn-primary"
+                            style={{ height: '44px', padding: '0 16px', fontSize: '12px', borderRadius: '12px', display: 'flex', alignItems: 'center', border: 'none', cursor: 'pointer' }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (course.lessons && course.lessons.length > 0) {
+                                    const firstLesson = course.lessons[0];
+                                    const lessonId = firstLesson.id || firstLesson._id || firstLesson;
+                                    navigate(`/dashboard/lesson/${lessonId}`);
+                                } else {
+                                    navigate(`/courses/${course.slug || course._id}`);
+                                }
+                            }}
                         >
                             Start Now
-                        </Link>
+                        </button>
                     </div>
                 </div>
             </div>
