@@ -90,16 +90,14 @@ export default function CourseCard({ course }) {
                         >
                             Details
                         </button>
-                        <button 
+                        <Link 
+                            to="/dashboard/lesson/24d4a5a9-aa50-4ae0-b13b-5960692c5079"
                             className="btn-primary" 
-                            style={{ height: '44px', padding: '0 16px', fontSize: '12px', borderRadius: '12px' }}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/courses/${course.slug || course._id}`);
-                            }}
+                            style={{ height: '44px', padding: '0 16px', fontSize: '12px', borderRadius: '12px', textDecoration: 'none', display: 'flex', alignItems: 'center' }}
+                            onClick={(e) => e.stopPropagation()}
                         >
                             Start Now
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </div>

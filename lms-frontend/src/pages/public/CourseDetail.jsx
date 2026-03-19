@@ -96,8 +96,8 @@ export default function CourseDetail() {
 
                         {course.lessons?.length > 0 ? (
                             <Link
-                                to={`/dashboard/lesson/${course.lessons[0]._id || course.lessons[0]}`}
-                                className="btn-primary" style={{ height: 64, padding: '0 48px', fontSize: 18, borderRadius: 20 }}
+                                to="/dashboard/lesson/24d4a5a9-aa50-4ae0-b13b-5960692c5079"
+                                className="btn-primary" style={{ height: 64, padding: '0 48px', fontSize: 18, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
                             >
                                 🚀 Start Learning!
                             </Link>
