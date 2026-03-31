@@ -6,10 +6,30 @@ import { Calendar, User, ArrowRight, BookOpen, Clock } from 'lucide-react'
 // Real blog data from eduvalues.in
 const BLOG_POSTS = [
     {
+        id: 'insight-1',
+        title: "The Future of Personalized Learning: How Technology is Shaping Value-Based Education",
+        excerpt: "Exploring how modern educational tools are no longer just about information transfer, but about cultivating character, integrity, and empathy in the digital generation. We delve into the intersection of technology and ethics.",
+        image: "/blog/insight-personal-learning.png",
+        author: "EduValues Insight Team",
+        date: "March 31, 2024",
+        category: "EdTech Insights",
+        readTime: "10 min read"
+    },
+    {
+        id: 'insight-2',
+        title: "Beyond Academic Success: Why 'Human Values' Are the Most Needed Skill of 2024",
+        excerpt: "In an era dominated by AI and automation, certain human traits remain irreplaceable. We dive into why empathy, ethics, and critical thinking are becoming the cornerstone of the global workforce.",
+        image: "/blog/insight-human-values.png",
+        author: "EduValues Insight Team",
+        date: "March 28, 2024",
+        category: "Global Education",
+        readTime: "8 min read"
+    },
+    {
         id: 1,
         title: "What are the easy dance form to learn for beginners?",
         excerpt: "Learn about the most accessible dance styles for those just starting their journey into the world of movement and music.",
-        image: "https://images.unsplash.com/photo-1508700115892-45ecd0562c3e?auto=format&fit=crop&w=800&q=80",
+        image: "/blog/dance.png",
         author: "EduValues Team",
         date: "October 8, 2021",
         category: "Dance",
@@ -19,7 +39,7 @@ const BLOG_POSTS = [
         id: 2,
         title: "Most essential UX design principle for new comers.",
         excerpt: "Understanding the core principles of User Experience design is crucial for any beginner entering the tech industry.",
-        image: "/blog/ux-layout.jpg",
+        image: "/blog/ux-ui.png",
         author: "EduValues Team",
         date: "October 8, 2021",
         category: "UX/UI Design",
@@ -29,7 +49,7 @@ const BLOG_POSTS = [
         id: 3,
         title: "10 most easy steps to master chord progression in guitar.",
         excerpt: "A step-by-step guide to understanding and playing beautiful chord sequences on your guitar.",
-        image: "/blog/guitar-chord.jpg",
+        image: "/blog/music.png",
         author: "EduValues Team",
         date: "October 8, 2021",
         category: "Music",
@@ -39,7 +59,7 @@ const BLOG_POSTS = [
         id: 4,
         title: "What is photoshop and what is it used for?",
         excerpt: "A comprehensive look at Adobe Photoshop and its role in modern graphic design and photo editing.",
-        image: "/blog/ux-layout.jpg",
+        image: "/blog/graphic-design.png",
         author: "EduValues Team",
         date: "October 8, 2021",
         category: "Graphic Designing",
@@ -49,7 +69,7 @@ const BLOG_POSTS = [
         id: 5,
         title: "How to become Social Media Manager in 11 steps?",
         excerpt: "Your roadmap to building a successful career managing social media presence for brands and businesses.",
-        image: "/blog/social-connect.jpg",
+        image: "/blog/social-media.png",
         author: "EduValues Team",
         date: "October 8, 2021",
         category: "Marketing",
@@ -59,7 +79,7 @@ const BLOG_POSTS = [
         id: 6,
         title: "Character sketch examples for creative writing.",
         excerpt: "Learn how to breathe life into your fictional characters with detailed and vivid character sketches.",
-        image: "/blog/sketch.jpg",
+        image: "/blog/creative-writing.png",
         author: "EduValues Team",
         date: "October 8, 2021",
         category: "Creative Writing",
@@ -69,7 +89,7 @@ const BLOG_POSTS = [
         id: 7,
         title: "The importance of Information Technology – Why is it so important?",
         excerpt: "Discover why IT is the backbone of modern society and how it impacts our daily lives and global economy.",
-        image: "/blog/phone-feed.jpg",
+        image: "/blog/it-tech.png",
         author: "EduValues Team",
         date: "October 8, 2021",
         category: "Information Technology",
@@ -79,7 +99,7 @@ const BLOG_POSTS = [
         id: 8,
         title: "Is creativity most valuable skill for designer?",
         excerpt: "Exploring the debate on whether raw creativity or technical skill is more important in the design world.",
-        image: "/blog/ux-layout.jpg",
+        image: "/blog/design-thinking.png",
         author: "EduValues Team",
         date: "October 8, 2021",
         category: "Design",
@@ -120,10 +140,16 @@ export default function Blog() {
                     </p>
                 </div>
 
-                {/* Wave Divider */}
-                <div style={{ position: 'absolute', bottom: -1, left: 0, width: '100%', overflow: 'hidden', lineHeight: 0 }}>
-                    <svg viewBox="0 0 1200 120" preserveAspectRatio="none" style={{ position: 'relative', display: 'block', width: 'calc(100% + 1.3px)', height: '50px' }}>
-                        <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118.43,147.3,126,221.33,113.36,275.64,104,303,80.89,321.39,56.44Z" fill="#F4F7F9"></path>
+                {/* Torn Paper Divider */}
+                <div style={{ position: 'absolute', bottom: -2, left: 0, width: '100%', overflow: 'hidden', lineHeight: 0, zIndex: 11 }}>
+                    <svg viewBox="0 0 1200 120" preserveAspectRatio="none" style={{ position: 'relative', display: 'block', width: '100%', height: '50px' }}>
+                        <defs>
+                            <filter id="torn-paper-edge-blog">
+                                <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="8" result="noise" seed="15" />
+                                <feDisplacementMap in="SourceGraphic" in2="noise" scale="25" xChannelSelector="R" yChannelSelector="G" />
+                            </filter>
+                        </defs>
+                        <rect x="-50" y="70" width="1300" height="100" fill="#F4F7F9" filter="url(#torn-paper-edge-blog)" />
                     </svg>
                 </div>
             </section>
@@ -182,9 +208,18 @@ export default function Blog() {
 
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '2px solid #F4F7F9', paddingTop: '20px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#F1F1F1', overflow: 'hidden' }}>
-                                            <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${post.author}`} alt={post.author} />
-                                        </div>
+                                        <span style={{ 
+                                            width: '32px', 
+                                            height: '32px', 
+                                            borderRadius: '50%', 
+                                            background: '#F1F1F1', 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            justifyContent: 'center',
+                                            color: '#00A6C0'
+                                        }}>
+                                            <User size={18} />
+                                        </span>
                                         <span style={{ fontSize: '13px', fontWeight: 800, color: '#333' }}>{post.author}</span>
                                     </div>
                                     <Link to={`#`} style={{

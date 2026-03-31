@@ -71,10 +71,16 @@ export default function Courses() {
                     </p>
                 </div>
 
-                {/* Wave Divider */}
-                <div style={{ position: 'absolute', bottom: -1, left: 0, width: '100%', overflow: 'hidden', lineHeight: 0 }}>
-                    <svg viewBox="0 0 1200 120" preserveAspectRatio="none" style={{ position: 'relative', display: 'block', width: 'calc(100% + 1.3px)', height: '50px' }}>
-                        <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118.43,147.3,126,221.33,113.36,275.64,104,303,80.89,321.39,56.44Z" fill="#F4F7F9"></path>
+                {/* Torn Paper Divider */}
+                <div style={{ position: 'absolute', bottom: -2, left: 0, width: '100%', overflow: 'hidden', lineHeight: 0, zIndex: 11 }}>
+                    <svg viewBox="0 0 1200 120" preserveAspectRatio="none" style={{ position: 'relative', display: 'block', width: '100%', height: '50px' }}>
+                        <defs>
+                            <filter id="torn-paper-edge-courses">
+                                <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="8" result="noise" seed="20" />
+                                <feDisplacementMap in="SourceGraphic" in2="noise" scale="25" xChannelSelector="R" yChannelSelector="G" />
+                            </filter>
+                        </defs>
+                        <rect x="-50" y="70" width="1300" height="100" fill="#F4F7F9" filter="url(#torn-paper-edge-courses)" />
                     </svg>
                 </div>
             </div>

@@ -343,21 +343,21 @@ export default function Home() {
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '40px' }}>
                         {[
                             {
-                                title: "What are the easy dance form to learn for beginners?",
+                                title: "The Future of Personalized Learning & Value-Based EdTech",
+                                cat: "EdTech Insights",
+                                img: "/blog/insight-personal-learning.png",
+                                date: "March 31, 2024"
+                            },
+                            {
+                                title: "Beyond Academic Success: The Vital Role of 'Human Values'",
+                                cat: "Global Education",
+                                img: "/blog/insight-human-values.png",
+                                date: "March 28, 2024"
+                            },
+                            {
+                                title: "What are the easiest dance forms for beginners to learn?",
                                 cat: "Dance",
-                                img: "https://images.unsplash.com/photo-1508700115892-45ecd0562c3e?auto=format&fit=crop&w=800&q=80",
-                                date: "Oct 8, 2021"
-                            },
-                            {
-                                title: "Most essential UX design principle for new comers.",
-                                cat: "UX/UI Design",
-                                img: "https://images.unsplash.com/photo-1541462608141-ad4d14207907?auto=format&fit=crop&w=800&q=80",
-                                date: "Oct 8, 2021"
-                            },
-                            {
-                                title: "10 most easy steps to master chord progression in guitar.",
-                                cat: "Music",
-                                img: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=800&q=80",
+                                img: "/blog/dance.png",
                                 date: "Oct 8, 2021"
                             }
                         ].map((post, i) => (

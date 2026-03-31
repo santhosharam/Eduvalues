@@ -18,7 +18,7 @@ const normalizeCourse = (c) => {
         shortDescription: c.short_description || c.shortDescription,
         discountPrice: c.discount_price || c.discountPrice,
         isPublished: c.is_published !== undefined ? c.is_published : c.isPublished,
-        lessons: (c.lessons || []).map(normalizeLesson)
+        lessons: (c.lessons || []).map(normalizeLesson).sort((a, b) => (a.order || 0) - (b.order || 0))
     }
 }
 
