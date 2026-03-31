@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import {
     Menu, X, User, LogOut, LayoutDashboard,
     Phone, Mail, Facebook, Instagram, Twitter,
-    BookOpen, Heart, Rocket, Smile, Home
+    BookOpen, Heart, Rocket, Smile, Home, MapPin
 } from 'lucide-react'
 
 export default function Navbar() {
@@ -34,17 +34,36 @@ export default function Navbar() {
             background: '#fff',
             transition: 'all 0.3s ease'
         }}>
-            {/* --- Info Bar - Updated to Navy --- */}
-            <div style={{ background: '#001F3F', color: '#fff', padding: '10px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-                <div style={{ display: 'flex', gap: 24, fontSize: 13, fontWeight: 600 }}>
+            {/* --- Top Info Bar --- */}
+            <div style={{ 
+                background: '#fff', 
+                color: '#555', 
+                padding: '12px 24px', 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                borderBottom: '1px solid #f0f0f0',
+                fontSize: '13px',
+                fontWeight: 600
+            }}>
+                <div style={{ display: 'flex', gap: '30px', alignItems: 'center' }} className="nav-info-left">
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        +91-12345-67890
+                        <MapPin size={16} color="#00A6C0" /> Chennai
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        hello@valueeducation.in
+                        <Phone size={16} color="#00A6C0" /> +91 98842 70368
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Mail size={16} color="#00A6C0" /> eduvalues123@gmail.com
                     </div>
                 </div>
-                <div style={{ display: 'flex', gap: 14 }}>
+                <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                    <a href="#" style={{ color: '#555', transition: 'color 0.2s' }}>
+                        <Instagram size={18} />
+                    </a>
+                    <a href="#" style={{ color: '#555', transition: 'color 0.2s' }}>
+                        <Twitter size={18} />
+                    </a>
                 </div>
             </div>
 
@@ -105,6 +124,7 @@ export default function Navbar() {
                 @media (max-width: 900px) {
                     .desktop-nav { display: none !important; }
                     .mobile-toggle { display: block !important; }
+                    .nav-info-left { display: none !important; }
                 }
                 @media (min-width: 901px) {
                     .mobile-toggle { display: none !important; }
