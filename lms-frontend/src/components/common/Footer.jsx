@@ -105,8 +105,8 @@ export default function Footer() {
                 <div style={{ borderTop: '2px solid #F1F1F1', marginTop: 40, paddingTop: 20, textAlign: 'center', fontSize: 13, color: '#999' }}>
                     © {new Date().getFullYear()} VE Value Education. Made with ❤️ for the next generation.
                     <div style={{ marginTop: 10, display: 'flex', justifyContent: 'center', gap: 30 }}>
-                        <Link to="/" style={{ color: '#999' }}>Privacy Policy</Link>
-                        <Link to="/" style={{ color: '#999' }}>Terms of Service</Link>
+                        <Link to="/privacy" style={{ color: '#999', textDecoration: 'none', fontWeight: 700 }}>Privacy Policy</Link>
+                        <Link to="/terms" style={{ color: '#999', textDecoration: 'none', fontWeight: 700 }}>Terms of Service</Link>
                     </div>
                 </div>
             </div>

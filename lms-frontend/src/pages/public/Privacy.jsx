@@ -1,64 +1,122 @@
 import Navbar from '../../components/common/Navbar'
 import Footer from '../../components/common/Footer'
+import { Shield, Lock, Eye, Database, Globe, UserCheck, Mail } from 'lucide-react'
 
 const SECTIONS = [
     {
-        title: '1. Information We Collect',
-        content: 'We collect information you provide directly such as your name, email address, and payment information when you register for an account or enroll in a course. We also automatically collect usage data and device information to improve our services.'
+        icon: Database,
+        title: 'Information We Collect',
+        content: 'We collect information you provide directly such as your name, email address, and profile details when you register for an account or enroll in a course. We also automatically collect device information, IP addresses, and interaction data to optimize your learning experience.'
     },
     {
-        title: '2. How We Use Your Information',
-        content: 'We use the information we collect to provide, maintain, and improve our services, process transactions, send transactional and promotional communications, and comply with legal obligations.'
+        icon: UserCheck,
+        title: 'How We Use Your Data',
+        content: 'Your information is used to personalize your curriculum, process secure payments, track your lesson progress, and issue verified certificates. We also use aggregated data to improve our educational content and platform stability.'
     },
     {
-        title: '3. Data Security',
-        content: 'We implement industry-standard security measures including SSL encryption, bcrypt password hashing, and JWT-based authentication to protect your personal information. Payment data is processed securely through Razorpay and is never stored on our servers.'
+        icon: Lock,
+        title: 'Security Infrastructure',
+        content: 'We implement enterprise-grade security protocols, including AES-256 encryption for data at rest and TLS for data in transit. Our authentication is powered by Supabase/BCrypt, ensuring your credentials are never stored in plain text.'
     },
     {
-        title: '4. Cookies',
-        content: 'We use local storage to maintain your session and authentication state. We do not use third-party tracking cookies for advertising purposes.'
+        icon: Globe,
+        title: 'Data Sharing & Third Parties',
+        content: 'EduValues does not sell or rent your personal data. We only share essential information with trusted partners like Razorpay (for payments) and Supabase (for infrastructure). All partners are strictly vetted for GDPR/CCPA compliance.'
     },
     {
-        title: '5. Data Sharing',
-        content: 'We do not sell, trade, or rent your personal information to third parties. We may share limited information with our payment processor (Razorpay) solely for completing transactions.'
+        icon: Shield,
+        title: 'Your Privacy Rights',
+        content: 'You maintain full ownership of your data. You have the right to request access to your information, correct inaccuracies, or request permanent deletion of your account and associated records by contacting our privacy team.'
     },
     {
-        title: '6. Your Rights',
-        content: 'You have the right to access, correct, and delete your personal data. Contact us at support@learnhub.in to exercise these rights.'
-    },
-    {
-        title: '7. Changes to This Policy',
-        content: 'We may update this policy from time to time. We will notify you of significant changes by posting a notice on our website.'
+        icon: Eye,
+        title: 'Cookies and Tracking',
+        content: 'We use essential functional cookies and local storage to maintain your educational session. We do not use third-party tracking pixels or intrusive marketing cookies that follow you across the web.'
     },
 ]
 
 export default function Privacy() {
     return (
-        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F4F7F9' }}>
             <Navbar />
-            <div style={{ flex: 1, maxWidth: 800, margin: '0 auto', padding: '60px 16px 80px', width: '100%' }}>
-                <h1 style={{ fontSize: 'clamp(28px, 4vw, 40px)', marginBottom: 8 }}>Privacy Policy</h1>
-                <p style={{ color: '#64748b', marginBottom: 40, fontSize: 14 }}>Last updated: March 2026</p>
 
-                <div className="glass-card" style={{ padding: '28px 28px', marginBottom: 24 }}>
-                    <p style={{ color: '#94a3b8', fontSize: 15, lineHeight: 1.8 }}>
-                        LearnHub ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our learning management platform.
+            {/* --- HERO SECTION --- */}
+            <section style={{
+                padding: '80px 24px 100px',
+                textAlign: 'center',
+                background: '#001F3F',
+                color: '#fff',
+                position: 'relative',
+                overflow: 'hidden'
+            }}>
+                <div style={{ position: 'absolute', top: -50, right: -50, width: 300, height: 300, background: 'rgba(0, 166, 192, 0.2)', borderRadius: '50%' }} />
+                <div style={{ position: 'absolute', bottom: -50, left: -50, width: 200, height: 200, background: 'rgba(29, 209, 161, 0.15)', borderRadius: '50%' }} />
+
+                <div className="section-container" style={{ position: 'relative', zIndex: 2 }}>
+                    <span style={{
+                        color: '#00A6C0',
+                        fontWeight: 800,
+                        fontSize: '14px',
+                        letterSpacing: '2px',
+                        textTransform: 'uppercase',
+                        display: 'block',
+                        marginBottom: '16px'
+                    }}>Legal Guard</span>
+                    <h1 style={{ fontSize: 'clamp(32px, 6vw, 56px)', fontWeight: 900, marginBottom: '24px' }}>Privacy Policy</h1>
+                    <p style={{ color: 'rgba(255,255,255,0.8)', maxWidth: '600px', margin: '0 auto', fontSize: '18px', lineHeight: 1.6 }}>
+                        Discover how we protect your information and maintain the highest standards of data integrity.
                     </p>
                 </div>
 
-                {SECTIONS.map((s, i) => (
-                    <div key={i} style={{ marginBottom: 28 }}>
-                        <h2 style={{ fontSize: 18, marginBottom: 12, color: '#f1f5f9' }}>{s.title}</h2>
-                        <p style={{ color: '#94a3b8', fontSize: 14, lineHeight: 1.85 }}>{s.content}</p>
+                {/* Signature Torn Paper Divider */}
+                <div style={{ position: 'absolute', bottom: -2, left: 0, width: '100%', overflow: 'hidden', lineHeight: 0, zIndex: 11 }}>
+                    <svg viewBox="0 0 1200 120" preserveAspectRatio="none" style={{ position: 'relative', display: 'block', width: '100%', height: '50px' }}>
+                        <defs>
+                            <filter id="torn-paper-edge-privacy">
+                                <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="8" result="noise" seed="30" />
+                                <feDisplacementMap in="SourceGraphic" in2="noise" scale="25" xChannelSelector="R" yChannelSelector="G" />
+                            </filter>
+                        </defs>
+                        <rect x="-50" y="70" width="1300" height="100" fill="#F4F7F9" filter="url(#torn-paper-edge-privacy)" />
+                    </svg>
+                </div>
+            </section>
+
+            {/* --- CONTENT SECTION --- */}
+            <main className="section-container" style={{ padding: '80px 24px', flex: 1 }}>
+                <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+                    <div style={{ background: '#fff', padding: '40px', borderRadius: '32px', boxShadow: '0 20px 40px rgba(0,0,0,0.05)', marginBottom: '40px', border: '1px solid #F1F1F1' }}>
+                        <p style={{ color: '#666', fontSize: '16px', lineHeight: 1.8, marginBottom: '0' }}>
+                            Last updated: <strong>March 31, 2026</strong>. <br />
+                            At EduValues, your trust is our most valuable asset. We are committed to being transparent about how we handle your data and ensuring your privacy is never compromised.
+                        </p>
                     </div>
-                ))}
 
-                <div className="glass-card" style={{ padding: '20px 24px', marginTop: 40, borderLeft: '3px solid #6366f1' }}>
-                    <p style={{ color: '#94a3b8', fontSize: 14 }}>
-                        Questions? Contact us at <a href="mailto:support@learnhub.in" style={{ color: '#818cf8' }}>support@learnhub.in</a>
-                    </p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
+                        {SECTIONS.map((s, i) => (
+                            <div key={i} style={{ background: '#fff', padding: '32px', borderRadius: '24px', border: '1px solid #F1F1F1', transition: 'all 0.3s ease' }}>
+                                <div style={{ width: '48px', height: '48px', background: '#00A6C015', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00A6C0', marginBottom: '20px' }}>
+                                    <s.icon size={24} />
+                                </div>
+                                <h2 style={{ fontSize: '20px', color: '#001F3F', fontWeight: 800, marginBottom: '12px' }}>{s.title}</h2>
+                                <p style={{ color: '#666', fontSize: '14.5px', lineHeight: 1.7 }}>{s.content}</p>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div style={{ background: '#00A6C0', padding: '40px', borderRadius: '32px', color: '#fff', marginTop: '60px', textAlign: 'center', boxShadow: '0 20px 40px rgba(0, 166, 192, 0.2)' }}>
+                        <Mail style={{ margin: '0 auto 16px' }} size={40} />
+                        <h3 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '12px' }}>Contact our Privacy Team</h3>
+                        <p style={{ color: 'rgba(255,255,255,0.9)', marginBottom: '24px', fontSize: '16px' }}>
+                            If you have any questions or concern about our privacy practices, please reach out to us at:
+                        </p>
+                        <a href="mailto:privacy@eduvalues.in" style={{ color: '#fff', fontWeight: 900, fontSize: '20px', textDecoration: 'none', borderBottom: '2px solid rgba(255,255,255,0.3)' }}>
+                            privacy@eduvalues.in
+                        </a>
+                    </div>
                 </div>
-            </div>
+            </main>
+
             <Footer />
         </div>
     )

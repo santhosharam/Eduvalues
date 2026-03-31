@@ -1,73 +1,132 @@
 import Navbar from '../../components/common/Navbar'
 import Footer from '../../components/common/Footer'
+import { FileText, Pencil, CreditCard, ShieldCheck, Award, MessageSquare, AlertCircle, Info } from 'lucide-react'
 
 const TERMS = [
     {
-        title: '1. Acceptance of Terms',
-        content: 'By accessing and using LearnHub, you accept and agree to be bound by the terms and provisions of this agreement. If you do not agree to these terms, please do not use our services.'
+        icon: ShieldCheck,
+        title: 'Acceptance of Terms',
+        content: 'By accessing and using EduValues, you accept and agree to be bound by the terms and provisions of this agreement. Use of our services constitutes full acceptance of these terms in their entirety.'
     },
     {
-        title: '2. Account Registration',
-        content: 'You must provide accurate and complete information when creating an account. You are responsible for maintaining the confidentiality of your password. You must notify us immediately of any unauthorized use of your account.'
+        icon: Pencil,
+        title: 'Account Registration',
+        content: 'Registration requires accurate and complete information. You are solely responsible for the confidentiality of your account credentials and any activity occurring under your account name.'
     },
     {
-        title: '3. Course Enrollment and Payment',
-        content: 'Course prices are displayed in Indian Rupees (INR). Payment is processed securely via Razorpay. Upon successful payment, you will be automatically enrolled and granted lifetime access to the course content.'
+        icon: CreditCard,
+        title: 'Payments & Course Access',
+        content: 'Payments are processed securely via Razorpay in INR. Successful transaction grants you lifetime, non-transferable access to the course materials through our learning dashboard.'
     },
     {
-        title: '4. Refund Policy',
-        content: 'We offer a 30-day money-back guarantee for paid courses. If you are not satisfied with a course, contact support@learnhub.in within 30 days of purchase for a full refund, provided you have not completed more than 25% of the course.'
+        icon: Award,
+        title: 'Intellectual Property',
+        content: 'All educational content, videos, code samples, and textual materials are the exclusive property of EduValues. Unauthorized reproduction, distribution, or resale is strictly prohibited by law.'
     },
     {
-        title: '5. Intellectual Property',
-        content: 'All course content, including videos, text, PDFs, and quizzes, is the intellectual property of LearnHub or its instructors. You may not reproduce, distribute, or sell any course content without express written permission.'
+        icon: AlertCircle,
+        title: 'Termination Policy',
+        content: 'EduValues reserves the right to terminate access to any user found engaging in fraudulent activity, harassment of other students, or systematic violation of our platform security.'
     },
     {
-        title: '6. Certificates',
-        content: 'Certificates of completion are issued digitally upon completing 100% of a course. Each certificate has a unique verification code and can be verified publicly at learnhub.in/verify.'
-    },
-    {
-        title: '7. Prohibited Conduct',
-        content: 'You agree not to share your account credentials, resell course access, upload harmful content, or attempt to circumvent our security measures. Violations may result in account termination without refund.'
-    },
-    {
-        title: '8. Limitation of Liability',
-        content: 'LearnHub is not liable for any indirect, incidental, or consequential damages arising from your use of our services. Our total liability shall not exceed the amount paid for the relevant course.'
-    },
-    {
-        title: '9. Changes to Terms',
-        content: 'We reserve the right to modify these terms at any time. Continued use of the platform after changes constitutes acceptance of the new terms.'
+        icon: MessageSquare,
+        title: 'Limitation of Liability',
+        content: 'While we strive for 100% platform uptime and accuracy, EduValues is not liable for indirect or consequential damages arising from service interruptions or minor informational discrepancies.'
     },
 ]
 
 export default function Terms() {
     return (
-        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F4F7F9' }}>
             <Navbar />
-            <div style={{ flex: 1, maxWidth: 800, margin: '0 auto', padding: '60px 16px 80px', width: '100%' }}>
-                <h1 style={{ fontSize: 'clamp(28px, 4vw, 40px)', marginBottom: 8 }}>Terms of Service</h1>
-                <p style={{ color: '#64748b', marginBottom: 40, fontSize: 14 }}>Last updated: March 2026</p>
 
-                <div className="glass-card" style={{ padding: '24px 28px', marginBottom: 32 }}>
-                    <p style={{ color: '#94a3b8', fontSize: 15, lineHeight: 1.8 }}>
-                        Welcome to LearnHub. These Terms of Service govern your use of our online learning platform. Please read them carefully before using our services.
+            {/* --- HERO SECTION --- */}
+            <section style={{
+                padding: '80px 24px 100px',
+                textAlign: 'center',
+                background: '#001F3F',
+                color: '#fff',
+                position: 'relative',
+                overflow: 'hidden'
+            }}>
+                <div style={{ position: 'absolute', top: -50, right: -50, width: 300, height: 300, background: 'rgba(0, 166, 192, 0.2)', borderRadius: '50%' }} />
+                <div style={{ position: 'absolute', bottom: -50, left: -50, width: 200, height: 200, background: 'rgba(29, 209, 161, 0.15)', borderRadius: '50%' }} />
+
+                <div className="section-container" style={{ position: 'relative', zIndex: 2 }}>
+                    <span style={{
+                        color: '#00A6C0',
+                        fontWeight: 800,
+                        fontSize: '14px',
+                        letterSpacing: '3px',
+                        textTransform: 'uppercase',
+                        display: 'block',
+                        marginBottom: '16px'
+                    }}>Service Contract</span>
+                    <h1 style={{ fontSize: 'clamp(32px, 6vw, 56px)', fontWeight: 900, marginBottom: '24px' }}>Terms of Service</h1>
+                    <p style={{ color: 'rgba(255,255,255,0.8)', maxWidth: '600px', margin: '0 auto', fontSize: '18px', lineHeight: 1.6 }}>
+                        A comprehensive agreement detailing the relationship between EduValues and our community of learners.
                     </p>
                 </div>
 
-                {TERMS.map((s, i) => (
-                    <div key={i} style={{ marginBottom: 28, paddingBottom: 28, borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                        <h2 style={{ fontSize: 17, marginBottom: 10, color: '#f1f5f9' }}>{s.title}</h2>
-                        <p style={{ color: '#94a3b8', fontSize: 14, lineHeight: 1.85 }}>{s.content}</p>
+                {/* Signature Torn Paper Divider */}
+                <div style={{ position: 'absolute', bottom: -2, left: 0, width: '100%', overflow: 'hidden', lineHeight: 0, zIndex: 11 }}>
+                    <svg viewBox="0 0 1200 120" preserveAspectRatio="none" style={{ position: 'relative', display: 'block', width: '100%', height: '50px' }}>
+                        <defs>
+                            <filter id="torn-paper-edge-terms">
+                                <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="8" result="noise" seed="35" />
+                                <feDisplacementMap in="SourceGraphic" in2="noise" scale="25" xChannelSelector="R" yChannelSelector="G" />
+                            </filter>
+                        </defs>
+                        <rect x="-50" y="70" width="1300" height="100" fill="#F4F7F9" filter="url(#torn-paper-edge-terms)" />
+                    </svg>
+                </div>
+            </section>
+
+            {/* --- CONTENT SECTION --- */}
+            <main className="section-container" style={{ padding: '80px 24px', flex: 1 }}>
+                <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+                    <div style={{ background: '#fff', padding: '40px', borderRadius: '32px', boxShadow: '0 20px 40px rgba(0,0,0,0.05)', marginBottom: '60px', border: '1px solid #F1F1F1', display: 'flex', gap: '24px', alignItems: 'center' }}>
+                        <div style={{ width: '64px', height: '64px', background: '#FF9F4315', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FF9F43', flexShrink: 0 }}>
+                            <Info size={32} />
+                        </div>
+                        <p style={{ color: '#666', fontSize: '16px', lineHeight: 1.8, marginBottom: '0' }}>
+                            Last updated: <strong>March 31, 2026</strong>. <br />
+                            These terms govern your access to and use of our website and services. Please read them carefully to understand your rights and obligations as a member of our learning playground.
+                        </p>
                     </div>
-                ))}
 
-                <div className="glass-card" style={{ padding: '20px 24px', marginTop: 20, borderLeft: '3px solid #6366f1' }}>
-                    <p style={{ color: '#94a3b8', fontSize: 14 }}>
-                        For questions about these Terms, contact us at{' '}
-                        <a href="mailto:support@learnhub.in" style={{ color: '#818cf8' }}>support@learnhub.in</a>
-                    </p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '32px' }}>
+                        {TERMS.map((s, i) => (
+                            <div key={i} style={{ background: '#fff', padding: '32px', borderRadius: '24px', border: '1px solid #F1F1F1', transition: 'all 0.3s ease' }}>
+                                <div style={{ width: '40px', height: '40px', color: '#00A6C0', marginBottom: '20px' }}>
+                                    <s.icon size={28} />
+                                </div>
+                                <h3 style={{ fontSize: '18px', color: '#001F3F', fontWeight: 800, marginBottom: '12px' }}>{s.title}</h3>
+                                <p style={{ color: '#666', fontSize: '14px', lineHeight: 1.7 }}>{s.content}</p>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div style={{ marginTop: '80px', padding: '48px', background: 'rgba(0, 31, 63, 0.02)', borderRadius: '40px', border: '2.5px dashed #001F3F20', textAlign: 'center' }}>
+                        <h4 style={{ fontSize: '24px', fontWeight: 900, color: '#001F3F', marginBottom: '16px' }}>Ready to start your adventure?</h4>
+                        <p style={{ color: '#555', marginBottom: '32px', fontSize: '17px' }}>By continuing to use our platform, you acknowledge that you have read and agreed to these terms.</p>
+                        <a href="/courses" style={{ 
+                            background: 'linear-gradient(135deg, #001F3F 0%, #00A6C0 100%)', 
+                            color: '#fff', 
+                            padding: '16px 40px', 
+                            borderRadius: '20px', 
+                            fontWeight: 900, 
+                            fontSize: '18px', 
+                            textDecoration: 'none',
+                            display: 'inline-block',
+                            boxShadow: '0 15px 30px rgba(0, 31, 63, 0.2)'
+                        }}>
+                            Agree & Discover Lessons
+                        </a>
+                    </div>
                 </div>
-            </div>
+            </main>
+
             <Footer />
         </div>
     )
