@@ -121,6 +121,24 @@ export default function Home() {
                     width: '100%'
                 }}>
                     <div style={{ maxWidth: '800px' }}>
+                        {/* Kid-Friendly Badge */}
+                        <div style={{ 
+                            display: 'inline-flex', 
+                            alignItems: 'center', 
+                            gap: 12, 
+                            background: 'rgba(0, 166, 192, 0.25)', 
+                            backdropFilter: 'blur(8px)',
+                            padding: '12px 24px', 
+                            borderRadius: '50px',
+                            marginBottom: '32px',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            animation: 'pulse 3s infinite'
+                        }}>
+                            <Rocket size={20} color="#00D2D3" className="animate-float" />
+                            <span style={{ color: '#fff', fontSize: '13px', fontWeight: '900', letterSpacing: 1.5 }}>
+                                THE PLAYGROUND IS OPEN!
+                            </span>
+                        </div>
 
                         <h1 style={{
                             fontSize: 'clamp(48px, 8vw, 84px)',
@@ -132,7 +150,7 @@ export default function Home() {
                             textShadow: '0 4px 12px rgba(0,0,0,0.3)'
                         }}>
                             Empowering <br />
-                            <span style={{ color: '#00A6C0' }}>Bright Futures</span>
+                            <span style={{ background: 'linear-gradient(90deg, #00A6C0, #1DD1A1)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', display: 'inline-block' }}>Bright Futures</span>
                         </h1>
                         <p style={{
                             fontSize: '22px',
@@ -147,14 +165,24 @@ export default function Home() {
                             Nurturing integrity, creativity, and leadership through interactive playgrounds.
                         </p>
                         <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-                            <Link to="/dashboard/lesson/24d4a5a9-aa50-4ae0-b13b-5960692c5079" className="btn-primary" style={{ height: 64, padding: '0 48px', fontSize: 20, boxShadow: '0 15px 30px rgba(0, 166, 192, 0.4)', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                Start Adventure <Play size={20} fill="#fff" />
+                            <Link to="/dashboard/lesson/24d4a5a9-aa50-4ae0-b13b-5960692c5079" className="btn-primary" style={{ height: 72, padding: '0 56px', fontSize: 22, borderRadius: '40px', boxShadow: '0 15px 30px rgba(0, 166, 192, 0.4)', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                Start Adventure <Play size={24} fill="#fff" style={{ marginLeft: 12 }} />
                             </Link>
-                            <Link to="/blog" className="btn-outline" style={{ height: 64, padding: '0 48px', fontSize: 20, color: '#fff', borderColor: '#fff' }}>
-                                <Heart size={20} /> Our Insights
+                            <Link to="/blog" className="btn-outline" style={{ height: 72, padding: '0 56px', fontSize: 22, color: '#fff', borderColor: '#fff', borderRadius: '40px' }}>
+                                <Heart size={24} style={{ marginRight: 12 }} /> Our Insights
                             </Link>
                         </div>
                     </div>
+                </div>
+
+                {/* Floating Decorative Elements */}
+                <div style={{ position: 'absolute', top: '15%', right: '10%', zIndex: 3 }} className="animate-float">
+                    <div style={{ width: 120, height: 120, background: 'rgba(29, 209, 161, 0.4)', borderRadius: '50%', filter: 'blur(40px)' }} />
+                    <Star style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: '#FFD700' }} size={48} fill="#FFD700" />
+                </div>
+                <div style={{ position: 'absolute', bottom: '25%', left: '5%', zIndex: 3, animationDelay: '1s' }} className="animate-float">
+                    <div style={{ width: 80, height: 80, background: 'rgba(0, 166, 192, 0.3)', borderRadius: '50%', filter: 'blur(30px)' }} />
+                    <Heart style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: '#FF6B6B' }} size={32} fill="#FF6B6B" />
                 </div>
 
                 {/* Carousel Indicators */}
@@ -184,18 +212,7 @@ export default function Home() {
                     ))}
                 </div>
 
-                {/* Torn Paper Divider */}
-                <div style={{ position: 'absolute', bottom: -2, left: 0, width: '100%', overflow: 'hidden', lineHeight: 0, zIndex: 11 }}>
-                    <svg viewBox="0 0 1200 120" preserveAspectRatio="none" style={{ position: 'relative', display: 'block', width: '100%', height: '100px' }}>
-                        <defs>
-                            <filter id="torn-paper-edge">
-                                <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="8" result="noise" seed="10" />
-                                <feDisplacementMap in="SourceGraphic" in2="noise" scale="25" xChannelSelector="R" yChannelSelector="G" />
-                            </filter>
-                        </defs>
-                        <rect x="-50" y="70" width="1300" height="100" fill="#fff" filter="url(#torn-paper-edge)" />
-                    </svg>
-                </div>
+
             </section>
 
             {/* ══ FEATURES SECTION (FORMERLY PLAYGROUNDS) ═════════ */}
@@ -285,12 +302,7 @@ export default function Home() {
 
             {/* ══ OUR COURSES ═══════════════════════════════════════ */}
             <section style={{ background: '#F4F7F9', padding: '40px 24px', position: 'relative' }}>
-                {/* Wave divider at top */}
-                <div style={{ position: 'absolute', top: -1, left: 0, width: '100%', overflow: 'hidden', lineHeight: 0, transform: 'rotate(180deg)' }}>
-                    <svg viewBox="0 0 1200 120" preserveAspectRatio="none" style={{ position: 'relative', display: 'block', width: 'calc(100% + 1.3px)', height: '50px' }}>
-                        <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" fill="#fff"></path>
-                    </svg>
-                </div>
+
 
                 <div className="section-container">
                     <div style={{

@@ -140,18 +140,7 @@ export default function Blog() {
                     </p>
                 </div>
 
-                {/* Torn Paper Divider */}
-                <div style={{ position: 'absolute', bottom: -2, left: 0, width: '100%', overflow: 'hidden', lineHeight: 0, zIndex: 11 }}>
-                    <svg viewBox="0 0 1200 120" preserveAspectRatio="none" style={{ position: 'relative', display: 'block', width: '100%', height: '50px' }}>
-                        <defs>
-                            <filter id="torn-paper-edge-blog">
-                                <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="8" result="noise" seed="15" />
-                                <feDisplacementMap in="SourceGraphic" in2="noise" scale="25" xChannelSelector="R" yChannelSelector="G" />
-                            </filter>
-                        </defs>
-                        <rect x="-50" y="70" width="1300" height="100" fill="#F4F7F9" filter="url(#torn-paper-edge-blog)" />
-                    </svg>
-                </div>
+
             </section>
 
             {/* --- BLOG LIST SECTION --- */}
