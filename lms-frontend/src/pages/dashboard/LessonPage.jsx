@@ -108,6 +108,115 @@ export default function LessonPage() {
             caption: 'After the game Coach knelt down proudly. "Great leadership today Riya! Your responsibility made a difference for the whole team!" Riya smiled — "Being responsible means being someone others can COUNT ON! 🌟 Responsibility builds TRUST!"'
         }
     ]
+
+    const perseverancePanels = [
+        {
+            image: '/kindness/lesson5/panel1.png',
+            caption: '"A mountain bike! This is the BEST BIRTHDAY EVER!" Jana jumped with excitement. Her dad smiled, "Happy Birthday, Jana! Ready for an adventure?" The shiny new bike sparkled in the sun.'
+        },
+        {
+            image: '/kindness/lesson5/panel2.png',
+            caption: 'They reached the mountain trail. "This trail is challenging, Jana. Maybe we should take it slow?" her dad suggested. Jana pedaled ahead confidently, "Don\'t worry Dad! I can handle it!"'
+        },
+        {
+            image: '/kindness/lesson5/panel3.png',
+            caption: 'CRASH! Jana hit a loose rock and tumbled onto the dirt. Her bike slid down the path. "Ouch... I want to go home," she whispered, looking at her scraped knee with tears in her eyes.'
+        },
+        {
+            image: '/kindness/lesson5/panel4.png',
+            caption: 'Dad knelt beside her. "You can go home... OR you could try again. Walk your bike down the rocky part for now." Jana looked at the trail, then at her bike. "Maybe... just one more try."'
+        },
+        {
+            image: '/kindness/lesson5/panel5.png',
+            caption: 'Jana got back on. She breathed deeply and focused. Slowly but surely, she navigated the tricky path. "I DID IT!" she shouted as she reached the bottom, her face lighting up with a huge grin.'
+        },
+        {
+            image: '/kindness/lesson5/panel6.png',
+            caption: 'That evening, Jana felt proud. "I didn\'t let that fall stop me!" She realized that success isn\'t about never falling—it\'s about always getting back up. "I NEVER GIVE UP—AND I MADE IT!" 🌟 Perseverance wins!'
+        }
+    ];
+
+    const empathyPanels = [
+        {
+            image: '/kindness/lesson6/panel1.png',
+            caption: 'Meera was the fastest runner in her class! On sports day she crossed the finish line FIRST again. "YES! First place AGAIN!" Everyone cheered — "Go Meera! She is the fastest!" But as she celebrated something caught her eye...'
+        },
+        {
+            image: '/kindness/lesson6/panel2.png',
+            caption: 'On the sideline sat a boy named Rihan — completely alone. He had a leg brace and could not join the races. He watched everyone play with sad longing eyes. Meera noticed him and felt something pull at her heart. "Wait... why is that boy sitting all alone?"'
+        },
+        {
+            image: '/kindness/lesson6/panel3.png',
+            caption: 'Meera asked her teacher about Rihan. "He feels different because he cannot run like the rest of you," the teacher explained gently. Meera thought deeply. "How would I feel if I could not run...?" She made up her mind to do something.'
+        },
+        {
+            image: '/kindness/lesson6/panel4.png',
+            caption: 'Meera walked over and sat beside Rihan with a warm smile. "Hi! I am Meera. What do you like to do?" Rihan looked surprised. "I love drawing and board games!" Meera\'s eyes lit up with genuine interest — she had found a new friend!'
+        },
+        {
+            image: '/kindness/lesson6/panel5.png',
+            caption: 'On the next sports day Meera organized a special TEAMWORK game — no running required — where everyone could join! Rihan was right in the middle laughing and playing for the first time. "This game is about TEAMWORK — everyone can play!" "I am actually PLAYING! This is amazing!"'
+        },
+        {
+            image: '/kindness/lesson6/panel6.png',
+            caption: '"Thank you for including me Meera. I never felt left out today," Rihan said warmly. Meera smiled. "Empathy means understanding how others feel — and making sure no one is left behind!" 🌟 The End — Empathy makes the world kinder!'
+        }
+    ];
+
+    const gratitudePanels = [
+        {
+            image: '/kindness/lesson7/panel1.png',
+            caption: 'Aarav sat surrounded by many toys looking bored and unhappy. "I want THAT new toy! Why don\'t I have everything I want?!" His grandfather watched quietly from his armchair. "Hmm... I think it is time for a little trip Aarav."'
+        },
+        {
+            image: '/kindness/lesson7/panel2.png',
+            caption: 'Grandfather took Aarav to volunteer at a community kitchen. Aarav helped serve food wearing an oversized apron. Around him children with very little were laughing and smiling with pure joy. "They have so much less than me... but they look so HAPPY?"'
+        },
+        {
+            image: '/kindness/lesson7/panel3.png',
+            caption: 'Aarav sat with his grandfather and asked the question burning in his heart. "Grandfather... why are they so happy when they have so little?" "Because they appreciate what they DO have. They are grateful for every small thing." Aarav\'s eyes went wide with understanding.'
+        },
+        {
+            image: '/kindness/lesson7/panel4.png',
+            caption: 'At home grandfather helped Aarav create a Thankfulness Tree on the wall. Every day Aarav wrote something he was grateful for on a paper leaf. "I am grateful for... the sunny day today!" "Perfect! Every blessing counts — big or small!"'
+        },
+        {
+            image: '/kindness/lesson7/panel5.png',
+            caption: 'Day by day the tree grew more beautiful and full of colorful leaves — his family, yummy food, sunshine, school, health and rain. "My tree is so full! I never noticed how much I already have!" Aarav felt happier and complained much less.'
+        },
+        {
+            image: '/kindness/lesson7/panel6.png',
+            caption: 'At dinner Aarav looked at his family and food with warm grateful eyes. "Grandfather... I used to always want MORE. Now I see how RICH I already am!" Grandfather smiled proudly. "That my boy... is the power of GRATITUDE." 🌟 The End — Gratitude turns what we have into enough!'
+        }
+    ];
+
+    const couragePanels = [
+        {
+            image: '/kindness/lesson8/panel1.png',
+            caption: 'When the teacher announced the class play Arjun froze with terror. "And Arjun will play the BRAVE KNIGHT!" "M-me?! In front of everyone?!" His heart sank. Everyone else looked excited but Arjun felt like he wanted to disappear.'
+        },
+        {
+            image: '/kindness/lesson8/panel2.png',
+            caption: '"I can\'t do it teacher. I get too scared when people watch me." His teacher knelt down with a warm smile. "Being brave doesn\'t mean NOT feeling scared Arjun. It means doing something EVEN THOUGH you are afraid." Arjun looked up with a tiny spark of hope.'
+        },
+        {
+            image: '/kindness/lesson8/panel3.png',
+            caption: 'Arjun practiced every day — first alone in his mirror, then with two friends, then with more classmates. Each time his fear got a little smaller. "I can feel my fear getting... smaller!" His confidence was slowly growing.'
+        },
+        {
+            image: '/kindness/lesson8/panel4.png',
+            caption: 'At home his whole family gathered on the sofa to watch him practice. In his cardboard knight costume Arjun performed his lines with a shaky but brave voice. "Amazing Arjun! Keep going!" Mom cheered. Their love and support gave him strength.'
+        },
+        {
+            image: '/kindness/lesson8/panel5.png',
+            caption: 'On the night of the play Arjun stood center stage under the spotlight. His hands trembled but his eyes were determined. "I am scared... but I am doing it anyway. THAT is what courage means!" He raised his sword. "I am the brave knight — and I will face this dragon!"'
+        },
+        {
+            image: '/kindness/lesson8/panel6.png',
+            caption: 'The audience erupted in applause! "You were SO brave up there Arjun!" his friends cheered rushing toward him. "I was scared the whole time... but I did it anyway!" Teacher wiped a proud tear. "THAT is true courage!" 🌟 The End — Courage grows every time you face your fears!'
+        }
+    ];
+
     const respectPanels = [
         {
             image: '/kindness/lesson4/panel1.png',
@@ -403,6 +512,14 @@ export default function LessonPage() {
                                                 <ComicViewer panels={responsibilityPanels} />
                                             ) : String(lessonId) === '11111111-0000-0000-0000-000000000004' ? (
                                                 <ComicViewer panels={respectPanels} />
+                                            ) : String(lessonId) === '11111111-0000-0000-0000-000000000005' ? (
+                                                <ComicViewer panels={perseverancePanels} />
+                                            ) : String(lessonId) === '11111111-0000-0000-0000-000000000006' ? (
+                                                <ComicViewer panels={empathyPanels} />
+                                            ) : String(lessonId) === '11111111-0000-0000-0000-000000000007' ? (
+                                                <ComicViewer panels={gratitudePanels} />
+                                            ) : String(lessonId) === '11111111-0000-0000-0000-000000000008' ? (
+                                                <ComicViewer panels={couragePanels} />
                                             ) : (
                                                 <div className="story-mode" style={{ 
                                                     fontSize: 22, 
@@ -426,7 +543,11 @@ export default function LessonPage() {
                                                 '11111111-0000-0000-0000-000000000001',
                                                 '11111111-0000-0000-0000-000000000002',
                                                 '11111111-0000-0000-0000-000000000003',
-                                                '11111111-0000-0000-0000-000000000004'
+                                                '11111111-0000-0000-0000-000000000004',
+                                                '11111111-0000-0000-0000-000000000005',
+                                                '11111111-0000-0000-0000-000000000006',
+                                                '11111111-0000-0000-0000-000000000007',
+                                                '11111111-0000-0000-0000-000000000008'
                                             ].includes(String(lessonId)) && (
                                                 <>
                                                     <div style={{ position: 'absolute', top: -20, right: 40, background: '#FFD700', color: '#000', padding: '8px 20px', borderRadius: '10px', fontWeight: 900, fontSize: 18, transform: 'rotate(5deg)', border: '3px solid #000' }}>
