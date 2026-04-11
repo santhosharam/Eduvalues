@@ -297,6 +297,14 @@ export default function LessonPage() {
         }
     }, [lessonId, completedLessons])
 
+    useEffect(() => {
+        // Force reset to the beginning for any new lesson
+        setActiveTab('content')
+        setQuizSubmitted(false)
+        setQuizAnswers({})
+        window.scrollTo(0, 0)
+    }, [lessonId])
+
     if (loading) return (
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ width: 40, height: 40, border: '3px solid rgba(0,166,192,0.2)', borderTop: '3px solid #00A6C0', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
@@ -559,6 +567,15 @@ export default function LessonPage() {
                                                 </>
                                             )}
                                         </div>
+                                        <div style={{ marginTop: 60, display: 'flex', justifyContent: 'center' }}>
+                                            <button 
+                                                onClick={() => setActiveTab('summary')}
+                                                className="btn-primary" 
+                                                style={{ padding: '20px 48px', background: '#00A6C0', fontSize: 18, fontWeight: 900, borderRadius: 20 }}
+                                            >
+                                                Next Activity → Summary
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
 
@@ -581,6 +598,15 @@ export default function LessonPage() {
                                                     </div>
                                                 </div>
                                             ))}
+                                        </div>
+                                        <div style={{ marginTop: 60, display: 'flex', justifyContent: 'center' }}>
+                                            <button 
+                                                onClick={() => setActiveTab('moral')}
+                                                className="btn-primary" 
+                                                style={{ padding: '20px 48px', background: '#FF9F43', fontSize: 18, fontWeight: 900, borderRadius: 20 }}
+                                            >
+                                                Next Activity → Deep Meaning
+                                            </button>
                                         </div>
                                     </div>
                                 )}
@@ -607,6 +633,16 @@ export default function LessonPage() {
                                         </p>
                                         <div style={{ marginTop: 40, padding: '20px 32px', background: '#F8FAFB', borderRadius: 20, display: 'inline-flex', gap: 12, alignItems: 'center', fontWeight: 800, color: '#001F3F' }}>
                                             <Sparkles size={24} color="#FFD700" /> MISSION: Help a friend today!
+                                        </div>
+
+                                        <div style={{ marginTop: 60, display: 'flex', justifyContent: 'center' }}>
+                                            <button 
+                                                onClick={() => setActiveTab(quizQuestions.length > 0 ? 'quiz' : 'content')}
+                                                className="btn-primary" 
+                                                style={{ padding: '20px 48px', background: '#FF6B6B', fontSize: 18, fontWeight: 900, borderRadius: 20 }}
+                                            >
+                                                {quizQuestions.length > 0 ? 'Ready for Brain Challenge? →' : 'Back to Adventure'}
+                                            </button>
                                         </div>
                                     </div>
                                 )}
