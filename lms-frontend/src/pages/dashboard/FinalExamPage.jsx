@@ -13,6 +13,7 @@ export default function FinalExamPage() {
     const [score, setScore] = useState(0)
     const [loading, setLoading] = useState(true)
     const [studentName, setStudentName] = useState('')
+    const [actionLoading, setActionLoading] = useState(false)
     const certificateRef = useRef()
 
     useEffect(() => {
@@ -22,14 +23,17 @@ export default function FinalExamPage() {
                 const { data, error } = await supabase
                     .from('quizzes')
                     .select('*')
-                    .eq('course_id', courseId)
+                    .eq('courseId', courseId)
                     .eq('is_final_exam', true)
                     .order('order_index', { ascending: true })
 
                 if (error) throw error
+                if (!data || data.length === 0) {
+                    toast.error('Curriculum error: Final exam questions are missing!')
+                }
                 setQuestions(data || [])
             } catch (err) {
-                toast.error('Failed to load final exam!')
+                toast.error('Could not reach the moral compass! Check your connection.')
             } finally {
                 setLoading(false)
             }
@@ -37,22 +41,34 @@ export default function FinalExamPage() {
         fetchQuestions()
     }, [courseId])
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (Object.keys(answers).length < questions.length) {
-            toast.error('Please answer all questions before submitting!')
+            toast.error('Please answer all 20 questions before submitting!')
             return
         }
 
-        const calculatedScore = questions.filter(q => answers[q.id] === q.correct_answer).length
-        setScore(calculatedScore)
-        setSubmitted(true)
-        
-        if (calculatedScore >= 15) {
-            toast.success('CONGRATULATIONS! You have passed the Final Exam! 🏆', { duration: 5000 })
-        } else {
-            toast.error(`You scored ${calculatedScore}/${questions.length}. You need at least 15 to pass.`, { duration: 5000 })
+        setActionLoading(true)
+        try {
+            const api = (await import('../../services/api')).default
+            const { data } = await api.post(`/courses/${courseId}/submit-final-exam`, { 
+                answers: Object.entries(answers).map(([id, val]) => ({ questionId: id, selected: val })) 
+            })
+
+            const calculatedScore = questions.filter(q => answers[q.id] === q.correct_answer).length
+            setScore(calculatedScore)
+            setSubmitted(true)
+            
+            if (calculatedScore >= 15) {
+                toast.success('CHALLENGE CONQUERED! You have earned your certificate! 🏆', { duration: 5000 })
+            } else {
+                toast.error(`Brave attempt! You scored ${calculatedScore}/${questions.length}. You need 15/20 to pass.`, { duration: 5000 })
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+        } catch (err) {
+            toast.error(err.friendlyMessage || 'Something went wrong with the submission. Please try again.')
+        } finally {
+            setActionLoading(false)
         }
-        window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
     const handlePrint = () => {
@@ -271,6 +287,7 @@ export default function FinalExamPage() {
                     <div style={{ marginTop: 60, textAlign: 'center' }}>
                         <button
                             onClick={handleSubmit}
+                            disabled={Object.keys(answers).length < questions.length || actionLoading}
                             className="btn-primary"
                             style={{
                                 background: '#1DD1A1',
@@ -279,10 +296,15 @@ export default function FinalExamPage() {
                                 fontSize: 24,
                                 borderRadius: 25,
                                 boxShadow: '0 15px 30px rgba(29, 209, 161, 0.3)',
-                                opacity: Object.keys(answers).length < questions.length ? 0.5 : 1
+                                opacity: (Object.keys(answers).length < questions.length || actionLoading) ? 0.5 : 1,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: 12
                             }}
                         >
-                            SUBMIT FINAL EXAM 🚀
+                            {actionLoading ? <Loader2 className="spin" size={28} /> : null}
+                            {actionLoading ? 'SUBMITTING...' : 'SUBMIT FINAL EXAM 🚀'}
                         </button>
                         <p style={{ marginTop: 24, color: '#888', fontWeight: 600 }}>Gather all your wisdom and send it to the heavens! ✨</p>
                     </div>

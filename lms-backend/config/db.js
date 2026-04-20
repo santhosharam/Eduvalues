@@ -1,4 +1,8 @@
 const mongoose = require('mongoose')
+const softDeletePlugin = require('../utils/softDeletePlugin')
+
+// Register global soft delete plugin
+mongoose.plugin(softDeletePlugin)
 
 const connectDB = async () => {
     try {
@@ -249,12 +253,12 @@ const connectDB = async () => {
                             content: lessonsData[val] || `<div class="lesson-content"><h3>Exploring ${val}</h3><p>Coming soon: engaging stories and activities about ${val.toLowerCase()}.</p></div>`,
                             isFree: idx === 0,
                             order: idx + 1,
-                            course: course._id,
+                            courseId: course._id,
                             quiz: quizzesData[val] || []
                         }));
                     } else {
                         lessons = [
-                            { title: 'Introduction', content: 'Basics...', isFree: true, order: 1, course: course._id }
+                            { title: 'Introduction', content: 'Basics...', isFree: true, order: 1, courseId: course._id }
                         ];
                     }
                     const createdLessons = await Lesson.insertMany(lessons);
@@ -281,11 +285,10 @@ const connectDB = async () => {
                 if (student) {
                     const courses = await Course.find();
                     for (const course of courses) {
-                        const exists = await Enrollment.findOne({ student: student._id, course: course._id });
                         if (!exists) {
                             await Enrollment.create({
                                 student: student._id,
-                                course: course._id,
+                                courseId: course._id,
                                 progress: 0
                             });
                         }

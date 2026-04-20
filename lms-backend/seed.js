@@ -63,13 +63,13 @@ const seedData = async () => {
                     content: `<h3>Exploring ${val}</h3><p>This lesson teaches children about the importance of ${val.toLowerCase()} in their daily lives through stories and interactive play.</p>`,
                     isFree: idx === 0, // First one free
                     order: idx + 1,
-                    course: course._id
+                    courseId: course._id
                 }));
             } else {
                 lessons = [
-                    { title: 'Introduction to the Course', content: 'In this lesson we cover the basics.', isFree: true, order: 1, course: course._id },
-                    { title: 'Setting up Environment', content: 'Install Node.js and VS Code.', isFree: false, order: 2, course: course._id },
-                    { title: 'Your First Project', content: 'Building a simple Hello World.', isFree: false, order: 3, course: course._id }
+                    { title: 'Introduction to the Course', content: 'In this lesson we cover the basics.', isFree: true, order: 1, courseId: course._id },
+                    { title: 'Setting up Environment', content: 'Install Node.js and VS Code.', isFree: false, order: 2, courseId: course._id },
+                    { title: 'Your First Project', content: 'Building a simple Hello World.', isFree: false, order: 3, courseId: course._id }
                 ];
             }
 

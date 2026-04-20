@@ -3,6 +3,7 @@ const crypto = require('crypto')
 const Payment = require('../models/Payment')
 const Enrollment = require('../models/Enrollment')
 const Course = require('../models/Course')
+const { successResponse, errorResponse } = require('../utils/response')
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -21,18 +22,20 @@ exports.initiatePayment = async (req, res) => {
         // Free course: auto-enroll
         if (amount === 0) {
             await Enrollment.findOneAndUpdate(
-                { student: req.user._id, course: courseId },
-                { student: req.user._id, course: courseId },
+                { student: req.user._id, courseId: courseId },
+                { student: req.user._id, courseId: courseId },
                 { upsert: true, new: true }
             )
             return res.json({ free: true, message: 'Enrolled for free!' })
         }
 
         const order = await razorpay.orders.create({ amount, currency: 'INR', receipt: `rcpt_${Date.now()}` })
-        const payment = await Payment.create({ student: req.user._id, course: courseId, amount: course.discountPrice || course.price, razorpayOrderId: order.id })
-        res.json({ orderId: order.id, amount, paymentId: payment._id })
+        const payment = await Payment.create({ student: req.user._id, courseId: courseId, amount: course.discountPrice || course.price, razorpayOrderId: order.id })
+        
+        return successResponse(res, 'Payment initiated', { orderId: order.id, amount, paymentId: payment._id })
     } catch (err) {
-        res.status(500).json({ message: err.message })
+        console.error(`[PAYMENT_INIT_ERROR] User: ${req.user?._id} Course: ${req.body?.courseId} Error: ${err.message}`)
+        return errorResponse(res, err.message, 500)
     }
 }
 
@@ -42,7 +45,11 @@ exports.verifyPayment = async (req, res) => {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, courseId } = req.body
         const body = razorpay_order_id + '|' + razorpay_payment_id
         const expectedSig = crypto.createHmac('sha256', process.env.RAZORPAY_SECRET).update(body).digest('hex')
-        if (expectedSig !== razorpay_signature) return res.status(400).json({ message: 'Invalid signature' })
+        
+        if (expectedSig !== razorpay_signature) {
+            console.warn(`[PAYMENT_FRAUD_ALERT] Signature mismatch for Order: ${razorpay_order_id} User: ${req.user?._id}`)
+            return errorResponse(res, 'Invalid signature detected. Transaction recorded for investigation.', 400)
+        }
 
         const payment = await Payment.findOneAndUpdate(
             { razorpayOrderId: razorpay_order_id },
@@ -51,8 +58,8 @@ exports.verifyPayment = async (req, res) => {
         )
         // Create enrollment
         await Enrollment.findOneAndUpdate(
-            { student: req.user._id, course: courseId },
-            { student: req.user._id, course: courseId, payment: payment._id },
+            { student: req.user._id, courseId: courseId },
+            { student: req.user._id, courseId: courseId, payment: payment._id },
             { upsert: true, new: true }
         )
         res.json({ message: 'Payment verified, enrolled successfully!' })
@@ -64,7 +71,7 @@ exports.verifyPayment = async (req, res) => {
 // GET /api/payments/history
 exports.getMyPayments = async (req, res) => {
     try {
-        const payments = await Payment.find({ student: req.user._id }).populate('course', 'title thumbnail').sort('-createdAt')
+        const payments = await Payment.find({ student: req.user._id }).populate('courseId', 'title thumbnail').sort('-createdAt')
         res.json({ payments })
     } catch (err) {
         res.status(500).json({ message: err.message })
@@ -74,7 +81,7 @@ exports.getMyPayments = async (req, res) => {
 // GET /api/payments/all (admin)
 exports.getAllPayments = async (req, res) => {
     try {
-        const payments = await Payment.find().populate('student', 'name email').populate('course', 'title').sort('-createdAt')
+        const payments = await Payment.find().populate('student', 'name email').populate('courseId', 'title').sort('-createdAt')
         res.json({ payments })
     } catch (err) {
         res.status(500).json({ message: err.message })

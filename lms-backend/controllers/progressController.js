@@ -7,7 +7,7 @@ const { v4: uuidv4 } = require('uuid')
 // GET /api/progress/:courseId
 exports.getCourseProgress = async (req, res) => {
     try {
-        const progress = await Progress.findOne({ student: req.user._id, course: req.params.courseId })
+        const progress = await Progress.findOne({ student: req.user._id, courseId: req.params.courseId })
         res.json({ progress: progress || { completedLessons: [], percent: 0 } })
     } catch (err) {
         res.status(500).json({ message: err.message })
@@ -20,9 +20,9 @@ exports.markLessonComplete = async (req, res) => {
         const { courseId, lessonId } = req.params
         const studentId = req.user._id
 
-        let progress = await Progress.findOne({ student: studentId, course: courseId })
+        let progress = await Progress.findOne({ student: studentId, courseId: courseId })
         if (!progress) {
-            progress = new Progress({ student: studentId, course: courseId, completedLessons: [] })
+            progress = new Progress({ student: studentId, courseId: courseId, completedLessons: [] })
         }
         if (!progress.completedLessons.map(String).includes(String(lessonId))) {
             progress.completedLessons.push(lessonId)
@@ -36,7 +36,7 @@ exports.markLessonComplete = async (req, res) => {
 
         // Auto-complete enrollment (REMOVED - now requires final assessment)
         await Enrollment.findOneAndUpdate(
-            { student: studentId, course: courseId },
+            { student: studentId, courseId: courseId },
             { progress: percent }
         )
 
@@ -61,7 +61,7 @@ exports.submitFinalAssessment = async (req, res) => {
         }
 
         // Check if all lessons are completed first
-        const progress = await Progress.findOne({ student: studentId, course: courseId })
+        const progress = await Progress.findOne({ student: studentId, courseId: courseId })
         if (!progress || progress.completedLessons.length < course.lessons.length) {
             return res.status(400).json({ message: 'Please complete all lessons before taking the final assessment' })
         }
@@ -82,17 +82,17 @@ exports.submitFinalAssessment = async (req, res) => {
         if (userPercentage >= passPercentage) {
             // Mark enrollment as completed
             await Enrollment.findOneAndUpdate(
-                { student: studentId, course: courseId },
+                { student: studentId, courseId: courseId },
                 { isCompleted: true, completedAt: new Date(), progress: 100 }
             )
 
             // Generate certificate
-            const exists = await Certificate.findOne({ student: studentId, course: courseId })
+            const exists = await Certificate.findOne({ student: studentId, courseId: courseId })
             let certificateId = exists?._id
             if (!exists) {
                 const newCert = await Certificate.create({
                     student: studentId,
-                    course: courseId,
+                    courseId: courseId,
                     uniqueCode: uuidv4().slice(0, 12).toUpperCase(),
                     certificateUrl: '', // In production, upload buffer from generateCertificatePDF
                     issuedAt: new Date(),

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getAllCourses } from '../../services/courseService';
 import { getLessonsByCourseId, createLesson, updateLesson, deleteLesson } from '../../services/lessonService';
 import toast from 'react-hot-toast';
@@ -6,20 +7,31 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import AdminTable from '../../components/admin/AdminTable';
 import AdminModal from '../../components/admin/AdminModal';
 import AdminForm from '../../components/admin/AdminForm';
-import { Plus, Edit, Trash2, Video, BookOpen, Layers, ChevronRight } from 'lucide-react';
+import { Plus, Edit, Trash2, Video, BookOpen, Layers, ChevronRight, Palette, HelpCircle } from 'lucide-react';
 
-const EMPTY_LESSON = { title: '', description: '', videoUrl: '', content: '', order: 1, isFree: false };
+const EMPTY_LESSON = { 
+    title: '', 
+    order_index: 1, 
+    video_url: '', 
+    content: '', 
+    quick_summary: '', 
+    moral_value: '',
+    isFree: false 
+};
 
 const FORM_FIELDS = [
     { name: 'title', label: 'Lesson Title', placeholder: 'e.g. Introduction to Variables', required: true },
-    { name: 'videoUrl', label: 'Streaming URL', placeholder: 'YouTube/Vimeo embed or direct .mp4' },
-    { name: 'order', label: 'Chronological Sequence', type: 'number', required: true },
-    { name: 'description', label: 'Lesson Synopsis', placeholder: 'Brief summary of objectives...' },
-    { name: 'content', label: 'Instructional Body (Markdown/HTML)', type: 'textarea', placeholder: 'Full lesson text content...', rows: 8 },
+    { name: 'order_index', label: 'Order Index', type: 'number', required: true },
+    { name: 'video_url', label: 'Video URL', placeholder: 'YouTube/Vimeo embed or direct .mp4' },
+    { name: 'content', label: 'Main Story Text', type: 'textarea', placeholder: 'The main lesson content/story...', rows: 6 },
+    { name: 'quick_summary', label: 'Quick Summary', type: 'textarea', placeholder: 'A brief summary of the lesson...', rows: 3 },
+    { name: 'moral_value', label: 'Moral Value', type: 'textarea', placeholder: 'The moral of the story...', rows: 2 },
 ];
 
 export default function ManageLessons() {
+    const navigate = useNavigate();
     const [courses, setCourses] = useState([]);
+    const [selectedCourseId, setSelectedCourseId] = useState('');
     const [selectedCourse, setSelectedCourse] = useState(null);
     const [lessons, setLessons] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -28,7 +40,16 @@ export default function ManageLessons() {
     const [editLesson, setEditLesson] = useState(null);
 
     useEffect(() => {
-        getAllCourses({ all: true }).then(r => setCourses(r.data.courses || []));
+        getAllCourses({ all: true }).then(r => {
+            const fetchedCourses = r.data.courses || [];
+            setCourses(fetchedCourses);
+            if (fetchedCourses.length > 0) {
+                const firstId = fetchedCourses[0]._id;
+                setSelectedCourseId(firstId);
+                setSelectedCourse(fetchedCourses[0]);
+                fetchLessons(firstId);
+            }
+        });
     }, []);
 
     const fetchLessons = async (courseId) => {
@@ -40,9 +61,12 @@ export default function ManageLessons() {
         finally { setLoading(false); }
     };
 
-    const handleSelectCourse = (course) => {
+    const handleCourseChange = (e) => {
+        const id = e.target.value;
+        const course = courses.find(c => c._id === id);
+        setSelectedCourseId(id);
         setSelectedCourse(course);
-        fetchLessons(course._id);
+        fetchLessons(id);
     };
 
     const handleSave = async (data) => {
@@ -52,12 +76,11 @@ export default function ManageLessons() {
                 await updateLesson(editLesson._id, data);
                 toast.success('Lesson content revised.');
             } else {
-                // IMPORTANT: When creating for Supabase, use 'course_id' field
-                await createLesson({ ...data, course_id: selectedCourse._id });
+                await createLesson({ ...data, courseId: selectedCourseId });
                 toast.success('Lesson appended to curriculum.');
             }
             setShowModal(false);
-            fetchLessons(selectedCourse._id);
+            fetchLessons(selectedCourseId);
         } catch (err) {
             toast.error(err.message || 'Critical write error');
         } finally { setActionLoading(false); }
@@ -68,131 +91,85 @@ export default function ManageLessons() {
         try {
             await deleteLesson(id);
             toast.success('Asset purged.');
-            fetchLessons(selectedCourse._id);
+            fetchLessons(selectedCourseId);
         } catch { toast.error('Deletion restricted'); }
     };
 
     return (
         <AdminLayout
             title="Curriculum Architect"
-            subtitle={selectedCourse ? `Modifying: ${selectedCourse.title}` : 'Select a course pathway to manage its instructional assets.'}
+            subtitle="Manage your courses, lessons, comics and quizzes from one unified dashboard."
         >
-            {/* Selection Grid for Courses */}
-            {!selectedCourse ? (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
-                    {courses.map(course => (
-                        <div
-                            key={course._id}
-                            onClick={() => handleSelectCourse(course)}
-                            style={{
-                                background: 'rgba(10, 17, 32, 0.4)',
-                                border: '1px solid rgba(255, 255, 255, 0.05)',
-                                borderRadius: '24px',
-                                padding: '24px',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 20
-                            }}
-                            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'; e.currentTarget.style.transform = 'translateY(-4px)'; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(10, 17, 32, 0.4)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-                        >
-                            <div style={{
-                                width: 64, height: 64, background: '#00A6C015',
-                                borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                color: '#00A6C0', border: '1px solid #00A6C033'
-                            }}>
-                                <Layers size={28} />
-                            </div>
-                            <div style={{ flex: 1 }}>
-                                <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 800 }}>{course.title}</h3>
-                                <p style={{ color: '#64748b', fontSize: 12, marginTop: 4 }}>{course.lessons?.length || 0} Lessons Integrated</p>
-                            </div>
-                            <ChevronRight size={20} color="#334155" />
-                        </div>
-                    ))}
+            {/* Header Control Panel */}
+            <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                marginBottom: '32px',
+                background: 'rgba(255,255,255,0.02)',
+                padding: '20px 24px',
+                borderRadius: '20px',
+                border: '1px solid rgba(255,255,255,0.05)'
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <label style={{ fontSize: 13, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5 }}>Select Course:</label>
+                    <select 
+                        value={selectedCourseId} 
+                        onChange={handleCourseChange}
+                        style={selectStyle}
+                    >
+                        {courses.map(c => <option key={c._id} value={c._id}>{c.title}</option>)}
+                    </select>
                 </div>
-            ) : (
-                <>
-                    {/* Lesson Management Dashboard for Selected Course */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '32px' }}>
-                        <button
-                            onClick={() => setSelectedCourse(null)}
-                            style={{ background: 'none', border: 'none', color: '#64748b', fontWeight: 800, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
-                        >
-                            ← Switch Pathway
-                        </button>
-                        <button
-                            onClick={() => { setEditLesson(null); setShowModal(true); }}
-                            style={{
-                                background: '#00A6C0',
-                                color: '#fff',
-                                padding: '12px 24px',
-                                borderRadius: '14px',
-                                border: 'none',
-                                fontWeight: 900,
-                                fontSize: 14,
-                                cursor: 'pointer',
-                                boxShadow: '0 8px 16px rgba(0, 166, 192, 0.2)'
-                            }}
-                        >
-                            <Plus size={18} style={{ marginRight: 8 }} /> Append Lesson
-                        </button>
-                    </div>
 
-                    <AdminTable
-                        headers={['Sequence', 'Instructional Label', 'Assets', 'Metadata']}
-                        loading={loading}
-                        data={lessons}
-                        renderRow={(lesson) => (
-                            <>
-                                <td style={{ padding: '20px 32px' }}>
-                                    <div style={{ width: 32, height: 32, borderRadius: '8px', background: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontWeight: 900, fontSize: 12 }}>
-                                        #{lesson.order}
-                                    </div>
-                                </td>
-                                <td style={{ padding: '20px 32px' }}>
-                                    <div style={{ fontWeight: 800, color: '#fff', fontSize: 14 }}>{lesson.title}</div>
-                                    <div style={{ fontSize: 11, color: '#475569', fontWeight: 600, marginTop: 2 }}>{lesson.description?.substring(0, 60)}...</div>
-                                </td>
-                                <td style={{ padding: '20px 32px' }}>
-                                    <div style={{ display: 'flex', gap: 12 }}>
-                                        {lesson.videoUrl && <div style={{ color: '#00A6C0' }} title="Video Component Integrated"><Video size={18} /></div>}
-                                        {lesson.content && <div style={{ color: '#FF9F43' }} title="Instructional Text Present"><BookOpen size={18} /></div>}
-                                    </div>
-                                </td>
-                                <td style={{ padding: '20px 32px' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: lesson.isFree ? '#1DD1A1' : '#64748b' }} />
-                                        <span style={{ fontSize: 11, fontWeight: 900, color: lesson.isFree ? '#1DD1A1' : '#64748b', textTransform: 'uppercase' }}>
-                                            {lesson.isFree ? 'Preview On' : 'Locked Access'}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td style={{ padding: '20px 32px', textAlign: 'right' }}>
-                                    <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-                                        <button onClick={() => { setEditLesson(lesson); setShowModal(true); }} style={actionBtnStyle}><Edit size={16} /></button>
-                                        <button onClick={() => handleDelete(lesson._id)} style={{ ...actionBtnStyle, color: '#FF6B6B' }}><Trash2 size={16} /></button>
-                                    </div>
-                                </td>
-                            </>
-                        )}
-                    />
-                </>
-            )}
+                <button
+                    onClick={() => { setEditLesson(null); setShowModal(true); }}
+                    style={addBtnStyle}
+                >
+                    <Plus size={18} /> Append New Lesson
+                </button>
+            </div>
 
-            {/* Lesson Architect Modal */}
+            <AdminTable
+                headers={['Seq', 'Label', 'Story Content', 'Actions']}
+                loading={loading}
+                data={lessons}
+                renderRow={(lesson) => (
+                    <>
+                        <td style={{ padding: '20px 32px' }}>
+                            <div style={seqBadgeStyle}>#{lesson.order_index}</div>
+                        </td>
+                        <td style={{ padding: '20px 32px' }}>
+                            <div style={{ fontWeight: 800, color: '#fff', fontSize: 14 }}>{lesson.title}</div>
+                            {lesson.video_url && <div style={{ fontSize: 10, color: '#00A6C0', fontWeight: 700, marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}><Video size={10} /> Video Linked</div>}
+                        </td>
+                        <td style={{ padding: '20px 32px' }}>
+                            <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.5, maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {lesson.content || 'No text content added yet.'}
+                            </div>
+                        </td>
+                        <td style={{ padding: '20px 32px', textAlign: 'right' }}>
+                            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                                <button onClick={() => { setEditLesson(lesson); setShowModal(true); }} style={actionBtnStyle} title="Edit Lesson"><Edit size={16} /></button>
+                                <button onClick={() => navigate(`/admin/lessons/${lesson._id}/comics`)} style={{ ...actionBtnStyle, color: '#00A6C0', background: 'rgba(0,166,192,0.1)' }} title="Manage Comics"><Palette size={16} /></button>
+                                <button onClick={() => navigate(`/admin/lessons/${lesson._id}/quiz`)} style={{ ...actionBtnStyle, color: '#FF9F43', background: 'rgba(255,159,67,0.1)' }} title="Manage Quiz"><HelpCircle size={16} /></button>
+                                <button onClick={() => handleDelete(lesson._id)} style={{ ...actionBtnStyle, color: '#FF6B6B' }} title="Delete"><Trash2 size={16} /></button>
+                            </div>
+                        </td>
+                    </>
+                )}
+            />
+
             <AdminModal
                 isOpen={showModal}
                 onClose={() => setShowModal(false)}
                 title={editLesson ? 'Refine Lesson Module' : 'Architect New Lesson'}
-                subtitle={selectedCourse ? `Constructing content for: ${selectedCourse.title}` : ''}
+                subtitle={selectedCourse ? `Target Course: ${selectedCourse.title}` : ''}
                 width={800}
             >
                 <AdminForm
                     fields={FORM_FIELDS}
-                    initialData={editLesson || { ...EMPTY_LESSON, order: lessons.length + 1 }}
+                    initialData={editLesson || { ...EMPTY_LESSON, order_index: lessons.length + 1 }}
                     loading={actionLoading}
                     onCancel={() => setShowModal(false)}
                     onSubmit={handleSave}
@@ -202,12 +179,47 @@ export default function ManageLessons() {
     );
 }
 
+const selectStyle = {
+    background: '#0f172a',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: '12px',
+    padding: '10px 16px',
+    color: '#fff',
+    fontSize: '14px',
+    fontWeight: 600,
+    outline: 'none',
+    cursor: 'pointer',
+    minWidth: '240px'
+};
+
+const addBtnStyle = {
+    background: '#00A6C0',
+    color: '#fff',
+    padding: '12px 24px',
+    borderRadius: '14px',
+    border: 'none',
+    fontWeight: 900,
+    fontSize: 14,
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    boxShadow: '0 8px 16px rgba(0, 166, 192, 0.2)',
+    transition: 'all 0.2s'
+};
+
+const seqBadgeStyle = { 
+    width: 32, height: 32, borderRadius: '8px', background: 'rgba(255,255,255,0.03)', 
+    display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', 
+    fontWeight: 900, fontSize: 12 
+};
+
 const actionBtnStyle = {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
     background: 'rgba(255,255,255,0.03)',
     border: '1px solid rgba(255,255,255,0.06)',
-    borderRadius: '12px',
+    borderRadius: '10px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',

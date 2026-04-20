@@ -2,13 +2,16 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
     LayoutDashboard, BookOpen, Users, CreditCard,
-    LogOut, ChevronRight, GraduationCap, Award, Settings, Video
+    LogOut, ChevronRight, GraduationCap, Award, Settings, Video,
+    Palette, HelpCircle
 } from 'lucide-react';
 
 const NAV_ITEMS = [
     { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
     { to: '/admin/courses', icon: BookOpen, label: 'Courses' },
     { to: '/admin/lessons', icon: Video, label: 'Lessons' },
+    { to: '/admin/comics', icon: Palette, label: 'Comics Manager' },
+    { to: '/admin/quiz', icon: HelpCircle, label: 'Quiz Builder' },
     { to: '/admin/students', icon: Users, label: 'Students' },
     { to: '/admin/payments', icon: CreditCard, label: 'Payments' },
     { to: '/admin/certificates', icon: Award, label: 'Certificates' },

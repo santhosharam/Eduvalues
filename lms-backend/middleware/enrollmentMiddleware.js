@@ -10,14 +10,14 @@ exports.checkLessonAccess = async (req, res, next) => {
 
         if (lesson.isFree) return next()
 
-        const enrolled = await Enrollment.findOne({ student: req.user._id, course: lesson.course })
+        const enrolled = await Enrollment.findOne({ student: req.user._id, courseId: lesson.courseId })
         if (!enrolled && req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Please enroll in the course to access this lesson' })
         }
 
         // Sequential Progress Check
-        const course = await Course.findById(lesson.course).populate('lessons')
-        const progress = await Progress.findOne({ student: req.user._id, course: lesson.course })
+        const course = await Course.findById(lesson.courseId).populate('lessons')
+        const progress = await Progress.findOne({ student: req.user._id, courseId: lesson.courseId })
         const completedIds = progress ? progress.completedLessons.map(id => id.toString()) : []
         
         // Find index of current lesson in course lessons

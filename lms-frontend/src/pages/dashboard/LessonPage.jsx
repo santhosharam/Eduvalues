@@ -5,9 +5,10 @@ import { getLessonById, getLessonsByCourseId } from '../../services/lessonServic
 import toast from 'react-hot-toast'
 import DOMPurify from 'dompurify'
 import { CheckCircle, FileText, ArrowLeft, Sparkles, Heart, Rocket, Brain, Trophy, Lock, PlayCircle, BookOpen, Star, Shield, Compass, Smile } from 'lucide-react'
-import { supabase } from '../../supabaseClient'
 
 import ComicViewer from '../../components/lesson/ComicViewer'
+import { trackEvent, AL_EVENTS } from '../../services/analytics'
+import { Loader2 } from 'lucide-react'
 
 export default function LessonPage() {
     const { lessonId } = useParams()
@@ -21,7 +22,9 @@ export default function LessonPage() {
     const [quizSubmitted, setQuizSubmitted] = useState(false)
     const [quizScore, setQuizScore] = useState(0)
     const [quizPassed, setQuizPassed] = useState(false)
+    const [actionLoading, setActionLoading] = useState(false)
     const [allCourseLessons, setAllCourseLessons] = useState([])
+    const analyticsTracked = useRef(false)
     const [activeTab, setActiveTab] = useState('content')
     const [completedLessons, setCompletedLessons] = useState(() => {
         const saved = localStorage.getItem('completedLessons')
@@ -243,49 +246,87 @@ export default function LessonPage() {
             caption: '"Thank you for being kind to me that first day Zach," Mei said warmly as they walked together. Zach smiled. "Everyone deserves to be treated with RESPECT!" 🌟 The End — Respect connects us all!'
         }
     ]
+ 
+    const integrityPanels = [
+        {
+            image: '/kindness/lesson9/panel1.png',
+            caption: 'During an important math test Diya sat in the warm golden sunlight writing carefully with full confidence. "I studied so hard for this. I know I can do it!" The classroom felt peaceful and safe as everyone worked quietly.'
+        },
+        {
+            image: '/kindness/lesson9/panel2.png',
+            caption: 'Then Diya got completely stuck on a difficult problem. Eraser marks covered her paper. Her eyes drifted sideways — her classmate\'s answer was right there glowing in the sunlight like a temptation. "I am completely stuck... and the answer is right there... glowing..."'
+        },
+        {
+            image: '/kindness/lesson9/panel3.png',
+            caption: 'Diya closed her eyes and a warm golden memory appeared. Little Diya sitting with her father in their cozy home. "Your character is who you are... when no one is watching." Father\'s gentle words echoed in her heart. Diya opened her eyes with quiet calm determination.'
+        },
+        {
+            image: '/kindness/lesson9/panel4.png',
+            caption: 'Diya turned her eyes away from the classmate\'s paper. A tiny glowing spirit of goodness sat on her shoulder as she picked up her pencil bravely. "I will do this with my own work. That is who I am." The sunlight felt warmer now — as if rewarding her choice.'
+        },
+        {
+            image: '/kindness/lesson9/panel5.png',
+            caption: 'When the test was returned Diya saw a red mark on the difficult problem. But her kind teacher knelt beside her warmly. "You got this wrong Diya... but your process shows true understanding." Speech bubble: "THAT matters more than any perfect score." Diya\'s disappointment slowly bloomed into quiet pride.'
+        },
+        {
+            image: '/kindness/lesson9/panel6.png',
+            caption: '"I got it wrong Papa... but I did it completely by myself. I chose not to cheat even when no one was watching." Father hugged Diya with proud happy tears. "THAT is integrity my daughter. I am more proud of this than any perfect score in the world." 🌟 The End — Integrity means doing right even when no one is watching!'
+        }
+    ]
 
     useEffect(() => {
         setLoading(true)
         getLessonById(lessonId)
             .then(async res => {
                 const lessonData = res.data.lesson
+                if (!lessonData) {
+                    setLesson(null)
+                    return
+                }
                 setLesson(lessonData)
-                console.log('Lesson loaded:', lessonData)
+                
+                if (!analyticsTracked.current) {
+                    trackEvent(AL_EVENTS.LESSON_VIEW, { lessonId, title: lessonData.title });
+                    analyticsTracked.current = true;
+                }
 
-                // Fetch lesson quiz questions from Supabase
-                const { data: quizData, error: quizError } = await supabase
-                    .from('quizzes')
-                    .select('*')
-                    .eq('lesson_id', lessonId)
-                    .eq('is_final_exam', false)
-                    .order('order_index', { ascending: true })
-
-                console.log('Quiz data:', quizData)
-                setQuizQuestions(quizData || [])
+                // Use the quiz data embedded in the lesson from MongoDB
+                setQuizQuestions(lessonData.quiz || [])
             })
             .catch((err) => {
                 toast.error('Could not load adventure!')
-                console.error(err)
+                console.error('getLessonById error:', err)
+                setLesson(null)
             })
             .finally(() => setLoading(false))
     }, [lessonId])
 
     useEffect(() => {
-        if (lesson?.course_id) {
-            getLessonsByCourseId(lesson.course_id)
+        // Standardized field name after normalization in lessonService
+        const courseId = lesson?.courseId
+        
+        if (courseId && typeof courseId === 'string' && courseId.length > 5) {
+            console.log('Fetching curriculum for course:', courseId)
+            getLessonsByCourseId(courseId)
                 .then(res => {
-                    const lessons = res.data.lessons
+                    const lessons = res.data.lessons || []
                     console.log('Curriculum fetched:', lessons)
                     setAllCourseLessons(lessons)
+                    
                     const currentIndex = lessons.findIndex(l => String(l._id) === String(lessonId))
                     if (currentIndex !== -1 && currentIndex < lessons.length - 1) {
                         setNextLessonId(lessons[currentIndex + 1].id || lessons[currentIndex + 1]._id)
                         setIsLastLesson(false)
                     } else {
                         setNextLessonId(null)
-                        setIsLastLesson(true)
+                        setIsLastLesson(lessons.length > 0)
                     }
                 })
+                .catch(err => {
+                    console.error('Curriculum fetch error:', err)
+                })
+        } else if (lesson) {
+            console.warn('Lesson found but no valid course ID extracted:', lesson)
         }
     }, [lesson, lessonId])
 
@@ -401,6 +442,12 @@ export default function LessonPage() {
                     })}
                 </div>
 
+                {allCourseLessons.length === 0 && !loading && (
+                    <div style={{ padding: 24, textAlign: 'center', color: '#888', fontSize: 13 }}>
+                        No curriculum content detected.
+                    </div>
+                )}
+
                 <div style={{ padding: 24, background: '#F8FAFB', borderTop: '2px solid #F1F1F1' }}>
                     <div style={{ fontSize: 12, fontWeight: 800, color: '#00A6C0', marginBottom: 8, textAlign: 'center' }}>CURRICULUM PROGRESS</div>
                     <div style={{ width: '100%', height: 8, background: '#eee', borderRadius: 4, overflow: 'hidden' }}>
@@ -512,22 +559,24 @@ export default function LessonPage() {
 
                                         {/* Comic Viewer logic */}
                                         <div style={{ position: 'relative' }}>
-                                            {String(lessonId) === '11111111-0000-0000-0000-000000000001' ? (
+                                            {lesson.title === 'Kindness' ? (
                                                 <ComicViewer panels={kindnessStoryPanels} />
-                                            ) : String(lessonId) === '11111111-0000-0000-0000-000000000002' ? (
+                                            ) : lesson.title === 'Honesty' ? (
                                                 <ComicViewer panels={honestyPanels} />
-                                            ) : String(lessonId) === '11111111-0000-0000-0000-000000000003' ? (
+                                            ) : lesson.title === 'Responsibility' ? (
                                                 <ComicViewer panels={responsibilityPanels} />
-                                            ) : String(lessonId) === '11111111-0000-0000-0000-000000000004' ? (
+                                            ) : lesson.title === 'Respect' ? (
                                                 <ComicViewer panels={respectPanels} />
-                                            ) : String(lessonId) === '11111111-0000-0000-0000-000000000005' ? (
+                                            ) : lesson.title === 'Perseverance' ? (
                                                 <ComicViewer panels={perseverancePanels} />
-                                            ) : String(lessonId) === '11111111-0000-0000-0000-000000000006' ? (
+                                            ) : lesson.title === 'Empathy' ? (
                                                 <ComicViewer panels={empathyPanels} />
-                                            ) : String(lessonId) === '11111111-0000-0000-0000-000000000007' ? (
+                                            ) : lesson.title === 'Gratitude' ? (
                                                 <ComicViewer panels={gratitudePanels} />
-                                            ) : String(lessonId) === '11111111-0000-0000-0000-000000000008' ? (
+                                            ) : lesson.title === 'Courage' ? (
                                                 <ComicViewer panels={couragePanels} />
+                                            ) : lesson.title === 'Integrity' ? (
+                                                <ComicViewer panels={integrityPanels} />
                                             ) : (
                                                 <div className="story-mode" style={{ 
                                                     fontSize: 22, 
@@ -547,16 +596,10 @@ export default function LessonPage() {
                                             )}
 
                                             {/* Comic Highlights - only for non-comic viewer mode or decorative */}
-                                            {![
-                                                '11111111-0000-0000-0000-000000000001',
-                                                '11111111-0000-0000-0000-000000000002',
-                                                '11111111-0000-0000-0000-000000000003',
-                                                '11111111-0000-0000-0000-000000000004',
-                                                '11111111-0000-0000-0000-000000000005',
-                                                '11111111-0000-0000-0000-000000000006',
-                                                '11111111-0000-0000-0000-000000000007',
-                                                '11111111-0000-0000-0000-000000000008'
-                                            ].includes(String(lessonId)) && (
+                                            {[
+                                                'Kindness', 'Honesty', 'Responsibility', 'Respect',
+                                                'Perseverance', 'Empathy', 'Gratitude', 'Courage', 'Integrity'
+                                            ].includes(lesson.title) && (
                                                 <>
                                                     <div style={{ position: 'absolute', top: -20, right: 40, background: '#FFD700', color: '#000', padding: '8px 20px', borderRadius: '10px', fontWeight: 900, fontSize: 18, transform: 'rotate(5deg)', border: '3px solid #000' }}>
                                                         WOW! 🌟
@@ -662,14 +705,14 @@ export default function LessonPage() {
                                                     <div key={q.id} style={{ background: '#F4F7F9', padding: '40px', borderRadius: '32px', border: '2px solid #EEE' }}>
                                                         <h4 style={{ fontSize: 22, fontWeight: 900, color: '#001F3F', marginBottom: 24, lineHeight: 1.4 }}>{idx + 1}. {q.question}</h4>
                                                         <div style={{ display: 'grid', gap: 16 }}>
-                                                            {['a', 'b', 'c', 'd'].map(opt => {
-                                                                const isSelected = quizAnswers[q.id] === opt
-                                                                const isCorrect = quizSubmitted && opt === q.correct_answer
-                                                                const isWrong = quizSubmitted && isSelected && opt !== q.correct_answer
+                                                            {q.options.map((opt, idxOpt) => {
+                                                                const isSelected = quizAnswers[idx] === idxOpt
+                                                                const isCorrect = quizSubmitted && opt.correct
+                                                                const isWrong = quizSubmitted && isSelected && !opt.correct
                                                                 return (
                                                                     <button
-                                                                        key={opt}
-                                                                        onClick={() => !quizSubmitted && setQuizAnswers(prev => ({ ...prev, [q.id]: opt }))}
+                                                                        key={idxOpt}
+                                                                        onClick={() => !quizSubmitted && setQuizAnswers(prev => ({ ...prev, [idx]: idxOpt }))}
                                                                         style={{
                                                                             padding: '24px 32px',
                                                                             borderRadius: 20,
@@ -684,8 +727,8 @@ export default function LessonPage() {
                                                                             transition: 'all 0.2s'
                                                                         }}
                                                                     >
-                                                                        <span style={{ width: 40, height: 40, background: isSelected ? '#00A6C0' : '#F1F1F1', color: isSelected ? '#fff' : '#001F3F', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', marginRight: 16, fontSize: 14 }}>{opt.toUpperCase()}</span>
-                                                                        {q[`option_${opt}`]}
+                                                                        <span style={{ width: 40, height: 40, background: isSelected ? '#00A6C0' : '#F1F1F1', color: isSelected ? '#fff' : '#001F3F', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', marginRight: 16, fontSize: 14 }}>{idxOpt + 1}</span>
+                                                                        {opt.text}
                                                                     </button>
                                                                 )
                                                             })}
@@ -694,21 +737,54 @@ export default function LessonPage() {
                                                 ))}
 
                                                 {!quizSubmitted ? (
-                                                    <button onClick={() => {
-                                                        const score = quizQuestions.filter(q => quizAnswers[q.id] === q.correct_answer).length
-                                                        setQuizScore(score)
-                                                        setQuizSubmitted(true)
-                                                        if (score >= Math.ceil(quizQuestions.length * 0.6)) {
-                                                            setQuizPassed(true)
-                                                            const newCompleted = [...new Set([...completedLessons, lessonId])]
-                                                            setCompletedLessons(newCompleted)
-                                                            localStorage.setItem('completedLessons', JSON.stringify(newCompleted))
-                                                            toast.success('CHALLENGE CONQUERED! 🏆', { duration: 3000 })
-                                                        } else {
-                                                            toast.error(`Scored ${score}/${quizQuestions.length}. Review and try again!`)
-                                                        }
-                                                    }} disabled={Object.keys(quizAnswers).length < quizQuestions.length} className="btn-primary" style={{ height: 80, fontSize: 24, background: '#1DD1A1', color: '#fff', borderRadius: 25, boxShadow: '0 20px 40px rgba(29, 209, 161, 0.3)' }}>
-                                                        FINISH CHALLENGE 🚀
+                                                    <button 
+                                                        onClick={async () => {
+                                                            setActionLoading(true);
+                                                            const score = quizQuestions.filter((q, qIdx) => {
+                                                                const selectedIdx = quizAnswers[qIdx]
+                                                                return q.options[selectedIdx]?.correct
+                                                            }).length
+                                                            
+                                                            try {
+                                                                setQuizScore(score)
+                                                                setQuizSubmitted(true)
+                                                                
+                                                                trackEvent(AL_EVENTS.QUIZ_SUBMIT, { lessonId, score, total: quizQuestions.length });
+
+                                                                if (score >= Math.ceil(quizQuestions.length * 0.6)) {
+                                                                    setQuizPassed(true)
+                                                                    const newCompleted = [...new Set([...completedLessons, String(lessonId)])]
+                                                                    setCompletedLessons(newCompleted)
+                                                                    localStorage.setItem('completedLessons', JSON.stringify(newCompleted))
+                                                                    toast.success('CHALLENGE CONQUERED! 🏆', { duration: 3000 })
+                                                                    trackEvent(AL_EVENTS.LESSON_COMPLETE, { lessonId });
+                                                                } else {
+                                                                    toast.error(`Strong attempt! Scored ${score}/${quizQuestions.length}. Review and try again!`)
+                                                                }
+                                                            } catch (err) {
+                                                                toast.error('Network congestion! Check your internet and try again.')
+                                                            } finally {
+                                                                setActionLoading(false);
+                                                            }
+                                                        }} 
+                                                        disabled={Object.keys(quizAnswers).length < quizQuestions.length || actionLoading} 
+                                                        className="btn-primary" 
+                                                        style={{ 
+                                                            height: 80, 
+                                                            fontSize: 24, 
+                                                            background: '#1DD1A1', 
+                                                            color: '#fff', 
+                                                            borderRadius: 25, 
+                                                            boxShadow: '0 20px 40px rgba(29, 209, 161, 0.3)',
+                                                            opacity: (Object.keys(quizAnswers).length < quizQuestions.length || actionLoading) ? 0.5 : 1,
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            gap: 12
+                                                        }}
+                                                    >
+                                                        {actionLoading ? <Loader2 className="spin" size={28} /> : null}
+                                                        {actionLoading ? 'PROCESSING...' : 'FINISH CHALLENGE 🚀'}
                                                     </button>
                                                 ) : !quizPassed ? (
                                                     <button onClick={() => { setQuizSubmitted(false); setQuizAnswers({}); setQuizScore(0) }} className="btn-primary" style={{ height: 80, fontSize: 24, background: '#00A6C0', color: '#fff', borderRadius: 25 }}>
@@ -737,7 +813,7 @@ export default function LessonPage() {
                                             <div style={{ marginBottom: 16, fontSize: 18, fontWeight: 800, color: '#001F3F' }}>
                                                 🎓 You have completed all lessons!
                                             </div>
-                                            <Link to={`/dashboard/course/${lesson.course_id}/final-exam`} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '24px 48px', fontSize: 22, borderRadius: 30, background: 'linear-gradient(135deg, #FF6B6B 0%, #FF9F43 100%)', boxShadow: '0 20px 40px rgba(255, 107, 107, 0.3)', fontWeight: 900, color: '#fff', textDecoration: 'none' }}>
+                                            <Link to={`/dashboard/course/${lesson.courseId?._id || lesson.courseId}/final-exam`} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '24px 48px', fontSize: 22, borderRadius: 30, background: 'linear-gradient(135deg, #FF6B6B 0%, #FF9F43 100%)', boxShadow: '0 20px 40px rgba(255, 107, 107, 0.3)', fontWeight: 900, color: '#fff', textDecoration: 'none' }}>
                                                 <Sparkles size={28} /> TAKE FINAL EXAM (20 QUESTIONS) <Trophy size={28} />
                                             </Link>
                                         </div>

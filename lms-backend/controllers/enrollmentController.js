@@ -6,11 +6,11 @@ exports.getMyEnrollments = async (req, res) => {
         const Enrollment = require('../models/Enrollment')
         const Progress = require('../models/Progress')
         
-        let enrollments = await Enrollment.find({ student: req.user._id }).populate('course').lean()
+        let enrollments = await Enrollment.find({ student: req.user._id }).populate('courseId').lean()
         
         // Add progress info to lean objects
         for (let e of enrollments) {
-            const p = await Progress.findOne({ student: req.user._id, course: e.course?._id })
+            const p = await Progress.findOne({ student: req.user._id, courseId: e.courseId?._id || e.courseId })
             if (p) {
                 e.lastWatched = p.lastWatched
                 e.completedLessons = p.completedLessons
@@ -27,9 +27,9 @@ exports.getMyEnrollments = async (req, res) => {
 exports.enroll = async (req, res) => {
     try {
         const { courseId, paymentId } = req.body
-        const existing = await Enrollment.findOne({ student: req.user._id, course: courseId })
+        const existing = await Enrollment.findOne({ student: req.user._id, courseId: courseId })
         if (existing) return res.status(409).json({ message: 'Already enrolled' })
-        const enrollment = await Enrollment.create({ student: req.user._id, course: courseId, payment: paymentId })
+        const enrollment = await Enrollment.create({ student: req.user._id, courseId: courseId, payment: paymentId })
         res.status(201).json({ enrollment })
     } catch (err) {
         res.status(500).json({ message: err.message })
@@ -39,7 +39,7 @@ exports.enroll = async (req, res) => {
 // GET /api/enrollments/:courseId/status
 exports.checkEnrollment = async (req, res) => {
     try {
-        const enrollment = await Enrollment.findOne({ student: req.user._id, course: req.params.courseId })
+        const enrollment = await Enrollment.findOne({ student: req.user._id, courseId: req.params.courseId })
         res.json({ enrolled: !!enrollment, enrollment })
     } catch (err) {
         res.status(500).json({ message: err.message })

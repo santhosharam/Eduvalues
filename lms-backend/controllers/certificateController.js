@@ -7,7 +7,7 @@ const PDFDocument = require('pdfkit')
 exports.getMyCertificates = async (req, res) => {
     try {
         const certificates = await Certificate.find({ student: req.user._id })
-            .populate('course', 'title thumbnail instructor')
+            .populate('courseId', 'title thumbnail instructor')
             .populate('student', 'name email')
             .sort('-issuedAt')
         res.json({ certificates })
@@ -21,7 +21,7 @@ exports.verifyCertificate = async (req, res) => {
     try {
         const cert = await Certificate.findOne({ uniqueCode: req.params.code })
             .populate('student', 'name')
-            .populate('course', 'title instructor')
+            .populate('courseId', 'title instructor')
         if (!cert) return res.status(404).json({ message: 'Certificate not found', valid: false })
         res.json({ valid: true, certificate: cert })
     } catch (err) {
@@ -34,7 +34,7 @@ exports.downloadCertificate = async (req, res) => {
     try {
         const cert = await Certificate.findById(req.params.id)
             .populate('student', 'name')
-            .populate('course', 'title instructor')
+            .populate('courseId', 'title instructor')
 
         if (!cert) return res.status(404).json({ message: 'Certificate not found' })
         if (String(cert.student._id) !== String(req.user._id) && req.user.role !== 'admin') {
@@ -102,14 +102,14 @@ exports.downloadCertificate = async (req, res) => {
         doc.fontSize(22)
             .font('Helvetica-Bold')
             .fillColor('#f1f5f9')
-            .text(cert.course.title, 60, 255, { align: 'center', width: doc.page.width - 120 })
+            .text(cert.courseId.title, 60, 255, { align: 'center', width: doc.page.width - 120 })
 
         // ── Instructor ──────────────────────────────────────────
-        if (cert.course.instructor) {
+        if (cert.courseId.instructor) {
             doc.fontSize(13)
                 .font('Helvetica')
                 .fillColor('#64748b')
-                .text(`Instructor: ${cert.course.instructor}`, 0, 310, { align: 'center' })
+                .text(`Instructor: ${cert.courseId.instructor}`, 0, 310, { align: 'center' })
         }
 
         // ── Divider ─────────────────────────────────────────────

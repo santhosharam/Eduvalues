@@ -37,6 +37,9 @@ import Congratulations from './pages/dashboard/Congratulations'
 import AdminDashboard from './pages/admin/Dashboard'
 import ManageCourses from './pages/admin/ManageCourses'
 import ManageLessons from './pages/admin/ManageLessons'
+import ManageComics from './pages/admin/ManageComics'
+import ManageQuiz from './pages/admin/ManageQuiz'
+import ManageLessonContent from './pages/admin/ManageLessonContent'
 import ManageStudents from './pages/admin/ManageStudents'
 import ManagePayments from './pages/admin/ManagePayments'
 import AdminCertificates from './pages/admin/Certificates'
@@ -100,6 +103,10 @@ export default function App() {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/courses" element={<ManageCourses />} />
             <Route path="/admin/lessons" element={<ManageLessons />} />
+            <Route path="/admin/comics" element={<ManageLessonContent />} />
+            <Route path="/admin/quiz" element={<ManageLessonContent />} />
+            <Route path="/admin/lessons/:lessonId/comics" element={<ManageComics />} />
+            <Route path="/admin/lessons/:lessonId/quiz" element={<ManageQuiz />} />
             <Route path="/admin/students" element={<ManageStudents />} />
             <Route path="/admin/payments" element={<ManagePayments />} />
             <Route path="/admin/certificates" element={<AdminCertificates />} />

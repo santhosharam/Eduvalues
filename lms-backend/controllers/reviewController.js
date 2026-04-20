@@ -8,18 +8,18 @@ exports.submitReview = async (req, res) => {
         const studentId = req.user._id
 
         // Verify enrollment
-        const enrollment = await Enrollment.findOne({ student: studentId, course: courseId })
+        const enrollment = await Enrollment.findOne({ student: studentId, courseId: courseId })
         if (!enrollment) return res.status(403).json({ message: 'You must be enrolled to review this course' })
 
         const review = await Review.create({
-            course: courseId,
+            courseId: courseId,
             student: studentId,
             rating,
             comment
         })
 
         // Update course rating (simple average)
-        const reviews = await Review.find({ course: courseId })
+        const reviews = await Review.find({ courseId: courseId })
         const avgRating = reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviews.length
 
         await Course.findByIdAndUpdate(courseId, {

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 const lessonSchema = new mongoose.Schema({
-    course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true },
+    courseId: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true },
     title: { type: String, required: true },
     description: { type: String },
     videoUrl: { type: String },
@@ -19,5 +19,7 @@ const lessonSchema = new mongoose.Schema({
         }]
     }]
 }, { timestamps: true })
+
+lessonSchema.index({ courseId: 1 })
 
 module.exports = mongoose.model('Lesson', lessonSchema)

@@ -119,7 +119,7 @@ export default function Certificates() {
                         <td style={{ padding: '20px 32px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#f1f5f9', fontWeight: 700, fontSize: 13 }}>
                                 <BookOpen size={14} color="#00A6C0" />
-                                {cert.course?.title}
+                                {cert.courseId?.title}
                             </div>
                         </td>
                         <td style={{ padding: '20px 32px' }}>

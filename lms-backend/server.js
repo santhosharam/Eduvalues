@@ -2,6 +2,7 @@ require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
 const morgan = require('morgan')
+const rateLimit = require('express-rate-limit')
 const connectDB = require('./config/db')
 
 const app = express()
@@ -20,6 +21,29 @@ const startServer = async () => {
             res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
             next()
         })
+
+        // Rate Limiting
+        const apiLimiter = rateLimit({
+            windowMs: 15 * 60 * 1000, // 15 minutes
+            limit: 100, // Limit each IP to 100 requests per windowMs
+            message: { success: false, message: 'Too many requests from this IP, please try again after 15 minutes' },
+            standardHeaders: 'draft-7',
+            legacyHeaders: false,
+            handler: (req, res, next, options) => {
+                res.status(options.statusCode).json(options.message);
+            }
+        })
+        app.use('/api/', apiLimiter)
+
+        const authLimiter = rateLimit({
+            windowMs: 60 * 60 * 1000, // 1 hour
+            limit: 5, // Limit each IP to 5 login attempts per hour
+            message: { success: false, message: 'Too many login attempts, please try again after an hour' },
+            handler: (req, res, next, options) => {
+                res.status(options.statusCode).json(options.message);
+            }
+        })
+        app.use('/api/auth/login', authLimiter)
 
         // Middleware
         app.use(cors({
@@ -53,10 +77,15 @@ const startServer = async () => {
         app.use((err, req, res, next) => {
             const statusCode = err.statusCode || 500
             const message = err.message || 'Internal Server Error'
+            const errors = err.errors || null
+
             console.error(`[ERROR] ${req.method} ${req.url} — ${message}`)
+            if (err.stack && process.env.NODE_ENV !== 'production') console.error(err.stack)
+
             res.status(statusCode).json({
                 success: false,
                 message: process.env.NODE_ENV === 'production' && statusCode === 500 ? 'Internal Server Error' : message,
+                errors
             })
         })
 

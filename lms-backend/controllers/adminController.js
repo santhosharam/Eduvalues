@@ -38,3 +38,17 @@ exports.deleteStudent = async (req, res) => {
         res.status(500).json({ message: err.message })
     }
 }
+
+// GET /api/admin/certificates
+exports.getCertificates = async (req, res) => {
+    try {
+        const Certificate = require('../models/Certificate')
+        const certificates = await Certificate.find()
+            .populate('student', 'name email')
+            .populate('courseId', 'title')
+            .sort('-issuedAt')
+        res.json({ certificates })
+    } catch (err) {
+        res.status(500).json({ message: err.message })
+    }
+}

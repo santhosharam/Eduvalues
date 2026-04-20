@@ -8,7 +8,7 @@ const { checkLessonAccess } = require('../middleware/enrollmentMiddleware')
 // GET /api/lessons/course/:courseId
 router.get('/course/:courseId', protect, async (req, res) => {
     try {
-        const lessons = await Lesson.find({ course: req.params.courseId }).sort('order')
+        const lessons = await Lesson.find({ courseId: req.params.courseId }).sort('order')
         res.json({ lessons })
     } catch (err) { res.status(500).json({ message: err.message }) }
 })
@@ -26,7 +26,7 @@ router.get('/:id', protect, checkLessonAccess, async (req, res) => {
 router.post('/', protect, adminOnly, async (req, res) => {
     try {
         const lesson = await Lesson.create(req.body)
-        await Course.findByIdAndUpdate(req.body.course, { $push: { lessons: lesson._id } })
+        await Course.findByIdAndUpdate(req.body.courseId, { $push: { lessons: lesson._id } })
         res.status(201).json({ lesson })
     } catch (err) { res.status(400).json({ message: err.message }) }
 })
@@ -43,7 +43,7 @@ router.put('/:id', protect, adminOnly, async (req, res) => {
 router.delete('/:id', protect, adminOnly, async (req, res) => {
     try {
         const lesson = await Lesson.findByIdAndDelete(req.params.id)
-        if (lesson) await Course.findByIdAndUpdate(lesson.course, { $pull: { lessons: lesson._id } })
+        if (lesson) await Course.findByIdAndUpdate(lesson.courseId, { $pull: { lessons: lesson._id } })
         res.json({ message: 'Lesson deleted' })
     } catch (err) { res.status(500).json({ message: err.message }) }
 })
