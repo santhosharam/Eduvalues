@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import Navbar from '../../components/common/Navbar'
 import { getLessonById, getLessonsByCourseId } from '../../services/lessonService'
+import { markLessonComplete, getCourseProgress } from '../../services/progressService'
 import toast from 'react-hot-toast'
 import DOMPurify from 'dompurify'
 import { CheckCircle, FileText, ArrowLeft, Sparkles, Heart, Rocket, Brain, Trophy, Lock, PlayCircle, BookOpen, Star, Shield, Compass, Smile } from 'lucide-react'
@@ -273,6 +274,33 @@ export default function LessonPage() {
             caption: '"I got it wrong Papa... but I did it completely by myself. I chose not to cheat even when no one was watching." Father hugged Diya with proud happy tears. "THAT is integrity my daughter. I am more proud of this than any perfect score in the world." 🌟 The End — Integrity means doing right even when no one is watching!'
         }
     ]
+ 
+    const humilityPanels = [
+      {
+        image: '/kindness/lesson10/panel1.png',
+        caption: 'In a bright classroom, Rohan proudly sat at the chessboard surrounded by classmates. He had won many matches and felt unbeatable. "I am the best player in this school!" he thought, as admiration filled the room.'
+      },
+      {
+        image: '/kindness/lesson10/panel2.png',
+        caption: 'A new teacher introduced an old man to the class. "He is a chess grandmaster," the teacher said. Rohan looked at him with doubt. "He looks like a beginner," he thought, feeling confident it would be an easy win.'
+      },
+      {
+        image: '/kindness/lesson10/panel3.png',
+        caption: 'The game began. Rohan leaned forward confidently while the old man calmly studied the board. "This will be easy," Rohan thought, unaware of what was coming next.'
+      },
+      {
+        image: '/kindness/lesson10/panel4.png',
+        caption: 'Suddenly, Rohan\'s confidence faded. Move after move, he began to lose. His eyes widened in shock. "Wait… what? How did he do that?" he thought, as the game slipped out of his control.'
+      },
+      {
+        image: '/kindness/lesson10/panel5.png',
+        caption: 'Sweating and humbled, Rohan lowered his head. "I… I can\'t win. I resign." The old man smiled gently. "That\'s how we learn and grow," he said, his voice calm and kind.'
+      },
+      {
+        image: '/kindness/lesson10/panel6.png',
+        caption: 'Later, Rohan sat beside the old man with a peaceful smile, eager to learn. "Can you teach me more?" he asked. The warm sunlight filled the room as wisdom replaced pride. 🌟 The End — True strength comes from humility and learning from others.'
+      }
+    ];
 
     useEffect(() => {
         setLoading(true)
@@ -450,12 +478,21 @@ export default function LessonPage() {
 
                 <div style={{ padding: 24, background: '#F8FAFB', borderTop: '2px solid #F1F1F1' }}>
                     <div style={{ fontSize: 12, fontWeight: 800, color: '#00A6C0', marginBottom: 8, textAlign: 'center' }}>CURRICULUM PROGRESS</div>
-                    <div style={{ width: '100%', height: 8, background: '#eee', borderRadius: 4, overflow: 'hidden' }}>
-                        <div style={{ width: `${(completedLessons.length / (allCourseLessons.length || 1)) * 100}%`, height: '100%', background: '#1DD1A1', transition: 'width 0.5s ease' }} />
-                    </div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: '#888', marginTop: 8, textAlign: 'center' }}>
-                        {completedLessons.length} / {allCourseLessons.length} Completed
-                    </div>
+                    {(() => {
+                        const courseCompletedCount = allCourseLessons.filter(l => completedLessons.includes(String(l._id))).length;
+                        const progressPercent = (courseCompletedCount / (allCourseLessons.length || 1)) * 100;
+                        
+                        return (
+                            <>
+                                <div style={{ width: '100%', height: 8, background: '#eee', borderRadius: 4, overflow: 'hidden' }}>
+                                    <div style={{ width: `${progressPercent}%`, height: '100%', background: '#1DD1A1', transition: 'width 0.5s ease' }} />
+                                </div>
+                                <div style={{ fontSize: 11, fontWeight: 700, color: '#888', marginTop: 8, textAlign: 'center' }}>
+                                    {courseCompletedCount} / {allCourseLessons.length} Completed
+                                </div>
+                            </>
+                        );
+                    })()}
                 </div>
             </aside>
 
@@ -466,12 +503,18 @@ export default function LessonPage() {
 
                     {/* Top Progress Bar (Mobile) */}
                     <div className="mobile-progress-bar" style={{ display: 'none', height: 6, background: '#eee', width: '100%', position: 'sticky', top: 0, zIndex: 50 }}>
-                        <div style={{ 
-                            height: '100%', 
-                            width: `${(completedLessons.length / (allCourseLessons.length || 1)) * 100}%`, 
-                            background: 'linear-gradient(to right, #1DD1A1, #00A6C0)',
-                            transition: 'width 0.5s ease'
-                        }} />
+                        {(() => {
+                            const courseCompletedCount = allCourseLessons.filter(l => completedLessons.includes(String(l._id))).length;
+                            const progressPercent = (courseCompletedCount / (allCourseLessons.length || 1)) * 100;
+                            return (
+                                <div style={{ 
+                                    height: '100%', 
+                                    width: `${progressPercent}%`, 
+                                    background: 'linear-gradient(to right, #1DD1A1, #00A6C0)',
+                                    transition: 'width 0.5s ease'
+                                }} />
+                            );
+                        })()}
                     </div>
 
                     <div style={{ flex: 1, padding: '40px 24px', maxWidth: 900, margin: '0 auto', width: '100%', position: 'relative', zIndex: 1 }}>
@@ -577,6 +620,8 @@ export default function LessonPage() {
                                                 <ComicViewer panels={couragePanels} />
                                             ) : lesson.title === 'Integrity' ? (
                                                 <ComicViewer panels={integrityPanels} />
+                                            ) : lesson.title === 'Humility' ? (
+                                                <ComicViewer panels={humilityPanels} />
                                             ) : (
                                                 <div className="story-mode" style={{ 
                                                     fontSize: 22, 
@@ -598,11 +643,11 @@ export default function LessonPage() {
                                             {/* Comic Highlights - only for non-comic viewer mode or decorative */}
                                             {[
                                                 'Kindness', 'Honesty', 'Responsibility', 'Respect',
-                                                'Perseverance', 'Empathy', 'Gratitude', 'Courage', 'Integrity'
+                                                'Perseverance', 'Empathy', 'Gratitude', 'Courage', 'Integrity', 'Humility'
                                             ].includes(lesson.title) && (
                                                 <>
                                                     <div style={{ position: 'absolute', top: -20, right: 40, background: '#FFD700', color: '#000', padding: '8px 20px', borderRadius: '10px', fontWeight: 900, fontSize: 18, transform: 'rotate(5deg)', border: '3px solid #000' }}>
-                                                        WOW! 🌟
+                                                        WOW!
                                                     </div>
                                                     <div style={{ position: 'absolute', bottom: -15, left: 60, background: '#1DD1A1', color: '#fff', padding: '6px 16px', borderRadius: '10px', fontWeight: 900, fontSize: 14, transform: 'rotate(-3deg)', border: '3px solid #001F3F' }}>
                                                         STORY TIME
@@ -624,7 +669,7 @@ export default function LessonPage() {
 
                                 {activeTab === 'summary' && (
                                     <div className="animate-fade-in">
-                                        <h3 style={{ fontSize: 28, color: '#FF9F43', marginBottom: 32, fontWeight: 900 }}>Top 3 Lessons! 🌟</h3>
+                                        <h3 style={{ fontSize: 28, color: '#FF9F43', marginBottom: 32, fontWeight: 900 }}>Top 3 Lessons!</h3>
                                         <div style={{ display: 'grid', gap: 24 }}>
                                             {[
                                                 { title: "Believe in Yourself", desc: "No matter how small you feel, you have great power within!", icon: Star },
@@ -692,12 +737,12 @@ export default function LessonPage() {
 
                                 {activeTab === 'quiz' && (
                                     <div className="animate-fade-in">
-                                        <h3 style={{ fontSize: 28, color: '#1DD1A1', marginBottom: 40, fontWeight: 900 }}>Brain Challenge 🎮</h3>
+                                        <h3 style={{ fontSize: 28, color: '#1DD1A1', marginBottom: 40, fontWeight: 900 }}>Brain Challenge</h3>
                                         {quizPassed ? (
                                             <div style={{ textAlign: 'center', padding: 60, background: '#E8FDF5', borderRadius: 40, border: '4px solid #1DD1A1' }}>
                                                 <Trophy size={80} color="#1DD1A1" style={{ marginBottom: 24 }} />
                                                 <h4 style={{ fontSize: 32, color: '#001F3F', fontWeight: 900 }}>You're a Legend!</h4>
-                                                <p style={{ fontSize: 18, color: '#666', marginTop: 12, fontWeight: 700 }}>You have conquered this challenge and opened the next map! 🧭</p>
+                                                <p style={{ fontSize: 18, color: '#666', marginTop: 12, fontWeight: 700 }}>You have conquered this challenge and opened the next map!</p>
                                             </div>
                                         ) : (
                                             <div style={{ display: 'grid', gap: 40 }}>
@@ -756,7 +801,7 @@ export default function LessonPage() {
                                                                     const newCompleted = [...new Set([...completedLessons, String(lessonId)])]
                                                                     setCompletedLessons(newCompleted)
                                                                     localStorage.setItem('completedLessons', JSON.stringify(newCompleted))
-                                                                    toast.success('CHALLENGE CONQUERED! 🏆', { duration: 3000 })
+                                                                    toast.success('CHALLENGE CONQUERED!', { duration: 3000 })
                                                                     trackEvent(AL_EVENTS.LESSON_COMPLETE, { lessonId });
                                                                 } else {
                                                                     toast.error(`Strong attempt! Scored ${score}/${quizQuestions.length}. Review and try again!`)
@@ -784,11 +829,11 @@ export default function LessonPage() {
                                                         }}
                                                     >
                                                         {actionLoading ? <Loader2 className="spin" size={28} /> : null}
-                                                        {actionLoading ? 'PROCESSING...' : 'FINISH CHALLENGE 🚀'}
+                                                        {actionLoading ? 'PROCESSING...' : 'FINISH CHALLENGE'}
                                                     </button>
                                                 ) : !quizPassed ? (
                                                     <button onClick={() => { setQuizSubmitted(false); setQuizAnswers({}); setQuizScore(0) }} className="btn-primary" style={{ height: 80, fontSize: 24, background: '#00A6C0', color: '#fff', borderRadius: 25 }}>
-                                                        TRY AGAIN 🔄
+                                                        TRY AGAIN
                                                     </button>
                                                 ) : null}
                                             </div>
@@ -805,16 +850,16 @@ export default function LessonPage() {
                                     {!isLastLesson ? (
                                         nextLessonId && (
                                             <Link to={`/dashboard/lesson/${nextLessonId}`} className="btn-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, width: '100%', maxWidth: 400, height: 72, fontSize: 22, fontWeight: 900, borderRadius: '25px', background: '#1DD1A1', boxShadow: '0 15px 30px rgba(29, 209, 161, 0.3)', animation: 'pulse 2s infinite', color: '#fff', textDecoration: 'none' }}>
-                                                <Rocket size={24} /> Next Lesson →
+                                                Next Lesson →
                                             </Link>
                                         )
                                     ) : (
                                         <div style={{ width: '100%', textAlign: 'center' }}>
                                             <div style={{ marginBottom: 16, fontSize: 18, fontWeight: 800, color: '#001F3F' }}>
-                                                🎓 You have completed all lessons!
+                                                You have completed all lessons!
                                             </div>
                                             <Link to={`/dashboard/course/${lesson.courseId?._id || lesson.courseId}/final-exam`} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '24px 48px', fontSize: 22, borderRadius: 30, background: 'linear-gradient(135deg, #FF6B6B 0%, #FF9F43 100%)', boxShadow: '0 20px 40px rgba(255, 107, 107, 0.3)', fontWeight: 900, color: '#fff', textDecoration: 'none' }}>
-                                                <Sparkles size={28} /> TAKE FINAL EXAM (20 QUESTIONS) <Trophy size={28} />
+                                                TAKE FINAL EXAM (20 QUESTIONS)
                                             </Link>
                                         </div>
                                     )}
@@ -823,7 +868,7 @@ export default function LessonPage() {
                             {(!quizPassed && quizQuestions.length > 0) && (
                                 <p style={{ color: '#888', fontWeight: 800, fontSize: 16 }}>Finish the challenge to unlock the next level! 🗝️</p>
                             )}
-                            <p style={{ color: '#888', fontWeight: 600, fontSize: 15, marginTop: 10 }}>You're doing great! Keep gathering seeds of kindness. 🌱</p>
+                            <p style={{ color: '#888', fontWeight: 600, fontSize: 15, marginTop: 10 }}>You're doing great! Keep gathering seeds of kindness.</p>
                         </div>
                     </div>
                 </div>

@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { supabase } from '../../supabaseClient'
 import Navbar from '../../components/common/Navbar'
 import toast from 'react-hot-toast'
 import { Sparkles, Trophy, Award, Printer, Download, ArrowLeft, Loader2, Heart, CheckCircle, RefreshCcw, Compass } from 'lucide-react'
+import html2canvas from 'html2canvas'
+import { jsPDF } from 'jspdf'
 
 export default function FinalExamPage() {
     const { courseId } = useParams()
@@ -20,18 +21,13 @@ export default function FinalExamPage() {
         const fetchQuestions = async () => {
             setLoading(true)
             try {
-                const { data, error } = await supabase
-                    .from('quizzes')
-                    .select('*')
-                    .eq('courseId', courseId)
-                    .eq('is_final_exam', true)
-                    .order('order_index', { ascending: true })
+                const api = (await import('../../services/api')).default
+                const { data } = await api.get(`/courses/${courseId}/final-exam`)
 
-                if (error) throw error
-                if (!data || data.length === 0) {
+                if (!data.questions || data.questions.length === 0) {
                     toast.error('Curriculum error: Final exam questions are missing!')
                 }
-                setQuestions(data || [])
+                setQuestions(data.questions || [])
             } catch (err) {
                 toast.error('Could not reach the moral compass! Check your connection.')
             } finally {
@@ -50,14 +46,14 @@ export default function FinalExamPage() {
         setActionLoading(true)
         try {
             const api = (await import('../../services/api')).default
-            const { data } = await api.post(`/courses/${courseId}/submit-final-exam`, { 
-                answers: Object.entries(answers).map(([id, val]) => ({ questionId: id, selected: val })) 
+            const { data } = await api.post(`/courses/${courseId}/submit-final-exam`, {
+                answers: Object.entries(answers).map(([id, val]) => ({ questionId: id, selected: val }))
             })
 
             const calculatedScore = questions.filter(q => answers[q.id] === q.correct_answer).length
             setScore(calculatedScore)
             setSubmitted(true)
-            
+
             if (calculatedScore >= 15) {
                 toast.success('CHALLENGE CONQUERED! You have earned your certificate! 🏆', { duration: 5000 })
             } else {
@@ -66,6 +62,45 @@ export default function FinalExamPage() {
             window.scrollTo({ top: 0, behavior: 'smooth' })
         } catch (err) {
             toast.error(err.friendlyMessage || 'Something went wrong with the submission. Please try again.')
+        } finally {
+            setActionLoading(false)
+        }
+    }
+
+    const handleDownload = async () => {
+        if (!certificateRef.current) return
+        
+        setActionLoading(true)
+        try {
+            // Wait a tiny bit for any state changes to settle
+            await new Promise(resolve => setTimeout(resolve, 500))
+            
+            const element = certificateRef.current
+            const canvas = await html2canvas(element, {
+                scale: 2, // Higher quality
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff'
+            })
+            
+            const imgData = canvas.toDataURL('image/png')
+            const pdf = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: 'a4'
+            })
+            
+            const imgProps = pdf.getImageProperties(imgData)
+            const pdfWidth = pdf.internal.pageSize.getWidth()
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
+            
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
+            pdf.save(`Certificate_${studentName.replace(/\s+/g, '_') || 'Character_Builder'}.pdf`)
+            
+            toast.success('Certificate downloaded successfully! 📄')
+        } catch (err) {
+            console.error('Download error:', err)
+            toast.error('Could not generate PDF. Please try the Print option.')
         } finally {
             setActionLoading(false)
         }
@@ -85,7 +120,7 @@ export default function FinalExamPage() {
         <div style={{ minHeight: '100vh', background: '#F8FAFB' }}>
             <Navbar />
             <div style={{ padding: 100, textAlign: 'center' }}>
-                <h2 style={{ fontSize: 32, color: '#001F3F' }}>Final Exam Coming Soon! ⏳</h2>
+                <h2 style={{ fontSize: 32, color: '#001F3F' }}>Final Exam Coming Soon!</h2>
                 <p style={{ color: '#64748b', margin: '20px 0 32px' }}>We are still preparing the final challenges for this course.</p>
                 <Link to="/" className="btn-primary">Return Home</Link>
             </div>
@@ -95,20 +130,20 @@ export default function FinalExamPage() {
     // Certificate View
     if (submitted && score >= 15) {
         const today = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })
-        
+
         return (
             <div style={{ minHeight: '100vh', background: '#F8FAFB', paddingBottom: 100 }}>
                 <Navbar />
-                
+
                 <div className="section-container" style={{ maxWidth: 900, marginTop: 60 }}>
                     <div style={{ textAlign: 'center', marginBottom: 40 }} className="no-print">
                         <Trophy size={80} color="#FFD700" style={{ marginBottom: 20 }} />
-                        <h1 style={{ fontSize: 42, color: '#001F3F', fontWeight: 900 }}>YOU DID IT! 🎉</h1>
+                        <h1 style={{ fontSize: 42, color: '#001F3F', fontWeight: 900 }}>YOU DID IT!</h1>
                         <p style={{ fontSize: 20, color: '#64748b', marginTop: 10 }}>You are officially a Character Builder!</p>
-                        
+
                         <div style={{ marginTop: 40, maxWidth: 500, margin: '40px auto' }}>
                             <label style={{ display: 'block', fontSize: 16, fontWeight: 700, color: '#001F3F', marginBottom: 12 }}>Enter Your Full Name for the Certificate:</label>
-                            <input 
+                            <input
                                 type="text"
                                 placeholder="e.g. Aditi Sharma"
                                 value={studentName}
@@ -118,14 +153,23 @@ export default function FinalExamPage() {
                         </div>
 
                         <div style={{ display: 'flex', gap: 20, justifyContent: 'center', marginTop: 32 }}>
-                            <button onClick={handlePrint} className="btn-primary" style={{ height: 60, padding: '0 32px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <button onClick={handlePrint} className="btn-primary" style={{ height: 60, padding: '0 32px', display: 'flex', alignItems: 'center', gap: 10, background: '#001F3F' }}>
                                 <Printer size={20} /> Print Certificate
+                            </button>
+                            <button 
+                                onClick={handleDownload} 
+                                disabled={actionLoading}
+                                className="btn-primary" 
+                                style={{ height: 60, padding: '0 32px', display: 'flex', alignItems: 'center', gap: 10, background: '#1DD1A1' }}
+                            >
+                                {actionLoading ? <Loader2 className="spin" size={20} /> : <Download size={20} />}
+                                {actionLoading ? 'Generating...' : 'Download Certificate'}
                             </button>
                         </div>
                     </div>
 
                     {/* Certificate Preview */}
-                    <div 
+                    <div
                         ref={certificateRef}
                         id="certificate-print-area"
                         style={{
@@ -145,28 +189,26 @@ export default function FinalExamPage() {
                     >
                         {/* Decorative Borders */}
                         <div style={{ position: 'absolute', inset: 10, border: '2px solid #00A6C0' }} />
-                        <div style={{ position: 'absolute', top: 40, left: 40, opacity: 0.1 }}><Award size={200} color="#00A6C0" /></div>
-                        <div style={{ position: 'absolute', bottom: 40, right: 40, opacity: 0.1 }}><Sparkles size={150} color="#FF9F43" /></div>
 
                         <div style={{ position: 'relative', zIndex: 1 }}>
                             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
                                 <img src="/logo.png" alt="VE" style={{ height: 80 }} />
                             </div>
-                            
+
                             <h4 style={{ fontSize: 24, fontWeight: 800, color: '#00A6C0', letterSpacing: 4, textTransform: 'uppercase', marginBottom: 30 }}>Certificate of Achievement</h4>
-                            
+
                             <p style={{ fontSize: 20, color: '#64748b', fontStyle: 'italic', marginBottom: 10 }}>This is to certify that</p>
-                            
+
                             <h2 style={{ fontSize: 56, fontWeight: 900, color: '#001F3F', borderBottom: '3px solid #F1F1F1', display: 'inline-block', minWidth: 400, paddingBottom: 10, marginBottom: 30, fontFamily: 'serif' }}>
                                 {studentName || 'Your Name'}
                             </h2>
-                            
+
                             <p style={{ fontSize: 20, color: '#64748b', fontStyle: 'italic', marginBottom: 10 }}>has successfully completed the course</p>
-                            
+
                             <h3 style={{ fontSize: 28, fontWeight: 800, color: '#00A6C0', marginBottom: 40 }}>
                                 Character Builders: Essential Life Values for Kids
                             </h3>
-                            
+
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 40, padding: '0 60px' }}>
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontSize: 20, fontWeight: 800, borderBottom: '1px solid #333', paddingBottom: 5, marginBottom: 5 }}>{today}</div>
@@ -209,20 +251,18 @@ export default function FinalExamPage() {
     return (
         <div style={{ minHeight: '100vh', background: '#F8FAFB', paddingBottom: 100 }}>
             <Navbar />
-            
+
             <div style={{ background: '#001F3F', color: '#fff', padding: '80px 24px', textAlign: 'center' }}>
                 <div className="section-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-                        <Compass size={48} color="#00D2D3" className="animate-float" />
                         <Trophy size={64} color="#FFD700" />
-                        <Compass size={48} color="#00D2D3" style={{ animationDelay: '2s' }} className="animate-float" />
                     </div>
                     <div>
                         <h1 style={{ fontSize: 'clamp(32px, 5vw, 42px)', fontWeight: 900, color: '#FFFFFF', marginBottom: 12 }}>
                             Final Moral Compass Challenge
                         </h1>
                         <p style={{ fontSize: 20, color: 'rgba(255,255,255,0.9)', fontWeight: 700, maxWidth: 600, margin: '0 auto' }}>
-                            Score at least 15/20 correctly to earn your certificate! 🧭
+                            Score at least 15/20 correctly to earn your certificate!
                         </p>
                     </div>
                 </div>
@@ -234,9 +274,9 @@ export default function FinalExamPage() {
                         <Heart size={48} color="#FF6B6B" style={{ marginBottom: 16 }} />
                         <h2 style={{ color: '#001F3F', fontSize: 24, fontWeight: 900 }}>Don't give up! You almost had it.</h2>
                         <p style={{ fontSize: 18, color: '#FF6B6B', marginTop: 8, fontWeight: 800 }}>You scored {score}/{questions.length} Correct</p>
-                        <button 
-                            onClick={() => { setAnswers({}); setSubmitted(false); setScore(0); window.scrollTo(0,0) }}
-                            className="btn-primary" 
+                        <button
+                            onClick={() => { setAnswers({}); setSubmitted(false); setScore(0); window.scrollTo(0, 0) }}
+                            className="btn-primary"
                             style={{ background: '#00A6C0', marginTop: 24, height: 60, padding: '0 40px', borderRadius: 20 }}
                         >
                             <RefreshCcw size={20} style={{ marginRight: 10 }} /> Try The Challenge Again
@@ -304,9 +344,9 @@ export default function FinalExamPage() {
                             }}
                         >
                             {actionLoading ? <Loader2 className="spin" size={28} /> : null}
-                            {actionLoading ? 'SUBMITTING...' : 'SUBMIT FINAL EXAM 🚀'}
+                            {actionLoading ? 'SUBMITTING...' : 'SUBMIT FINAL EXAM'}
                         </button>
-                        <p style={{ marginTop: 24, color: '#888', fontWeight: 600 }}>Gather all your wisdom and send it to the heavens! ✨</p>
+                        <p style={{ marginTop: 24, color: '#888', fontWeight: 600 }}>Gather all your wisdom and send it to the heavens!</p>
                     </div>
                 )}
             </main>

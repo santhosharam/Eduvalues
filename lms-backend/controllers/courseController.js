@@ -100,6 +100,42 @@ exports.deleteCourse = async (req, res) => {
     }
 }
 
+// GET /api/courses/:id/final-exam
+exports.getFinalExam = async (req, res) => {
+    try {
+        const Lesson = require('../models/Lesson')
+        const lessons = await Lesson.find({ courseId: req.params.id }).sort('order')
+        
+        if (!lessons || lessons.length === 0) {
+            return res.status(404).json({ message: 'No lessons found for this course' })
+        }
+
+        // Aggregate 2 random questions from each lesson (10 lessons * 2 = 20 questions)
+        let examQuestions = []
+        lessons.forEach(lesson => {
+            if (lesson.quiz && lesson.quiz.length > 0) {
+                // Shuffle lesson questions and pick 2
+                const shuffled = [...lesson.quiz].sort(() => 0.5 - Math.random())
+                const selected = shuffled.slice(0, 2).map((q, qIdx) => ({
+                    id: `${lesson._id}-${qIdx}`,
+                    question: q.question,
+                    option_a: q.options[0]?.text || '',
+                    option_b: q.options[1]?.text || '',
+                    option_c: q.options[2]?.text || '',
+                    option_d: q.options[3]?.text || (q.options.length === 3 ? 'None of the above' : ''),
+                    correct_answer: ['a', 'b', 'c', 'd'][q.options.findIndex(o => o.correct)] || 'a'
+                }))
+                examQuestions.push(...selected)
+            }
+        })
+
+        // If we don't have exactly 20, we might need to fill or trim, but with 10 lessons we should be good.
+        res.json({ questions: examQuestions })
+    } catch (err) {
+        res.status(500).json({ message: err.message })
+    }
+}
+
 // GET /api/courses/categories
 exports.getCategories = async (req, res) => {
     try {

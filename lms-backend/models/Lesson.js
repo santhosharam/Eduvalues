@@ -17,6 +17,10 @@ const lessonSchema = new mongoose.Schema({
             correct: { type: Boolean, default: false },
             feedback: { type: String }
         }]
+    }],
+    panels: [{
+        image: { type: String, required: true },
+        caption: { type: String }
     }]
 }, { timestamps: true })
 
