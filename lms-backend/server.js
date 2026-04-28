@@ -113,11 +113,14 @@ const startServer = async () => {
         })
 
         const PORT = process.env.PORT || 5000
-        app.listen(PORT, () => console.log(`🚀 LMS Server running on http://localhost:${PORT}`))
+        if (process.env.NODE_ENV !== 'test') {
+            app.listen(PORT, () => console.log(`🚀 LMS Server running on port ${PORT}`))
+        }
     } catch (err) {
         console.error('Failed to start server:', err)
-        process.exit(1)
     }
 }
 
 startServer()
+
+module.exports = app
