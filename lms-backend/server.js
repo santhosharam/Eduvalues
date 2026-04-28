@@ -13,12 +13,23 @@ const startServer = async () => {
     try {
         await connectDB()
 
-        // Security headers
+        // Security headers & Private Network Access support
         app.use((req, res, next) => {
             res.setHeader('X-Content-Type-Options', 'nosniff')
             res.setHeader('X-Frame-Options', 'DENY')
             res.setHeader('X-XSS-Protection', '1; mode=block')
             res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
+            
+            // Allow Private Network Access (for local development with public frontend)
+            if (req.headers['access-control-request-private-network']) {
+                res.setHeader('Access-Control-Allow-Private-Network', 'true')
+            }
+
+            // Handle preflight for PNA
+            if (req.method === 'OPTIONS' && req.headers['access-control-request-private-network']) {
+                return res.sendStatus(204)
+            }
+
             next()
         })
 
@@ -46,8 +57,20 @@ const startServer = async () => {
         app.use('/api/auth/login', authLimiter)
 
         // Middleware
+        const allowedOrigins = [
+            process.env.CLIENT_URL,
+            'http://localhost:5173',
+            'https://eduvalues.vercel.app'
+        ].filter(Boolean)
+
         app.use(cors({
-            origin: process.env.CLIENT_URL || 'http://localhost:5173',
+            origin: (origin, callback) => {
+                if (!origin || allowedOrigins.includes(origin)) {
+                    callback(null, true)
+                } else {
+                    callback(new Error('Not allowed by CORS'))
+                }
+            },
             credentials: true,
         }))
         app.use(express.json({ limit: '5mb' }))
