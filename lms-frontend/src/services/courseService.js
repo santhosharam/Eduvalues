@@ -1,48 +1,54 @@
-import api from './api'
-
-const normalizeLesson = (l) => {
-    if (!l) return null
-    return {
-        ...l,
-        _id: l._id || l.id,
-        videoUrl: l.videoUrl || l.video_url,
-        isFree: l.isFree !== undefined ? l.isFree : l.is_free
-    }
-}
-
-const normalizeCourse = (c) => {
-    if (!c) return null
-    return {
-        ...c,
-        _id: c._id || c.id,
-        shortDescription: c.shortDescription || c.short_description,
-        discountPrice: c.discountPrice || c.discount_price,
-        isPublished: c.isPublished !== undefined ? c.isPublished : c.is_published,
-        lessons: (c.lessons || []).map(normalizeLesson).sort((a, b) => (a.order || 0) - (b.order || 0))
-    }
-}
+import { supabase } from './supabaseClient'
 
 export const getAllCourses = async (params = {}) => {
-    const { data } = await api.get('/courses', { params })
-    const courses = (data.courses || []).map(normalizeCourse)
-    return { data: { courses } }
+    let query = supabase.from('courses').select('*')
+    
+    if (params.category) query = query.eq('category', params.category)
+    if (params.level) query = query.eq('level', params.level)
+    if (params.limit) query = query.limit(params.limit)
+    if (params.search) query = query.ilike('title', `%${params.search}%`)
+
+    const { data, error } = await query
+    if (error) throw error
+    return { data: { courses: data } }
 }
 
 export const getCourseBySlug = async (slug) => {
-    const { data } = await api.get(`/courses/${slug}`)
-    return { data: { course: normalizeCourse(data.course) } }
+    const { data, error } = await supabase
+        .from('courses')
+        .select('*, lessons(*)')
+        .eq('slug', slug)
+        .single()
+    
+    if (error) throw error
+    // Re-ordering lessons by order_index
+    if (data.lessons) {
+        data.lessons.sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
+    }
+    return { data: { course: data } }
 }
 
 export const getCourseById = async (id) => {
-    const { data } = await api.get(`/courses/id/${id}`)
-    return { data: { course: normalizeCourse(data.course) } }
+    const { data, error } = await supabase
+        .from('courses')
+        .select('*, lessons(*)')
+        .eq('id', id)
+        .single()
+    
+    if (error) throw error
+    return { data: { course: data } }
 }
 
 export const getCategories = async () => {
-    const { data } = await api.get('/courses/categories')
-    return { data: { categories: data.categories } }
+    const { data, error } = await supabase
+        .from('courses')
+        .select('category')
+    
+    if (error) throw error
+    const categories = [...new Set(data.map(c => c.category))]
+    return { data: { categories } }
 }
 
-export const createCourse = (data) => api.post('/courses', data)
-export const updateCourse = (id, data) => api.put(`/courses/${id}`, data)
-export const deleteCourse = (id) => api.delete(`/courses/${id}`)
+export const createCourse = (data) => supabase.from('courses').insert([data])
+export const updateCourse = (id, data) => supabase.from('courses').update(data).eq('id', id)
+export const deleteCourse = (id) => supabase.from('courses').delete().eq('id', id)

@@ -1,26 +1,27 @@
-import api from './api'
-
-const normalizeLesson = (l) => {
-    if (!l) return null
-    return {
-        ...l,
-        _id: l._id || l.id,
-        courseId: l.courseId || l.course_id || l.course, // Prioritize courseId
-        videoUrl: l.videoUrl || l.video_url,
-        isFree: l.isFree !== undefined ? l.isFree : l.is_free
-    }
-}
+import { supabase } from './supabaseClient'
 
 export const getLessonById = async (id) => {
-    const { data } = await api.get(`/lessons/${id}`)
-    return { data: { lesson: normalizeLesson(data.lesson) } }
+    const { data, error } = await supabase
+        .from('lessons')
+        .select('*')
+        .eq('id', id)
+        .single()
+    
+    if (error) throw error
+    return { data: { lesson: data } }
 }
 
 export const getLessonsByCourseId = async (courseId) => {
-    const { data } = await api.get(`/lessons/course/${courseId}`)
-    return { data: { lessons: (data.lessons || []).map(normalizeLesson) } }
+    const { data, error } = await supabase
+        .from('lessons')
+        .select('*')
+        .eq('course_id', courseId)
+        .order('order_index', { ascending: true })
+    
+    if (error) throw error
+    return { data: { lessons: data } }
 }
 
-export const createLesson = (data) => api.post('/lessons', data)
-export const updateLesson = (id, data) => api.put(`/lessons/${id}`, data)
-export const deleteLesson = (id) => api.delete(`/lessons/${id}`)
+export const createLesson = (data) => supabase.from('lessons').insert([data])
+export const updateLesson = (id, data) => supabase.from('lessons').update(data).eq('id', id)
+export const deleteLesson = (id) => supabase.from('lessons').delete().eq('id', id)
