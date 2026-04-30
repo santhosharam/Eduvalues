@@ -34,270 +34,270 @@ export default function LessonPage() {
 
     const kindnessStoryPanels = [
         {
-            image: '/kindness/lesson1/panel1.png',
+            image: '/lessons/character-builders/kindness/panel1.png',
             caption: 'In a small neighborhood, Maya spotted elderly Mr. Jenkins sitting sadly on his porch. His once vibrant garden — full of colorful flowers — was now overgrown with weeds. "My beautiful garden... it\'s all gone," he sighed. Maya felt her heart sink seeing him so sad.'
         },
         {
-            image: '/kindness/lesson1/panel2.png',
+            image: '/lessons/character-builders/kindness/panel2.png',
             caption: 'Maya decided to help. Every day after school, she spent time pulling weeds and planting new flowers in Mr. Jenkins\' garden. She never gave up, even when it was hard work!'
         },
         {
-            image: '/kindness/lesson1/panel3.png',
+            image: '/lessons/character-builders/kindness/panel3.png',
             caption: '"Don\'t worry Mr. Jenkins! I will fix your garden!" Maya rolled up her sleeves with a big determined smile. Small acts of kindness — like planting seeds — can grow into something truly beautiful!'
         },
         {
-            image: '/kindness/lesson1/panel4.png',
+            image: '/lessons/character-builders/kindness/panel4.png',
             caption: 'Other neighborhood children saw what Maya was doing and joined her. Soon they were not only helping Mr. Jenkins — but also other neighbors who needed help with their gardens too!'
         },
         {
-            image: '/kindness/lesson1/panel5.png',
+            image: '/lessons/character-builders/kindness/panel5.png',
             caption: 'As they worked together, the entire neighborhood started to bloom — not just with flowers, but with friendship and joy! Maya realized that acts of kindness, like seeds, grow into beautiful things when planted and nurtured. 🌸'
         },
         {
-            image: '/kindness/lesson1/panel6.png',
+            image: '/lessons/character-builders/kindness/panel6.png',
             caption: '🌟 What You Will Learn:\n\n• How small acts of kindness make a big difference\n• Why being kind helps others AND makes you feel good too\n• Creative ways to show kindness every day\n\n💛 Remember:\nKindness means being friendly, generous and considerate to others. It\'s about treating people with care and respect — and doing nice things without expecting anything in return!'
         }
     ]
 
     const honestyPanels = [
         {
-            image: '/kindness/lesson2/panel1.png',
+            image: '/lessons/character-builders/honesty/panel1.png',
             caption: 'Alex was home alone feeling bored. He spotted his ball and thought "Mom said no ball inside... but just once won\'t hurt!" He tossed it high with a big excited smile.'
         },
         {
-            image: '/kindness/lesson2/panel2.png',
+            image: '/lessons/character-builders/honesty/panel2.png',
             caption: 'CRASH! SHATTER! The ball bounced off the ceiling and knocked Mom\'s favorite vase straight off the shelf! Alex froze in horror. "Oh no...!!" Broken pieces were everywhere on the floor.'
         },
         {
-            image: '/kindness/lesson2/panel3.png',
+            image: '/lessons/character-builders/honesty/panel3.png',
             caption: 'Alex knelt by the broken pieces feeling terrible. A tiny devil whispered "Just hide it! Say the cat did it!" But a tiny angel replied "Tell the truth! Be honest!" Alex felt torn inside.'
         },
         {
-            image: '/kindness/lesson2/panel4.png',
+            image: '/lessons/character-builders/honesty/panel4.png',
             caption: 'Alex stood alone at the front door waiting for Mom to come home. His fists were clenched with courage. "I have to tell the truth... even if it\'s scary," he thought bravely.'
         },
         {
-            image: '/kindness/lesson2/panel5.png',
+            image: '/lessons/character-builders/honesty/panel5.png',
             caption: '"Mom... I broke your special vase. I was playing ball inside. I am really sorry." Mom was quiet for a moment — then hugged him warmly. "I am sad about my vase... but I am SO proud of you for telling the truth. That was brave!"'
         },
         {
-            image: '/kindness/lesson2/panel6.png',
+            image: '/lessons/character-builders/honesty/panel6.png',
             caption: 'Together they cleaned up the pieces. Alex used his allowance to help buy a new vase and couldn\'t play ball for a week. But he felt good inside. "Even though I got in trouble... telling the truth felt RIGHT! 🌟 Honesty builds TRUST!"'
         }
     ]
 
     const responsibilityPanels = [
         {
-            image: '/kindness/lesson3/panel1.png',
+            image: '/lessons/character-builders/responsibility/panel1.png',
             caption: 'Riya jumped for joy when her coach handed her the captain\'s armband! "Riya! You are our new team captain!" "YES! I won\'t let you down!" Her teammates cheered around her on the sunny soccer field.'
         },
         {
-            image: '/kindness/lesson3/panel2.png',
+            image: '/lessons/character-builders/responsibility/panel2.png',
             caption: 'But on game day morning, Riya\'s alarm rang early. She sleepily reached out and hit SNOOZE. "Just five more minutes..." she mumbled, pulling her blanket back over her head.'
         },
         {
-            image: '/kindness/lesson3/panel3.png',
+            image: '/lessons/character-builders/responsibility/panel3.png',
             caption: 'Riya arrived late. Coach looked disappointed. "Riya... we had to start without you." The team rushed through warm-ups and lost the game. "This is my fault," Riya thought sadly.'
         },
         {
-            image: '/kindness/lesson3/panel4.png',
+            image: '/lessons/character-builders/responsibility/panel4.png',
             caption: 'That night Riya sat at her desk and set her alarm with determination. She stuck a note on the wall: "BE RESPONSIBLE — ARRIVE EARLY!" "Next week will be different. I promise," she thought.'
         },
         {
-            image: '/kindness/lesson3/panel5.png',
+            image: '/lessons/character-builders/responsibility/panel5.png',
             caption: 'The next week Riya arrived FIRST! She set up the cones, led the warm-ups and cheered for everyone. "Good morning everyone! Let\'s warm up together!" "Wow Riya is already here!" a teammate said happily.'
         },
         {
-            image: '/kindness/lesson3/panel6.png',
+            image: '/lessons/character-builders/responsibility/panel6.png',
             caption: 'After the game Coach knelt down proudly. "Great leadership today Riya! Your responsibility made a difference for the whole team!" Riya smiled — "Being responsible means being someone others can COUNT ON! 🌟 Responsibility builds TRUST!"'
         }
     ]
 
     const perseverancePanels = [
         {
-            image: '/kindness/lesson5/panel1.png',
+            image: '/lessons/character-builders/perseverance/panel1.png',
             caption: '"A mountain bike! This is the BEST BIRTHDAY EVER!" Jana jumped with excitement. Her dad smiled, "Happy Birthday, Jana! Ready for an adventure?" The shiny new bike sparkled in the sun.'
         },
         {
-            image: '/kindness/lesson5/panel2.png',
+            image: '/lessons/character-builders/perseverance/panel2.png',
             caption: 'They reached the mountain trail. "This trail is challenging, Jana. Maybe we should take it slow?" her dad suggested. Jana pedaled ahead confidently, "Don\'t worry Dad! I can handle it!"'
         },
         {
-            image: '/kindness/lesson5/panel3.png',
+            image: '/lessons/character-builders/perseverance/panel3.png',
             caption: 'CRASH! Jana hit a loose rock and tumbled onto the dirt. Her bike slid down the path. "Ouch... I want to go home," she whispered, looking at her scraped knee with tears in her eyes.'
         },
         {
-            image: '/kindness/lesson5/panel4.png',
+            image: '/lessons/character-builders/perseverance/panel4.png',
             caption: 'Dad knelt beside her. "You can go home... OR you could try again. Walk your bike down the rocky part for now." Jana looked at the trail, then at her bike. "Maybe... just one more try."'
         },
         {
-            image: '/kindness/lesson5/panel5.png',
+            image: '/lessons/character-builders/perseverance/panel5.png',
             caption: 'Jana got back on. She breathed deeply and focused. Slowly but surely, she navigated the tricky path. "I DID IT!" she shouted as she reached the bottom, her face lighting up with a huge grin.'
         },
         {
-            image: '/kindness/lesson5/panel6.png',
+            image: '/lessons/character-builders/perseverance/panel6.png',
             caption: 'That evening, Jana felt proud. "I didn\'t let that fall stop me!" She realized that success isn\'t about never falling—it\'s about always getting back up. "I NEVER GIVE UP—AND I MADE IT!" 🌟 Perseverance wins!'
         }
     ];
 
     const empathyPanels = [
         {
-            image: '/kindness/lesson6/panel1.png',
+            image: '/lessons/character-builders/empathy/panel1.png',
             caption: 'Meera was the fastest runner in her class! On sports day she crossed the finish line FIRST again. "YES! First place AGAIN!" Everyone cheered — "Go Meera! She is the fastest!" But as she celebrated something caught her eye...'
         },
         {
-            image: '/kindness/lesson6/panel2.png',
+            image: '/lessons/character-builders/empathy/panel2.png',
             caption: 'On the sideline sat a boy named Rihan — completely alone. He had a leg brace and could not join the races. He watched everyone play with sad longing eyes. Meera noticed him and felt something pull at her heart. "Wait... why is that boy sitting all alone?"'
         },
         {
-            image: '/kindness/lesson6/panel3.png',
+            image: '/lessons/character-builders/empathy/panel3.png',
             caption: 'Meera asked her teacher about Rihan. "He feels different because he cannot run like the rest of you," the teacher explained gently. Meera thought deeply. "How would I feel if I could not run...?" She made up her mind to do something.'
         },
         {
-            image: '/kindness/lesson6/panel4.png',
+            image: '/lessons/character-builders/empathy/panel4.png',
             caption: 'Meera walked over and sat beside Rihan with a warm smile. "Hi! I am Meera. What do you like to do?" Rihan looked surprised. "I love drawing and board games!" Meera\'s eyes lit up with genuine interest — she had found a new friend!'
         },
         {
-            image: '/kindness/lesson6/panel5.png',
+            image: '/lessons/character-builders/empathy/panel5.png',
             caption: 'On the next sports day Meera organized a special TEAMWORK game — no running required — where everyone could join! Rihan was right in the middle laughing and playing for the first time. "This game is about TEAMWORK — everyone can play!" "I am actually PLAYING! This is amazing!"'
         },
         {
-            image: '/kindness/lesson6/panel6.png',
+            image: '/lessons/character-builders/empathy/panel6.png',
             caption: '"Thank you for including me Meera. I never felt left out today," Rihan said warmly. Meera smiled. "Empathy means understanding how others feel — and making sure no one is left behind!" 🌟 The End — Empathy makes the world kinder!'
         }
     ];
 
     const gratitudePanels = [
         {
-            image: '/kindness/lesson7/panel1.png',
+            image: '/lessons/character-builders/gratitude/panel1.png',
             caption: 'Aarav sat surrounded by many toys looking bored and unhappy. "I want THAT new toy! Why don\'t I have everything I want?!" His grandfather watched quietly from his armchair. "Hmm... I think it is time for a little trip Aarav."'
         },
         {
-            image: '/kindness/lesson7/panel2.png',
+            image: '/lessons/character-builders/gratitude/panel2.png',
             caption: 'Grandfather took Aarav to volunteer at a community kitchen. Aarav helped serve food wearing an oversized apron. Around him children with very little were laughing and smiling with pure joy. "They have so much less than me... but they look so HAPPY?"'
         },
         {
-            image: '/kindness/lesson7/panel3.png',
+            image: '/lessons/character-builders/gratitude/panel3.png',
             caption: 'Aarav sat with his grandfather and asked the question burning in his heart. "Grandfather... why are they so happy when they have so little?" "Because they appreciate what they DO have. They are grateful for every small thing." Aarav\'s eyes went wide with understanding.'
         },
         {
-            image: '/kindness/lesson7/panel4.png',
+            image: '/lessons/character-builders/gratitude/panel4.png',
             caption: 'At home grandfather helped Aarav create a Thankfulness Tree on the wall. Every day Aarav wrote something he was grateful for on a paper leaf. "I am grateful for... the sunny day today!" "Perfect! Every blessing counts — big or small!"'
         },
         {
-            image: '/kindness/lesson7/panel5.png',
+            image: '/lessons/character-builders/gratitude/panel5.png',
             caption: 'Day by day the tree grew more beautiful and full of colorful leaves — his family, yummy food, sunshine, school, health and rain. "My tree is so full! I never noticed how much I already have!" Aarav felt happier and complained much less.'
         },
         {
-            image: '/kindness/lesson7/panel6.png',
+            image: '/lessons/character-builders/gratitude/panel6.png',
             caption: 'At dinner Aarav looked at his family and food with warm grateful eyes. "Grandfather... I used to always want MORE. Now I see how RICH I already am!" Grandfather smiled proudly. "That my boy... is the power of GRATITUDE." 🌟 The End — Gratitude turns what we have into enough!'
         }
     ];
 
     const couragePanels = [
         {
-            image: '/kindness/lesson8/panel1.png',
+            image: '/lessons/character-builders/courage/panel1.png',
             caption: 'When the teacher announced the class play Arjun froze with terror. "And Arjun will play the BRAVE KNIGHT!" "M-me?! In front of everyone?!" His heart sank. Everyone else looked excited but Arjun felt like he wanted to disappear.'
         },
         {
-            image: '/kindness/lesson8/panel2.png',
+            image: '/lessons/character-builders/courage/panel2.png',
             caption: '"I can\'t do it teacher. I get too scared when people watch me." His teacher knelt down with a warm smile. "Being brave doesn\'t mean NOT feeling scared Arjun. It means doing something EVEN THOUGH you are afraid." Arjun looked up with a tiny spark of hope.'
         },
         {
-            image: '/kindness/lesson8/panel3.png',
+            image: '/lessons/character-builders/courage/panel3.png',
             caption: 'Arjun practiced every day — first alone in his mirror, then with two friends, then with more classmates. Each time his fear got a little smaller. "I can feel my fear getting... smaller!" His confidence was slowly growing.'
         },
         {
-            image: '/kindness/lesson8/panel4.png',
+            image: '/lessons/character-builders/courage/panel4.png',
             caption: 'At home his whole family gathered on the sofa to watch him practice. In his cardboard knight costume Arjun performed his lines with a shaky but brave voice. "Amazing Arjun! Keep going!" Mom cheered. Their love and support gave him strength.'
         },
         {
-            image: '/kindness/lesson8/panel5.png',
+            image: '/lessons/character-builders/courage/panel5.png',
             caption: 'On the night of the play Arjun stood center stage under the spotlight. His hands trembled but his eyes were determined. "I am scared... but I am doing it anyway. THAT is what courage means!" He raised his sword. "I am the brave knight — and I will face this dragon!"'
         },
         {
-            image: '/kindness/lesson8/panel6.png',
+            image: '/lessons/character-builders/courage/panel6.png',
             caption: 'The audience erupted in applause! "You were SO brave up there Arjun!" his friends cheered rushing toward him. "I was scared the whole time... but I did it anyway!" Teacher wiped a proud tear. "THAT is true courage!" 🌟 The End — Courage grows every time you face your fears!'
         }
     ];
 
     const respectPanels = [
         {
-            image: '/kindness/lesson4/panel1.png',
+            image: '/lessons/character-builders/respect/panel1.png',
             caption: 'Ms. Gracy smiled warmly at the class. "Everyone please welcome our new student Mei!" Mei stood nervously at the door in her traditional clothing. Some kids whispered and giggled. "She dresses so differently..." Mei felt very uncomfortable.'
         },
         {
-            image: '/kindness/lesson4/panel2.png',
+            image: '/lessons/character-builders/respect/panel2.png',
             caption: 'At lunch Mei sat completely alone, carefully opening her containers of dumplings. Suddenly a rude boy pointed loudly. "Eww! What IS that?!" Mei looked down at her food, her cheeks turning red with embarrassment.'
         },
         {
-            image: '/kindness/lesson4/panel3.png',
+            image: '/lessons/character-builders/respect/panel3.png',
             caption: 'Across the cafeteria Zach watched Mei with a concerned heart. He remembered his own first day at a new school — how lonely and scared he felt. "I remember how that felt... being the new kid. I have to do something."'
         },
         {
-            image: '/kindness/lesson4/panel4.png',
+            image: '/lessons/character-builders/respect/panel4.png',
             caption: 'Zach took a deep breath and walked over to Mei\'s table with a warm smile. "Hi! I am Zach. Can I sit with you?" Mei looked up surprised. "That food smells really good! What is it?" Mei began to smile shyly for the first time.'
         },
         {
-            image: '/kindness/lesson4/panel5.png',
+            image: '/lessons/character-builders/respect/panel5.png',
             caption: 'Soon more friends joined them at lunch! "These dumplings are AMAZING!" Zach exclaimed. Within a week Mei was running and laughing with the whole friend group on the playground — no longer alone!'
         },
         {
-            image: '/kindness/lesson4/panel6.png',
+            image: '/lessons/character-builders/respect/panel6.png',
             caption: '"Thank you for being kind to me that first day Zach," Mei said warmly as they walked together. Zach smiled. "Everyone deserves to be treated with RESPECT!" 🌟 The End — Respect connects us all!'
         }
     ]
  
     const integrityPanels = [
         {
-            image: '/kindness/lesson9/panel1.png',
+            image: '/lessons/character-builders/integrity/panel1.png',
             caption: 'During an important math test Diya sat in the warm golden sunlight writing carefully with full confidence. "I studied so hard for this. I know I can do it!" The classroom felt peaceful and safe as everyone worked quietly.'
         },
         {
-            image: '/kindness/lesson9/panel2.png',
+            image: '/lessons/character-builders/integrity/panel2.png',
             caption: 'Then Diya got completely stuck on a difficult problem. Eraser marks covered her paper. Her eyes drifted sideways — her classmate\'s answer was right there glowing in the sunlight like a temptation. "I am completely stuck... and the answer is right there... glowing..."'
         },
         {
-            image: '/kindness/lesson9/panel3.png',
+            image: '/lessons/character-builders/integrity/panel3.png',
             caption: 'Diya closed her eyes and a warm golden memory appeared. Little Diya sitting with her father in their cozy home. "Your character is who you are... when no one is watching." Father\'s gentle words echoed in her heart. Diya opened her eyes with quiet calm determination.'
         },
         {
-            image: '/kindness/lesson9/panel4.png',
+            image: '/lessons/character-builders/integrity/panel4.png',
             caption: 'Diya turned her eyes away from the classmate\'s paper. A tiny glowing spirit of goodness sat on her shoulder as she picked up her pencil bravely. "I will do this with my own work. That is who I am." The sunlight felt warmer now — as if rewarding her choice.'
         },
         {
-            image: '/kindness/lesson9/panel5.png',
+            image: '/lessons/character-builders/integrity/panel5.png',
             caption: 'When the test was returned Diya saw a red mark on the difficult problem. But her kind teacher knelt beside her warmly. "You got this wrong Diya... but your process shows true understanding." Speech bubble: "THAT matters more than any perfect score." Diya\'s disappointment slowly bloomed into quiet pride.'
         },
         {
-            image: '/kindness/lesson9/panel6.png',
+            image: '/lessons/character-builders/integrity/panel6.png',
             caption: '"I got it wrong Papa... but I did it completely by myself. I chose not to cheat even when no one was watching." Father hugged Diya with proud happy tears. "THAT is integrity my daughter. I am more proud of this than any perfect score in the world." 🌟 The End — Integrity means doing right even when no one is watching!'
         }
     ]
  
     const humilityPanels = [
       {
-        image: '/kindness/lesson10/panel1.png',
+        image: '/lessons/character-builders/humility/panel1.png',
         caption: 'In a bright classroom, Rohan proudly sat at the chessboard surrounded by classmates. He had won many matches and felt unbeatable. "I am the best player in this school!" he thought, as admiration filled the room.'
       },
       {
-        image: '/kindness/lesson10/panel2.png',
+        image: '/lessons/character-builders/humility/panel2.png',
         caption: 'A new teacher introduced an old man to the class. "He is a chess grandmaster," the teacher said. Rohan looked at him with doubt. "He looks like a beginner," he thought, feeling confident it would be an easy win.'
       },
       {
-        image: '/kindness/lesson10/panel3.png',
+        image: '/lessons/character-builders/humility/panel3.png',
         caption: 'The game began. Rohan leaned forward confidently while the old man calmly studied the board. "This will be easy," Rohan thought, unaware of what was coming next.'
       },
       {
-        image: '/kindness/lesson10/panel4.png',
+        image: '/lessons/character-builders/humility/panel4.png',
         caption: 'Suddenly, Rohan\'s confidence faded. Move after move, he began to lose. His eyes widened in shock. "Wait… what? How did he do that?" he thought, as the game slipped out of his control.'
       },
       {
-        image: '/kindness/lesson10/panel5.png',
+        image: '/lessons/character-builders/humility/panel5.png',
         caption: 'Sweating and humbled, Rohan lowered his head. "I… I can\'t win. I resign." The old man smiled gently. "That\'s how we learn and grow," he said, his voice calm and kind.'
       },
       {
-        image: '/kindness/lesson10/panel6.png',
+        image: '/lessons/character-builders/humility/panel6.png',
         caption: 'Later, Rohan sat beside the old man with a peaceful smile, eager to learn. "Can you teach me more?" he asked. The warm sunlight filled the room as wisdom replaced pride. 🌟 The End — True strength comes from humility and learning from others.'
       }
     ];
