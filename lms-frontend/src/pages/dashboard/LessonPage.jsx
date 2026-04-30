@@ -602,7 +602,15 @@ export default function LessonPage() {
 
                                         {/* Comic Viewer logic */}
                                         <div style={{ position: 'relative' }}>
-                                            {lesson.title === 'Kindness' ? (
+                                            {/* Priority 1: Panels from Database (Supabase/MongoDB) */}
+                                            {lesson.panels && lesson.panels.length > 0 ? (
+                                                <ComicViewer panels={lesson.panels.map(p => ({
+                                                    image: p.image_url || p.image, // Handle both Supabase and MongoDB field names
+                                                    caption: p.caption
+                                                }))} />
+                                            ) : 
+                                            /* Priority 2: Hardcoded fallbacks */
+                                            lesson.title === 'Kindness' ? (
                                                 <ComicViewer panels={kindnessStoryPanels} />
                                             ) : lesson.title === 'Honesty' ? (
                                                 <ComicViewer panels={honestyPanels} />
