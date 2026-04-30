@@ -54,7 +54,7 @@ export default function ManageCourses() {
         try {
             const { price, discountPrice, ...payload } = data;
             if (editCourse) {
-                await updateCourse(editCourse._id, payload);
+                await updateCourse(editCourse.id || editCourse._id, payload);
                 toast.success('Course parameters updated.');
             } else {
                 await createCourse(payload);
@@ -120,11 +120,11 @@ export default function ManageCourses() {
                         <td style={{ padding: '20px 32px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                                 <div style={{ width: 60, height: 42, background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <img src={course.thumbnail || `https://picsum.photos/seed/${course._id}/60/42`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
+                                    <img src={course.thumbnail || `https://picsum.photos/seed/${course.id || course._id}/60/42`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
                                 </div>
                                 <div>
                                     <div style={{ fontWeight: 800, color: '#fff', fontSize: 14 }}>{course.title}</div>
-                                    <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600, marginTop: 2 }}>ID: {course._id.substring(0, 8)}...</div>
+                                    <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600, marginTop: 2 }}>ID: {(course.id || course._id || '').substring(0, 8)}...</div>
                                 </div>
                             </div>
                         </td>
@@ -146,16 +146,16 @@ export default function ManageCourses() {
                         </td>
                         <td style={{ padding: '20px 32px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: course.isPublished ? '#1DD1A1' : '#64748b' }} />
-                                <span style={{ fontSize: 12, fontWeight: 700, color: course.isPublished ? '#1DD1A1' : '#64748b' }}>
-                                    {course.isPublished ? 'Live' : 'Draft'}
+                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: (course.is_published || course.isPublished) ? '#1DD1A1' : '#64748b' }} />
+                                <span style={{ fontSize: 12, fontWeight: 700, color: (course.is_published || course.isPublished) ? '#1DD1A1' : '#64748b' }}>
+                                    {(course.is_published || course.isPublished) ? 'Live' : 'Draft'}
                                 </span>
                             </div>
                         </td>
                         <td style={{ padding: '20px 32px', textAlign: 'right' }}>
                             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
                                 <button onClick={() => openEdit(course)} style={actionBtnStyle} title="Modify Parameters"><Edit size={16} /></button>
-                                <button onClick={() => handleDelete(course._id)} style={{ ...actionBtnStyle, color: '#FF6B6B' }} title="Purge Record"><Trash2 size={16} /></button>
+                                <button onClick={() => handleDelete(course.id || course._id)} style={{ ...actionBtnStyle, color: '#FF6B6B' }} title="Purge Record"><Trash2 size={16} /></button>
                             </div>
                         </td>
                     </>
@@ -167,7 +167,7 @@ export default function ManageCourses() {
                 isOpen={showModal}
                 onClose={() => setShowModal(false)}
                 title={editCourse ? 'Modify Course Asset' : 'Blueprint New Course'}
-                subtitle={editCourse ? `Target ID: ${editCourse._id}` : 'Initialize a new learning pathway in the ecosystem.'}
+                subtitle={editCourse ? `Target ID: ${editCourse.id || editCourse._id}` : 'Initialize a new learning pathway in the ecosystem.'}
                 width={720}
             >
                 <AdminForm

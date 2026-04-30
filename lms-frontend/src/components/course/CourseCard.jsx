@@ -14,7 +14,7 @@ export default function CourseCard({ course }) {
     const reviewsCount = course.reviews?.length || 0
 
     return (
-        <div className="kids-card" style={{ height: '100%', display: 'flex', flexDirection: 'column', cursor: 'pointer' }} onClick={() => navigate(`/courses/${course.slug || course._id}`)}>
+        <div className="kids-card" style={{ height: '100%', display: 'flex', flexDirection: 'column', cursor: 'pointer' }} onClick={() => navigate(`/courses/${course.slug || course.id || course._id}`)}>
             {/* Image Section */}
             <div style={{ position: 'relative', height: '220px', overflow: 'hidden' }}>
                 <img
@@ -88,7 +88,7 @@ export default function CourseCard({ course }) {
                             style={{ height: '44px', padding: '0 12px', fontSize: '12px', borderRadius: '12px' }}
                             onClick={(e) => {
                                 e.stopPropagation();
-                                navigate(`/courses/${course.slug || course._id}`);
+                                navigate(`/courses/${course.slug || course.id || course._id}`);
                             }}
                         >
                             Details
@@ -102,7 +102,7 @@ export default function CourseCard({ course }) {
                                     const lessonId = lessons[0].id || lessons[0]._id;
                                     navigate(`/dashboard/lesson/${lessonId}`);
                                 } else {
-                                    navigate(`/courses/${course.slug || course._id}`);
+                                    navigate(`/courses/${course.slug || course.id || course._id}`);
                                 }
                             }}
                         >

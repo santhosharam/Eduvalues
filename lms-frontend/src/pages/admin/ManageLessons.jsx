@@ -44,7 +44,7 @@ export default function ManageLessons() {
             const fetchedCourses = r.data.courses || [];
             setCourses(fetchedCourses);
             if (fetchedCourses.length > 0) {
-                const firstId = fetchedCourses[0]._id;
+                const firstId = fetchedCourses[0].id || fetchedCourses[0]._id;
                 setSelectedCourseId(firstId);
                 setSelectedCourse(fetchedCourses[0]);
                 fetchLessons(firstId);
@@ -63,7 +63,7 @@ export default function ManageLessons() {
 
     const handleCourseChange = (e) => {
         const id = e.target.value;
-        const course = courses.find(c => c._id === id);
+        const course = courses.find(c => (c.id || c._id) === id);
         setSelectedCourseId(id);
         setSelectedCourse(course);
         fetchLessons(id);
@@ -73,10 +73,10 @@ export default function ManageLessons() {
         setActionLoading(true);
         try {
             if (editLesson) {
-                await updateLesson(editLesson._id, data);
+                await updateLesson(editLesson.id || editLesson._id, data);
                 toast.success('Lesson content revised.');
             } else {
-                await createLesson({ ...data, courseId: selectedCourseId });
+                await createLesson({ ...data, course_id: selectedCourseId });
                 toast.success('Lesson appended to curriculum.');
             }
             setShowModal(false);
@@ -118,7 +118,7 @@ export default function ManageLessons() {
                         onChange={handleCourseChange}
                         style={selectStyle}
                     >
-                        {courses.map(c => <option key={c._id} value={c._id}>{c.title}</option>)}
+                        {courses.map(c => <option key={c.id || c._id} value={c.id || c._id}>{c.title}</option>)}
                     </select>
                 </div>
 
@@ -151,9 +151,9 @@ export default function ManageLessons() {
                         <td style={{ padding: '20px 32px', textAlign: 'right' }}>
                             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                                 <button onClick={() => { setEditLesson(lesson); setShowModal(true); }} style={actionBtnStyle} title="Edit Lesson"><Edit size={16} /></button>
-                                <button onClick={() => navigate(`/admin/lessons/${lesson._id}/comics`)} style={{ ...actionBtnStyle, color: '#00A6C0', background: 'rgba(0,166,192,0.1)' }} title="Manage Comics"><Palette size={16} /></button>
-                                <button onClick={() => navigate(`/admin/lessons/${lesson._id}/quiz`)} style={{ ...actionBtnStyle, color: '#FF9F43', background: 'rgba(255,159,67,0.1)' }} title="Manage Quiz"><HelpCircle size={16} /></button>
-                                <button onClick={() => handleDelete(lesson._id)} style={{ ...actionBtnStyle, color: '#FF6B6B' }} title="Delete"><Trash2 size={16} /></button>
+                                <button onClick={() => navigate(`/admin/lessons/${lesson.id || lesson._id}/comics`)} style={{ ...actionBtnStyle, color: '#00A6C0', background: 'rgba(0,166,192,0.1)' }} title="Manage Comics"><Palette size={16} /></button>
+                                <button onClick={() => navigate(`/admin/lessons/${lesson.id || lesson._id}/quiz`)} style={{ ...actionBtnStyle, color: '#FF9F43', background: 'rgba(255,159,67,0.1)' }} title="Manage Quiz"><HelpCircle size={16} /></button>
+                                <button onClick={() => handleDelete(lesson.id || lesson._id)} style={{ ...actionBtnStyle, color: '#FF6B6B' }} title="Delete"><Trash2 size={16} /></button>
                             </div>
                         </td>
                     </>

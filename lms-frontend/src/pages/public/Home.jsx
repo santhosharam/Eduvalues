@@ -333,7 +333,7 @@ export default function Home() {
                                 <p style={{ marginTop: 20, color: '#001F3F', fontWeight: 700 }}>Finding adventures...</p>
                             </div>
                         ) : courses.map(course => (
-                            <CourseCard key={course._id} course={course} />
+                            <CourseCard key={course.id || course._id} course={course} />
                         ))}
                     </div>
                 </div>

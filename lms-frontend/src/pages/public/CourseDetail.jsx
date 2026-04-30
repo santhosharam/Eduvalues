@@ -49,7 +49,7 @@ export default function CourseDetail() {
         </div>
     )
 
-    const isEnrolled = user?.enrolledCourses?.some(c => c._id === course._id) || user?.role === 'admin'
+    const isEnrolled = user?.enrolledCourses?.some(c => (c.id || c._id) === (course.id || course._id)) || user?.role === 'admin'
 
     return (
         <div style={{ minHeight: '100vh', background: '#fff' }}>
@@ -167,7 +167,7 @@ export default function CourseDetail() {
                                     No lessons added to this journey yet.
                                 </div>
                             ) : course.lessons.map((lesson, idx) => (
-                                <div key={lesson._id} style={{
+                                <div key={lesson.id || lesson._id} style={{
                                     padding: '24px 32px',
                                     background: idx % 2 === 0 ? '#fff' : '#F4F7F9',
                                     display: 'flex',
@@ -229,7 +229,7 @@ export default function CourseDetail() {
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                                 {course.reviews.map(review => (
-                                    <div key={review._id} style={{ padding: '32px', background: '#F4F7F9', borderRadius: '32px', border: '2px solid #EEE' }}>
+                                    <div key={review.id || review._id} style={{ padding: '32px', background: '#F4F7F9', borderRadius: '32px', border: '2px solid #EEE' }}>
                                         <div style={{ display: 'flex', gap: 4, marginBottom: 12 }}>
                                             {[...Array(5)].map((_, i) => (
                                                 <Star key={i} size={20} fill={i < review.rating ? "#F59E0B" : "none"} color="#F59E0B" />
@@ -265,7 +265,7 @@ export default function CourseDetail() {
 
                         {course.lessons?.length > 0 ? (
                             <Link
-                                to={`/dashboard/lesson/${course.lessons[0]._id || course.lessons[0]}`}
+                                to={`/dashboard/lesson/${course.lessons[0].id || course.lessons[0]._id || course.lessons[0]}`}
                                 className="btn-primary"
                                 style={{ width: '100%', height: 64, borderRadius: 20 }}
                             >

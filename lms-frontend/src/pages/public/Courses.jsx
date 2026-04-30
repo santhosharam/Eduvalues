@@ -21,9 +21,11 @@ export default function Courses() {
             category: categoryFilter
         })
             .then(res => {
-                setCourses(res.data.courses || [])
+                const fetchedCourses = res.data.courses || []
+                setCourses(fetchedCourses)
+                
                 if (categories.length === 0) {
-                    const uniqueCategories = [...new Set((res.data.courses || []).map(c => c.category).filter(Boolean))]
+                    const uniqueCategories = [...new Set(fetchedCourses.map(c => c.category).filter(Boolean))]
                     setCategories(uniqueCategories)
                 }
             })
@@ -176,7 +178,7 @@ export default function Courses() {
                                         gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
                                         gap: '32px'
                                     }}>
-                                        {courses.map(course => <CourseCard key={course._id} course={course} />)}
+                                        {courses.map(course => <CourseCard key={course.id || course._id} course={course} />)}
                                     </div>
                                 )}
                             </>
