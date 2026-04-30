@@ -1,47 +1,42 @@
-import { supabase } from '../supabaseClient'
-import api from './api'
+import { supabase } from './supabaseClient';
+import api from './api';
 
 export const getLessonById = async (id) => {
-    // Check if the id is a UUID (Supabase format) or MongoDB format
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
     
     if (isUuid) {
-        // Fetch lesson and join with comic_panels
         const { data, error } = await supabase
             .from('lessons')
-            .select(`
-                *,
-                panels:comic_panels(*)
-            `)
+            .select('*, panels:comic_panels(*)')
             .eq('id', id)
-            .single()
+            .single();
 
-        if (error) throw error
-        return { data: { lesson: data } }
+        if (error) throw error;
+        return { data: { lesson: data } };
     } else {
-        // Fallback to local API for MongoDB IDs
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/lessons/${id}`)
-        return res.json()
+        const res = await api.get(`/lessons/${id}`);
+        return res.data;
     }
-}
+};
 
 export const getLessonsByCourseId = async (courseId) => {
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(courseId)
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(courseId);
 
     if (isUuid) {
         const { data, error } = await supabase
             .from('lessons')
             .select('*')
             .eq('course_id', courseId)
-            .order('order_index')
+            .order('order_index');
 
-        if (error) throw error
-        return { data: { lessons: data } }
+        if (error) throw error;
+        return { data: { lessons: data } };
     } else {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/lessons/course/${courseId}`)
-        return res.json()
+        const res = await api.get(`/lessons/course/${courseId}`);
+        return res.data;
     }
-}
-export const createLesson = (data) => api.post('/lessons', data)
-export const updateLesson = (id, data) => api.put(`/lessons/${id}`, data)
-export const deleteLesson = (id) => api.delete(`/lessons/${id}`)
+};
+
+export const createLesson = (data) => api.post('/lessons', data);
+export const updateLesson = (id, data) => api.put(`/lessons/${id}`, data);
+export const deleteLesson = (id) => api.delete(`/lessons/${id}`);
