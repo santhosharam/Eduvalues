@@ -58,6 +58,41 @@ export const getCategories = async () => {
     return api.get('/courses/categories');
 };
 
-export const createCourse = (data) => api.post('/courses', data);
-export const updateCourse = (id, data) => api.put(`/courses/${id}`, data);
-export const deleteCourse = (id) => api.delete(`/courses/${id}`);
+export const createCourse = async (data) => {
+    const { data: result, error } = await supabase
+        .from('courses')
+        .insert([data])
+        .select()
+        .single();
+    
+    if (error) return api.post('/courses', data);
+    return { data: { course: result } };
+};
+
+export const updateCourse = async (id, data) => {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+    if (isUuid) {
+        const { data: result, error } = await supabase
+            .from('courses')
+            .update(data)
+            .eq('id', id)
+            .select()
+            .single();
+        if (error) throw error;
+        return { data: { course: result } };
+    }
+    return api.put(`/courses/${id}`, data);
+};
+
+export const deleteCourse = async (id) => {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+    if (isUuid) {
+        const { error } = await supabase
+            .from('courses')
+            .delete()
+            .eq('id', id);
+        if (error) throw error;
+        return { data: { success: true } };
+    }
+    return api.delete(`/courses/${id}`);
+};

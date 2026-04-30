@@ -37,6 +37,40 @@ export const getLessonsByCourseId = async (courseId) => {
     }
 };
 
-export const createLesson = (data) => api.post('/lessons', data);
-export const updateLesson = (id, data) => api.put(`/lessons/${id}`, data);
-export const deleteLesson = (id) => api.delete(`/lessons/${id}`);
+export const createLesson = async (data) => {
+    const { data: result, error } = await supabase
+        .from('lessons')
+        .insert([data])
+        .select()
+        .single();
+    if (error) return api.post('/lessons', data);
+    return { data: { lesson: result } };
+};
+
+export const updateLesson = async (id, data) => {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+    if (isUuid) {
+        const { data: result, error } = await supabase
+            .from('lessons')
+            .update(data)
+            .eq('id', id)
+            .select()
+            .single();
+        if (error) throw error;
+        return { data: { lesson: result } };
+    }
+    return api.put(`/lessons/${id}`, data);
+};
+
+export const deleteLesson = async (id) => {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+    if (isUuid) {
+        const { error } = await supabase
+            .from('lessons')
+            .delete()
+            .eq('id', id);
+        if (error) throw error;
+        return { data: { success: true } };
+    }
+    return api.delete(`/lessons/${id}`);
+};
