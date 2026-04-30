@@ -1,4 +1,5 @@
 import { supabase } from '../supabaseClient'
+import api from './api'
 
 export const getLessonById = async (id) => {
     // Check if the id is a UUID (Supabase format) or MongoDB format
@@ -41,3 +42,6 @@ export const getLessonsByCourseId = async (courseId) => {
         return res.json()
     }
 }
+export const createLesson = (data) => api.post('/lessons', data)
+export const updateLesson = (id, data) => api.put(`/lessons/${id}`, data)
+export const deleteLesson = (id) => api.delete(`/lessons/${id}`)

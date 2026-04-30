@@ -1,4 +1,5 @@
 import { supabase } from '../supabaseClient'
+import api from './api'
 
 export const getAllCourses = async (params = {}) => {
     const { data, error } = await supabase
@@ -56,3 +57,10 @@ export const getCourseById = async (id) => {
         return res.json()
     }
 }
+export const getCategories = async () => {
+    return api.get('/courses/categories')
+}
+
+export const createCourse = (data) => api.post('/courses', data)
+export const updateCourse = (id, data) => api.put(`/courses/${id}`, data)
+export const deleteCourse = (id) => api.delete(`/courses/${id}`)
