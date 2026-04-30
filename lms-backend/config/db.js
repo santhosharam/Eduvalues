@@ -27,6 +27,7 @@ const connectDB = async () => {
             const User = require('../models/User');
             const Course = require('../models/Course');
             const Lesson = require('../models/Lesson');
+            const Panel = require('../models/Panel');
 
             if (await User.countDocuments() === 0) {
                 await User.create({
@@ -438,16 +439,35 @@ const connectDB = async () => {
                             isFree: idx === 0,
                             order: idx + 1,
                             courseId: course._id,
-                            quiz: quizzesData[val] || [],
-                            panels: comicLessons[val] || []
+                            quiz: quizzesData[val] || []
                         }));
+                        const createdLessons = await Lesson.insertMany(lessons);
+                        
+                        // Create separate Panel documents for lessons that have them
+                        for (let i = 0; i < createdLessons.length; i++) {
+                            const lesson = createdLessons[i];
+                            const val = values[i];
+                            const panelData = comicLessons[val] || [];
+                            
+                            if (panelData.length > 0) {
+                                const panels = await Panel.insertMany(panelData.map((p, idx) => ({
+                                    ...p,
+                                    lessonId: lesson._id,
+                                    order: idx + 1
+                                })));
+                                lesson.panels = panels.map(p => p._id);
+                                await lesson.save();
+                            }
+                        }
+
+                        course.lessons = createdLessons.map(l => l._id);
                     } else {
                         lessons = [
                             { title: 'Introduction', content: 'Basics...', isFree: true, order: 1, courseId: course._id }
                         ];
+                        const createdLessons = await Lesson.insertMany(lessons);
+                        course.lessons = createdLessons.map(l => l._id);
                     }
-                    const createdLessons = await Lesson.insertMany(lessons);
-                    course.lessons = createdLessons.map(l => l._id);
                     await course.save();
                 }
                 const Enrollment = require('../models/Enrollment');

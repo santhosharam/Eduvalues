@@ -18,10 +18,7 @@ const lessonSchema = new mongoose.Schema({
             feedback: { type: String }
         }]
     }],
-    panels: [{
-        image: { type: String, required: true },
-        caption: { type: String }
-    }]
+    panels: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Panel' }]
 }, { timestamps: true })
 
 lessonSchema.index({ courseId: 1 })

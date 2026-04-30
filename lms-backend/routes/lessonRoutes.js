@@ -8,7 +8,7 @@ const { checkLessonAccess } = require('../middleware/enrollmentMiddleware')
 // GET /api/lessons/course/:courseId
 router.get('/course/:courseId', protect, async (req, res) => {
     try {
-        const lessons = await Lesson.find({ courseId: req.params.courseId }).sort('order')
+        const lessons = await Lesson.find({ courseId: req.params.courseId }).sort('order').populate('panels')
         res.json({ lessons })
     } catch (err) { res.status(500).json({ message: err.message }) }
 })
@@ -16,7 +16,7 @@ router.get('/course/:courseId', protect, async (req, res) => {
 // GET /api/lessons/:id
 router.get('/:id', protect, checkLessonAccess, async (req, res) => {
     try {
-        const lesson = await Lesson.findById(req.params.id)
+        const lesson = await Lesson.findById(req.params.id).populate('panels')
         if (!lesson) return res.status(404).json({ message: 'Lesson not found' })
         res.json({ lesson })
     } catch (err) { res.status(500).json({ message: err.message }) }
