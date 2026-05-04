@@ -10,12 +10,12 @@ export const getAllCourses = async () => {
 
         if (error || !data || data.length === 0) {
             const res = await api.get('/courses');
-            return res.data;
+            return { data: res.data };
         }
         return { data: { courses: data } };
     } catch (err) {
         const res = await api.get('/courses');
-        return res.data;
+        return { data: res.data };
     }
 };
 
@@ -29,11 +29,14 @@ export const getCourseById = async (id) => {
             .eq('id', id)
             .single();
 
-        if (error) throw error;
+        if (error || !data.lessons || data.lessons.length === 0) {
+            const res = await api.get(`/courses/id/${id}`).catch(() => ({ data: { course: data } }));
+            return res.data?.course ? { data: { course: res.data.course } } : { data: { course: data } };
+        }
         return { data: { course: data } };
     } else {
         const res = await api.get(`/courses/id/${id}`);
-        return res.data;
+        return { data: res.data };
     }
 };
 
@@ -47,9 +50,13 @@ export const getCourseBySlug = async (slug) => {
         .eq('slug', slug)
         .single();
 
-    if (error) {
-        const res = await api.get(`/courses/${slug}`);
-        return res.data;
+    if (error || !data?.lessons || data.lessons.length === 0) {
+        try {
+            const res = await api.get(`/courses/${slug}`);
+            if (res.data?.course?.lessons?.length > 0) return { data: { course: res.data.course } };
+        } catch (err) {
+            // Fallback to Supabase data if backend fails
+        }
     }
     return { data: { course: data } };
 };

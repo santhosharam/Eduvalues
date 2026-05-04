@@ -24,10 +24,25 @@ export default function CourseDetail() {
         setLoading(true)
         console.log('CourseDetail Fetching Slug:', slug)
         getCourseBySlug(slug)
-            .then(res => setCourse(res.data.course))
+            .then(res => {
+                const c = res.data.course
+                console.log('Course loaded:', c)
+                console.log('Lessons array:', c?.lessons)
+                setCourse(c)
+            })
             .catch(() => setCourse(null))
             .finally(() => setLoading(false))
     }, [slug])
+
+    // Safely extract the first lesson ID regardless of shape:
+    // - Supabase: lessons = [{ id: 'uuid', ... }]
+    // - MongoDB:  lessons = [{ _id: 'objectid', ... }] or ['objectid-string']
+    const getFirstLessonId = (lessons) => {
+        if (!lessons || lessons.length === 0) return null
+        const first = lessons[0]
+        if (typeof first === 'string') return first          // plain ID string
+        return first.id || first._id || null                // full object
+    }
 
     if (loading) return (
         <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
@@ -94,17 +109,21 @@ export default function CourseDetail() {
                             </div>
                         </div>
 
-                        {course.lessons?.length > 0 ? (
+                        {getFirstLessonId(course.lessons) ? (
                             <Link
-                                to={`/dashboard/lesson/${course.lessons[0]?.id || course.lessons[0]?._id}`}
+                                to={`/dashboard/lesson/${getFirstLessonId(course.lessons)}`}
                                 className="btn-primary" style={{ height: 64, padding: '0 48px', fontSize: 18, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
                             >
                                 🚀 Start Learning!
                             </Link>
                         ) : (
-                            <div className="btn-primary" style={{ height: 64, padding: '0 48px', fontSize: 18, borderRadius: 20, opacity: 0.8, cursor: 'default' }}>
-                                📚 Coming Soon!
-                            </div>
+                            <button
+                                onClick={() => toast.error('Lessons not loaded yet. Please refresh the page.')}
+                                className="btn-primary" 
+                                style={{ height: 64, padding: '0 48px', fontSize: 18, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: 'none' }}
+                            >
+                                Start Course
+                            </button>
                         )}
                     </div>
 
@@ -263,20 +282,22 @@ export default function CourseDetail() {
                         </div>
                         <p style={{ fontSize: 15, color: '#888', fontWeight: 600, marginBottom: 32 }}>Give your child the gift of values!</p>
 
-                        {course.lessons?.length > 0 ? (
+                        {getFirstLessonId(course.lessons) ? (
                             <Link
-                                to={`/dashboard/lesson/${course.lessons[0].id || course.lessons[0]._id || course.lessons[0]}`}
+                                to={`/dashboard/lesson/${getFirstLessonId(course.lessons)}`}
                                 className="btn-primary"
-                                style={{ width: '100%', height: 64, borderRadius: 20 }}
+                                style={{ width: '100%', height: 64, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
                             >
                                 🚀 Start Learning!
                             </Link>
                         ) : (
-                            <div
-                                style={{ width: '100%', height: 64, borderRadius: 20, background: '#00A6C0', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 18 }}
+                            <button
+                                onClick={() => toast.error('Lessons not loaded yet. Please refresh the page.')}
+                                className="btn-primary"
+                                style={{ width: '100%', height: 64, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: 'none' }}
                             >
-                                📚 Coming Soon!
-                            </div>
+                                Start Course
+                            </button>
                         )}
 
                         <div style={{ marginTop: 40, textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 20 }}>

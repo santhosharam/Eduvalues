@@ -45,16 +45,15 @@ export default function FinalExamPage() {
 
         setActionLoading(true)
         try {
-            const api = (await import('../../services/api')).default
-            const { data } = await api.post(`/courses/${courseId}/submit-final-exam`, {
-                answers: Object.entries(answers).map(([id, val]) => ({ questionId: id, selected: val }))
-            })
-
             const calculatedScore = questions.filter(q => answers[q.id] === q.correct_answer).length
             setScore(calculatedScore)
             setSubmitted(true)
 
             if (calculatedScore >= 15) {
+                const api = (await import('../../services/api')).default
+                await api.post(`/courses/${courseId}/submit-final-exam`, {
+                    answers: Object.entries(answers).map(([id, val]) => ({ questionId: id, selected: val }))
+                })
                 toast.success('CHALLENGE CONQUERED! You have earned your certificate! 🏆', { duration: 5000 })
             } else {
                 toast.error(`Brave attempt! You scored ${calculatedScore}/${questions.length}. You need 15/20 to pass.`, { duration: 5000 })

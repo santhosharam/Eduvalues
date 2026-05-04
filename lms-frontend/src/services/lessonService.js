@@ -15,7 +15,7 @@ export const getLessonById = async (id) => {
         return { data: { lesson: data } };
     } else {
         const res = await api.get(`/lessons/${id}`);
-        return res.data;
+        return { data: res.data };
     }
 };
 
@@ -33,7 +33,7 @@ export const getLessonsByCourseId = async (courseId) => {
         return { data: { lessons: data } };
     } else {
         const res = await api.get(`/lessons/course/${courseId}`);
-        return res.data;
+        return { data: res.data };
     }
 };
 
@@ -43,7 +43,10 @@ export const createLesson = async (data) => {
         .insert([data])
         .select()
         .single();
-    if (error) return api.post('/lessons', data);
+    if (error) {
+        const res = await api.post('/lessons', data);
+        return { data: res.data };
+    }
     return { data: { lesson: result } };
 };
 
@@ -59,7 +62,8 @@ export const updateLesson = async (id, data) => {
         if (error) throw error;
         return { data: { lesson: result } };
     }
-    return api.put(`/lessons/${id}`, data);
+    const res = await api.put(`/lessons/${id}`, data);
+    return { data: res.data };
 };
 
 export const deleteLesson = async (id) => {
@@ -72,5 +76,6 @@ export const deleteLesson = async (id) => {
         if (error) throw error;
         return { data: { success: true } };
     }
-    return api.delete(`/lessons/${id}`);
+    const res = await api.delete(`/lessons/${id}`);
+    return { data: res.data };
 };

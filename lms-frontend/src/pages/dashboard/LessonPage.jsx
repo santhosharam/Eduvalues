@@ -341,7 +341,7 @@ export default function LessonPage() {
                     console.log('Curriculum fetched:', lessons)
                     setAllCourseLessons(lessons)
                     
-                    const currentIndex = lessons.findIndex(l => String(l._id) === String(lessonId))
+                    const currentIndex = lessons.findIndex(l => String(l.id || l._id) === String(lessonId))
                     if (currentIndex !== -1 && currentIndex < lessons.length - 1) {
                         setNextLessonId(lessons[currentIndex + 1].id || lessons[currentIndex + 1]._id)
                         setIsLastLesson(false)
@@ -420,15 +420,17 @@ export default function LessonPage() {
 
                 <div style={{ flex: 1, padding: 12 }}>
                     {allCourseLessons.map((l, idx) => {
-                        const isCurrent = String(l._id) === String(lessonId)
-                        const isCompleted = completedLessons.includes(String(l._id))
+                        const lessonIdStr = String(l.id || l._id)
+                        const isCurrent = lessonIdStr === String(lessonId)
+                        const isCompleted = completedLessons.includes(lessonIdStr)
                         // Unlock logic: lesson 1 is always unlocked. n is unlocked if n-1 is completed.
-                        const isUnlocked = idx === 0 || completedLessons.includes(String(allCourseLessons[idx - 1]?._id))
+                        const prevLessonIdStr = idx > 0 ? String(allCourseLessons[idx - 1]?.id || allCourseLessons[idx - 1]?._id) : null
+                        const isUnlocked = idx === 0 || completedLessons.includes(prevLessonIdStr)
                         
                         return (
                             <div 
-                                key={l._id}
-                                onClick={() => isUnlocked && navigate(`/dashboard/lesson/${l._id}`)}
+                                key={lessonIdStr}
+                                onClick={() => isUnlocked && navigate(`/dashboard/lesson/${lessonIdStr}`)}
                                 style={{
                                     padding: '16px 20px',
                                     borderRadius: 16,
@@ -479,7 +481,7 @@ export default function LessonPage() {
                 <div style={{ padding: 24, background: '#F8FAFB', borderTop: '2px solid #F1F1F1' }}>
                     <div style={{ fontSize: 12, fontWeight: 800, color: '#00A6C0', marginBottom: 8, textAlign: 'center' }}>CURRICULUM PROGRESS</div>
                     {(() => {
-                        const courseCompletedCount = allCourseLessons.filter(l => completedLessons.includes(String(l._id))).length;
+                        const courseCompletedCount = allCourseLessons.filter(l => completedLessons.includes(String(l.id || l._id))).length;
                         const progressPercent = (courseCompletedCount / (allCourseLessons.length || 1)) * 100;
                         
                         return (
@@ -504,7 +506,7 @@ export default function LessonPage() {
                     {/* Top Progress Bar (Mobile) */}
                     <div className="mobile-progress-bar" style={{ display: 'none', height: 6, background: '#eee', width: '100%', position: 'sticky', top: 0, zIndex: 50 }}>
                         {(() => {
-                            const courseCompletedCount = allCourseLessons.filter(l => completedLessons.includes(String(l._id))).length;
+                            const courseCompletedCount = allCourseLessons.filter(l => completedLessons.includes(String(l.id || l._id))).length;
                             const progressPercent = (courseCompletedCount / (allCourseLessons.length || 1)) * 100;
                             return (
                                 <div style={{ 
