@@ -331,7 +331,7 @@ export default function LessonPage() {
 
     useEffect(() => {
         // Standardized field name after normalization in lessonService
-        const courseId = lesson?.courseId
+        const courseId = lesson?.course_id || lesson?.courseId
         
         if (courseId && typeof courseId === 'string' && courseId.length > 5) {
             console.log('Fetching curriculum for course:', courseId)
@@ -868,7 +868,7 @@ export default function LessonPage() {
                                             <div style={{ marginBottom: 16, fontSize: 18, fontWeight: 800, color: '#001F3F' }}>
                                                 You have completed all lessons!
                                             </div>
-                                            <Link to={`/dashboard/course/${lesson.courseId?._id || lesson.courseId}/final-exam`} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '24px 48px', fontSize: 22, borderRadius: 30, background: 'linear-gradient(135deg, #FF6B6B 0%, #FF9F43 100%)', boxShadow: '0 20px 40px rgba(255, 107, 107, 0.3)', fontWeight: 900, color: '#fff', textDecoration: 'none' }}>
+                                            <Link to={`/dashboard/course/${lesson.courseId?._id || lesson.courseId || lesson.course_id}/final-exam`} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '24px 48px', fontSize: 22, borderRadius: 30, background: 'linear-gradient(135deg, #FF6B6B 0%, #FF9F43 100%)', boxShadow: '0 20px 40px rgba(255, 107, 107, 0.3)', fontWeight: 900, color: '#fff', textDecoration: 'none' }}>
                                                 TAKE FINAL EXAM (20 QUESTIONS)
                                             </Link>
                                         </div>
