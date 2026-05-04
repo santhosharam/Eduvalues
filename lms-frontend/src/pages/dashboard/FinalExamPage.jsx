@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import { Sparkles, Trophy, Award, Printer, Download, ArrowLeft, Loader2, Heart, CheckCircle, RefreshCcw, Compass } from 'lucide-react'
 import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
+import { quizzesData } from '../../data/quizzesData'
 
 export default function FinalExamPage() {
     const { courseId } = useParams()
@@ -21,13 +22,29 @@ export default function FinalExamPage() {
         const fetchQuestions = async () => {
             setLoading(true)
             try {
-                const api = (await import('../../services/api')).default
-                const { data } = await api.get(`/courses/${courseId}/final-exam`)
-
-                if (!data.questions || data.questions.length === 0) {
+                let examQuestions = []
+                Object.keys(quizzesData).forEach((title, idx) => {
+                    const quiz = quizzesData[title]
+                    if (quiz && quiz.length > 0) {
+                        // Pick 2 questions from each of the 10 lessons
+                        const shuffled = [...quiz].sort(() => 0.5 - Math.random())
+                        const selected = shuffled.slice(0, 2).map((q, qIdx) => ({
+                            id: `${title}-${qIdx}`,
+                            question: q.question,
+                            option_a: q.options[0]?.text || '',
+                            option_b: q.options[1]?.text || '',
+                            option_c: q.options[2]?.text || '',
+                            option_d: q.options[3]?.text || (q.options.length === 3 ? 'None of the above' : ''),
+                            correct_answer: ['a', 'b', 'c', 'd'][q.options.findIndex(o => o.correct)] || 'a'
+                        }))
+                        examQuestions.push(...selected)
+                    }
+                })
+                
+                if (examQuestions.length === 0) {
                     toast.error('Curriculum error: Final exam questions are missing!')
                 }
-                setQuestions(data.questions || [])
+                setQuestions(examQuestions)
             } catch (err) {
                 toast.error('Could not reach the moral compass! Check your connection.')
             } finally {
@@ -50,10 +67,7 @@ export default function FinalExamPage() {
             setSubmitted(true)
 
             if (calculatedScore >= 15) {
-                const api = (await import('../../services/api')).default
-                await api.post(`/courses/${courseId}/submit-final-exam`, {
-                    answers: Object.entries(answers).map(([id, val]) => ({ questionId: id, selected: val }))
-                })
+                // Exam passed locally - unlock certificate generation
                 toast.success('CHALLENGE CONQUERED! You have earned your certificate! 🏆', { duration: 5000 })
             } else {
                 toast.error(`Brave attempt! You scored ${calculatedScore}/${questions.length}. You need 15/20 to pass.`, { duration: 5000 })

@@ -9,6 +9,8 @@ import { CheckCircle, FileText, ArrowLeft, Sparkles, Heart, Rocket, Brain, Troph
 import ComicViewer from '../../components/lesson/ComicViewer'
 import { trackEvent, AL_EVENTS } from '../../services/analytics'
 import { Loader2 } from 'lucide-react'
+import { quizzesData } from '../../data/quizzesData'
+import { comicPanelsData } from '../../data/comicPanelsData'
 
 export default function LessonPage() {
     const { lessonId } = useParams()
@@ -317,8 +319,8 @@ export default function LessonPage() {
                     analyticsTracked.current = true;
                 }
 
-                // Use the quiz data embedded in the lesson from MongoDB
-                setQuizQuestions(lessonData.quiz || [])
+                // Use the static quiz data based on the lesson title
+                setQuizQuestions(lessonData.quiz?.length > 0 ? lessonData.quiz : (quizzesData[lessonData.title] || []))
             })
             .catch((err) => {
                 toast.error('Could not load adventure!')
@@ -600,53 +602,32 @@ export default function LessonPage() {
                                             </div>
                                         </div>
 
-                                        {/* Comic Viewer logic */}
-                                        <div style={{ position: 'relative' }}>
-                                            {/* Priority 1: Panels from Database (Supabase/MongoDB) */}
-                                            {lesson.panels && lesson.panels.length > 0 ? (
-                                                <ComicViewer panels={lesson.panels.map(p => ({
-                                                    image: p.image_url || p.image, // Handle both Supabase and MongoDB field names
+                                        {/* Comic Panels Grid */}
+                                        <div style={{ marginTop: 40 }}>
+                                            <ComicViewer panels={lesson.panels?.length > 0 ? lesson.panels.map(p => ({
+                                                    image: p.image_url || p.image,
                                                     caption: p.caption
-                                                }))} />
-                                            ) : 
-                                            /* Priority 2: Hardcoded fallbacks */
-                                            lesson.title === 'Kindness' ? (
-                                                <ComicViewer panels={kindnessStoryPanels} />
-                                            ) : lesson.title === 'Honesty' ? (
-                                                <ComicViewer panels={honestyPanels} />
-                                            ) : lesson.title === 'Responsibility' ? (
-                                                <ComicViewer panels={responsibilityPanels} />
-                                            ) : lesson.title === 'Respect' ? (
-                                                <ComicViewer panels={respectPanels} />
-                                            ) : lesson.title === 'Perseverance' ? (
-                                                <ComicViewer panels={perseverancePanels} />
-                                            ) : lesson.title === 'Empathy' ? (
-                                                <ComicViewer panels={empathyPanels} />
-                                            ) : lesson.title === 'Gratitude' ? (
-                                                <ComicViewer panels={gratitudePanels} />
-                                            ) : lesson.title === 'Courage' ? (
-                                                <ComicViewer panels={couragePanels} />
-                                            ) : lesson.title === 'Integrity' ? (
-                                                <ComicViewer panels={integrityPanels} />
-                                            ) : lesson.title === 'Humility' ? (
-                                                <ComicViewer panels={humilityPanels} />
-                                            ) : (
-                                                <div className="story-mode" style={{ 
-                                                    fontSize: 22, 
-                                                    lineHeight: 1.8, 
-                                                    color: '#001F3F', 
-                                                    fontFamily: '"Fredoka", sans-serif',
-                                                    fontWeight: 500 
-                                                }}>
-                                                    {safeContent ? (
-                                                        <div dangerouslySetInnerHTML={{ __html: safeContent }} />
-                                                    ) : (
-                                                        <div style={{ textAlign: 'center', padding: 40, color: '#888' }}>
-                                                            Waiting for the adventure to unfold...
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
+                                                })) : (comicPanelsData[lesson.title] || [])} 
+                                            />
+                                        </div>
+
+                                        <div style={{ marginTop: 40, position: 'relative' }}>
+                                            <div className="story-mode" style={{ 
+                                                fontSize: 22, 
+                                                lineHeight: 1.8, 
+                                                color: '#001F3F', 
+                                                fontFamily: '"Fredoka", sans-serif',
+                                                fontWeight: 500 
+                                            }}>
+                                                {safeContent ? (
+                                                    <div dangerouslySetInnerHTML={{ __html: safeContent }} />
+                                                ) : (
+                                                    <div style={{ textAlign: 'center', padding: 40, color: '#888' }}>
+                                                        Waiting for the adventure to unfold...
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
 
                                             {/* Comic Highlights - only for non-comic viewer mode or decorative */}
                                             {[
