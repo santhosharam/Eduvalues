@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import Navbar from '../../components/common/Navbar'
 import { getLessonById, getLessonsByCourseId } from '../../services/lessonService'
 import { markLessonComplete, getCourseProgress } from '../../services/progressService'
 import toast from 'react-hot-toast'
@@ -501,7 +500,6 @@ export default function LessonPage() {
             {/* Main Content Area */}
             <main style={{ flex: 1, marginLeft: 320, transition: 'margin-left 0.3s' }} className="main-content-layout">
                 <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F8FAFB', position: 'relative', overflow: 'hidden' }}>
-                    <Navbar />
 
                     {/* Top Progress Bar (Mobile) */}
                     <div className="mobile-progress-bar" style={{ display: 'none', height: 6, background: '#eee', width: '100%', position: 'sticky', top: 0, zIndex: 50 }}>
