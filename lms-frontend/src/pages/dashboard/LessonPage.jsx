@@ -627,7 +627,6 @@ export default function LessonPage() {
                                                     </div>
                                                 )}
                                             </div>
-                                        </div>
 
                                             {/* Comic Highlights - only for non-comic viewer mode or decorative */}
                                             {[
