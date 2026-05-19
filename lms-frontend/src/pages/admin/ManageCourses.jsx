@@ -1,22 +1,29 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getAllCourses, createCourse, updateCourse, deleteCourse } from '../../services/courseService';
 import toast from 'react-hot-toast';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminTable from '../../components/admin/AdminTable';
 import AdminModal from '../../components/admin/AdminModal';
 import AdminForm from '../../components/admin/AdminForm';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, CheckCircle } from 'lucide-react';
 
 const EMPTY_COURSE = {
-    title: '', category: '', instructor: '', duration: '',
-    level: 'beginner', thumbnail: '', shortDescription: '', description: ''
+    title: '', category: '', instructor: '', price: 0, discount_price: null,
+    level: 'beginner', thumbnail: '', description: '', short_description: '',
+    duration: '', is_published: false
 };
 
 const FORM_FIELDS = [
     { name: 'title', label: 'Course Title', placeholder: 'e.g. Master React in 30 Days', required: true },
+    { name: 'short_description', label: 'Short Description (Teaser)', placeholder: 'A one-sentence hook for the card...', required: true },
     { name: 'category', label: 'Category', placeholder: 'e.g. Web Development', required: true },
     { name: 'instructor', label: 'Lead Instructor', placeholder: 'e.g. Dr. Jane Smith', required: true },
-    { name: 'duration', label: 'Total Duration', placeholder: 'e.g. 15h 45m', required: true },
+    
+    { label: '--- PRICING & LOGISTICS ---', type: 'header' },
+    { name: 'price', label: 'Base Price (₹)', type: 'number', placeholder: 'e.g. 999', required: true },
+    { name: 'discount_price', label: 'Discount Price (₹) - Optional', type: 'number', placeholder: 'e.g. 499' },
+    { name: 'duration', label: '⏱️ Duration', placeholder: 'e.g. 10 Hours' },
     {
         name: 'level', label: 'Skill Level', type: 'select',
         options: [
@@ -26,12 +33,15 @@ const FORM_FIELDS = [
         ],
         required: true
     },
+    
+    { label: '--- MEDIA & CONTENT ---', type: 'header' },
     { name: 'thumbnail', label: 'Thumbnail URL', placeholder: 'https://images.unsplash.com/...' },
-    { name: 'shortDescription', label: 'Elevator Pitch', placeholder: 'One sentence hook...', required: true },
-    { name: 'description', label: 'Full Curriculum Overview', type: 'textarea', placeholder: 'Detailed description of the course...', required: true }
+    { name: 'description', label: 'Full Course Description', type: 'textarea', placeholder: 'Detailed description...', required: true },
+    { name: 'is_published', label: 'Publish Live?', type: 'checkbox' }
 ];
 
 export default function ManageCourses() {
+    const navigate = useNavigate();
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
@@ -52,18 +62,17 @@ export default function ManageCourses() {
     const handleSave = async (data) => {
         setActionLoading(true);
         try {
-            const { price, discountPrice, ...payload } = data;
             if (editCourse) {
-                await updateCourse(editCourse.id || editCourse._id, payload);
+                await updateCourse(editCourse.id || editCourse._id, data);
                 toast.success('Course parameters updated.');
             } else {
-                await createCourse(payload);
+                await createCourse(data);
                 toast.success('New course added to catalog.');
             }
             setShowModal(false);
             fetchCourses();
         } catch (err) {
-            toast.error(err.message || 'Transaction failed');
+            toast.error(err.friendlyMessage || err.response?.data?.message || err.message || 'Transaction failed');
         } finally { setActionLoading(false); }
     };
 
@@ -154,6 +163,7 @@ export default function ManageCourses() {
                         </td>
                         <td style={{ padding: '20px 32px', textAlign: 'right' }}>
                             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                                <button onClick={() => navigate(`/admin/courses/${course.id || course._id}/exam`)} style={{ ...actionBtnStyle, color: '#1DD1A1', background: 'rgba(29,209,161,0.1)' }} title="Final Exam Builder"><CheckCircle size={16} /></button>
                                 <button onClick={() => openEdit(course)} style={actionBtnStyle} title="Modify Parameters"><Edit size={16} /></button>
                                 <button onClick={() => handleDelete(course.id || course._id)} style={{ ...actionBtnStyle, color: '#FF6B6B' }} title="Purge Record"><Trash2 size={16} /></button>
                             </div>

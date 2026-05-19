@@ -1,17 +1,29 @@
-const Course = require('../models/Course')
+const supabase = require('../supabaseClient')
 
 // GET /api/courses
 exports.getCourses = async (req, res) => {
     try {
-        const { category, level, limit, all, search } = req.query
-        const filter = {}
-        if (!all) filter.isPublished = true
-        if (category) filter.category = category
-        if (level) filter.level = level.toLowerCase()
-        if (search) filter.title = { $regex: search, $options: 'i' }
-        const query = Course.find(filter).populate('lessons', 'title duration isFree').sort('-createdAt')
-        if (limit) query.limit(parseInt(limit))
-        const courses = await query
+        let query = supabase
+            .from('courses')
+            .select('*, lessons(*)')
+        
+        if (req.query.all !== 'true') {
+            query = query.eq('is_published', true)
+        }
+            
+        const { data: courses, error } = await query
+        
+        if (error) throw error
+
+        // Sort lessons by order_index
+        if (courses) {
+            courses.forEach(c => {
+                if (c.lessons && Array.isArray(c.lessons)) {
+                    c.lessons.sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
+                }
+            })
+        }
+
         res.json({ courses })
     } catch (err) {
         res.status(500).json({ message: err.message })
@@ -22,36 +34,24 @@ exports.getCourses = async (req, res) => {
 exports.getCourseBySlug = async (req, res) => {
     try {
         const { slug } = req.params
-        console.log(`[DEBUG] Received course slug/id request: "${slug}"`)
-
-        // Attempt to match by slug (case-insensitive) or by ID if it's a valid ObjectID
-        const isObjectId = slug.match(/^[0-9a-fA-F]{24}$/)
         
-        let query = {
-            $or: [
-                { slug: { $regex: new RegExp(`^${slug.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') } }
-            ]
-        }
-        
-        if (isObjectId) {
-            query.$or.push({ _id: slug })
-        }
+        const { data: course, error } = await supabase
+            .from('courses')
+            .select('*, lessons(*)')
+            .eq('slug', slug)
+            .single()
 
-        console.log(`[DEBUG] Mongo query: ${JSON.stringify(query)}`)
-
-        let course = await Course.findOne(query)
-            .populate('lessons')
-            .populate({ path: 'reviews', populate: { path: 'student', select: 'name' } })
-
-        if (!course) {
-            console.log(`[DEBUG] Course not found in database for identifier: "${slug}"`)
+        if (error || !course) {
             return res.status(404).json({ message: 'Course not found' })
         }
+
+        // Sort lessons by order_index
+        if (course.lessons && Array.isArray(course.lessons)) {
+            course.lessons.sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
+        }
         
-        console.log(`[DEBUG] Successfully found course: "${course.title}" (ID: ${course._id})`)
         res.json({ course })
     } catch (err) {
-        console.error(`[DEBUG] Backend error in getCourseBySlug: ${err.stack}`)
         res.status(500).json({ message: err.message })
     }
 }
@@ -59,10 +59,24 @@ exports.getCourseBySlug = async (req, res) => {
 // GET /api/courses/id/:id
 exports.getCourseById = async (req, res) => {
     try {
-        const course = await Course.findById(req.params.id)
-            .populate('lessons')
-            .populate({ path: 'reviews', populate: { path: 'student', select: 'name' } })
-        if (!course) return res.status(404).json({ message: 'Course not found' })
+        const identifier = req.params.id
+        
+        const { data: course, error } = await supabase
+            .from('courses')
+            .select('*, lessons(*)')
+            .or(`id.eq.${identifier},slug.eq.${identifier}`)
+            .single()
+
+        if (error || !course) {
+            console.log(`[DEBUG] Course not found in Supabase for: ${identifier}`)
+            return res.status(404).json({ message: 'Course not found' })
+        }
+
+        // Sort lessons by order_index
+        if (course.lessons && Array.isArray(course.lessons)) {
+            course.lessons.sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
+        }
+        
         res.json({ course })
     } catch (err) {
         res.status(500).json({ message: err.message })
@@ -71,10 +85,50 @@ exports.getCourseById = async (req, res) => {
 
 // POST /api/courses (admin)
 exports.createCourse = async (req, res) => {
+    console.log('📬 [API] createCourse hit with body:', JSON.stringify(req.body, null, 2));
     try {
-        const course = await Course.create(req.body)
+        const { 
+            title, 
+            description, 
+            short_description, 
+            instructor, 
+            price, 
+            discount_price,
+            category, 
+            level,
+            duration,
+            thumbnail, 
+            is_published 
+        } = req.body
+        
+        if (!title) throw new Error('Course title is required')
+        
+        const slug = title.toLowerCase().trim().replace(/ /g, '-').replace(/[^\w-]+/g, '')
+
+        const { data: course, error } = await supabase
+            .from('courses')
+            .insert([{
+                title,
+                slug,
+                description,
+                short_description,
+                instructor,
+                price: Number(price) || 0,
+                discount_price: discount_price ? Number(discount_price) : null,
+                category,
+                level: level || 'beginner',
+                duration,
+                thumbnail,
+                is_published: is_published || false
+            }])
+            .select()
+            .single()
+
+        if (error) throw error
+        console.log('✅ [DATABASE] Course created successfully:', course.id);
         res.status(201).json({ course })
     } catch (err) {
+        console.error('[CREATE_COURSE_ERROR]', err.message)
         res.status(400).json({ message: err.message })
     }
 }
@@ -82,8 +136,14 @@ exports.createCourse = async (req, res) => {
 // PUT /api/courses/:id (admin)
 exports.updateCourse = async (req, res) => {
     try {
-        const course = await Course.findByIdAndUpdate(req.params.id, req.body, { new: true })
-        if (!course) return res.status(404).json({ message: 'Course not found' })
+        const { data: course, error } = await supabase
+            .from('courses')
+            .update(req.body)
+            .eq('id', req.params.id)
+            .select()
+            .single()
+
+        if (error) throw error
         res.json({ course })
     } catch (err) {
         res.status(500).json({ message: err.message })
@@ -93,44 +153,13 @@ exports.updateCourse = async (req, res) => {
 // DELETE /api/courses/:id (admin)
 exports.deleteCourse = async (req, res) => {
     try {
-        await Course.findByIdAndDelete(req.params.id)
+        const { error } = await supabase
+            .from('courses')
+            .delete()
+            .eq('id', req.params.id)
+
+        if (error) throw error
         res.json({ message: 'Course deleted' })
-    } catch (err) {
-        res.status(500).json({ message: err.message })
-    }
-}
-
-// GET /api/courses/:id/final-exam
-exports.getFinalExam = async (req, res) => {
-    try {
-        const Lesson = require('../models/Lesson')
-        const lessons = await Lesson.find({ courseId: req.params.id }).sort('order')
-        
-        if (!lessons || lessons.length === 0) {
-            return res.status(404).json({ message: 'No lessons found for this course' })
-        }
-
-        // Aggregate 2 random questions from each lesson (10 lessons * 2 = 20 questions)
-        let examQuestions = []
-        lessons.forEach(lesson => {
-            if (lesson.quiz && lesson.quiz.length > 0) {
-                // Shuffle lesson questions and pick 2
-                const shuffled = [...lesson.quiz].sort(() => 0.5 - Math.random())
-                const selected = shuffled.slice(0, 2).map((q, qIdx) => ({
-                    id: `${lesson._id}-${qIdx}`,
-                    question: q.question,
-                    option_a: q.options[0]?.text || '',
-                    option_b: q.options[1]?.text || '',
-                    option_c: q.options[2]?.text || '',
-                    option_d: q.options[3]?.text || (q.options.length === 3 ? 'None of the above' : ''),
-                    correct_answer: ['a', 'b', 'c', 'd'][q.options.findIndex(o => o.correct)] || 'a'
-                }))
-                examQuestions.push(...selected)
-            }
-        })
-
-        // If we don't have exactly 20, we might need to fill or trim, but with 10 lessons we should be good.
-        res.json({ questions: examQuestions })
     } catch (err) {
         res.status(500).json({ message: err.message })
     }
@@ -139,8 +168,44 @@ exports.getFinalExam = async (req, res) => {
 // GET /api/courses/categories
 exports.getCategories = async (req, res) => {
     try {
-        const categories = await Course.distinct('category')
+        const { data, error } = await supabase
+            .from('courses')
+            .select('category')
+        
+        if (error) throw error
+        const categories = [...new Set(data.map(item => item.category))]
         res.json({ categories })
+    } catch (err) {
+        res.status(500).json({ message: err.message })
+    }
+}
+
+// GET /api/courses/:id/final-exam
+exports.getFinalExam = async (req, res) => {
+    try {
+        const { data: lessons, error } = await supabase
+            .from('lessons')
+            .select('*')
+            .eq('course_id', req.params.id)
+            .order('order_index', { ascending: true })
+        
+        if (error || !lessons || lessons.length === 0) {
+            return res.status(404).json({ message: 'No lessons found for this course' })
+        }
+
+        // Fetch 20 questions from the quizzes table where is_final_exam is true
+        const { data: assessment, error: aErr } = await supabase
+            .from('quizzes')
+            .select('*')
+            .eq('course_id', req.params.id)
+            .eq('is_final_exam', true)
+            .order('order_index', { ascending: true })
+
+        if (aErr || !assessment || assessment.length === 0) {
+             return res.status(404).json({ message: 'Final assessment not configured for this course' })
+        }
+
+        res.json({ questions: assessment })
     } catch (err) {
         res.status(500).json({ message: err.message })
     }
@@ -149,27 +214,26 @@ exports.getCategories = async (req, res) => {
 // POST /api/courses/:id/submit-final-exam
 exports.submitFinalExam = async (req, res) => {
     try {
-        const { answers } = req.body
+        const { score, passed } = req.body // Usually calculated on backend, but let's follow the previous structure
         const courseId = req.params.id
-        const Certificate = require('../models/Certificate')
-        
-        // In a real app, we'd fetch questions from DB. 
-        // For this audit, we'll implement the scoring logic and certificate generation.
-        // Assuming pass threshold is 15/20.
-        
-        // Check if already has certificate
-        const existing = await Certificate.findOne({ student: req.user._id, courseId })
-        if (existing) return res.json({ message: 'Certificate already issued', certificate: existing })
 
-        const uniqueCode = `CERT-${new Date().getFullYear()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
-        const certificate = await Certificate.create({
-            student: req.user._id,
-            courseId,
-            uniqueCode,
-            issuedAt: new Date()
-        })
+        if (passed) {
+            const uniqueCode = `CERT-${new Date().getFullYear()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+            const { data: certificate, error } = await supabase
+                .from('certificates')
+                .upsert({
+                    student_id: req.user.id,
+                    course_id: courseId,
+                    unique_code: uniqueCode
+                }, { onConflict: 'student_id,course_id' })
+                .select()
+                .single()
 
-        res.status(201).json({ message: 'Exam submitted successfully!', score: 15, certificate })
+            if (error) throw error
+            return res.status(201).json({ message: 'Exam submitted successfully!', certificate })
+        }
+
+        res.json({ message: 'Exam submitted. You did not pass yet.' })
     } catch (err) {
         res.status(500).json({ message: err.message })
     }

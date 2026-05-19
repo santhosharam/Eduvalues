@@ -12,9 +12,17 @@ export default function AdminForm({
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
+        let finalValue = type === 'checkbox' ? checked : value;
+        
+        // Convert to number if it's a numeric field
+        const field = fields.find(f => f.name === name);
+        if (field?.type === 'number') {
+            finalValue = value === '' ? 0 : Number(value);
+        }
+
         setFormData(prev => ({
             ...prev,
-            [name]: type === 'checkbox' ? checked : value
+            [name]: finalValue
         }));
     };
 
@@ -26,48 +34,70 @@ export default function AdminForm({
     return (
         <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '24px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }}>
-                {fields.map((field, idx) => (
-                    <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <label style={{ fontSize: '13px', fontWeight: 700, color: '#f1f5f9', letterSpacing: '0.5px' }}>
-                            {field.label} {field.required && <span style={{ color: '#ff6b6b' }}>*</span>}
-                        </label>
+                {fields.map((field, idx) => {
+                    if (field.type === 'header') {
+                        return (
+                            <div key={idx} style={{ marginTop: '24px', marginBottom: '8px' }}>
+                                <div style={{ fontSize: '11px', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                    {field.label}
+                                </div>
+                                <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', marginTop: '8px' }}></div>
+                            </div>
+                        );
+                    }
 
-                        {field.type === 'textarea' ? (
-                            <textarea
-                                name={field.name}
-                                value={formData[field.name] || ''}
-                                onChange={handleChange}
-                                placeholder={field.placeholder}
-                                required={field.required}
-                                style={inputBaseStyle}
-                                rows={field.rows || 4}
-                            />
-                        ) : field.type === 'select' ? (
-                            <select
-                                name={field.name}
-                                value={formData[field.name] || ''}
-                                onChange={handleChange}
-                                required={field.required}
-                                style={inputBaseStyle}
-                            >
-                                <option value="" disabled>{field.placeholder || '-- Select Option --'}</option>
-                                {field.options.map((opt, i) => (
-                                    <option key={i} value={opt.value}>{opt.label}</option>
-                                ))}
-                            </select>
-                        ) : (
-                            <input
-                                name={field.name}
-                                type={field.type || 'text'}
-                                value={formData[field.name] || ''}
-                                onChange={handleChange}
-                                placeholder={field.placeholder}
-                                required={field.required}
-                                style={inputBaseStyle}
-                            />
-                        )}
-                    </div>
-                ))}
+                    return (
+                        <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <label style={{ fontSize: '13px', fontWeight: 700, color: '#f1f5f9', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                {field.type === 'checkbox' && (
+                                    <input
+                                        name={field.name}
+                                        type="checkbox"
+                                        checked={!!formData[field.name]}
+                                        onChange={handleChange}
+                                        style={checkboxStyle}
+                                    />
+                                )}
+                                {field.label} {field.required && <span style={{ color: '#ff6b6b' }}>*</span>}
+                            </label>
+
+                            {field.type === 'textarea' ? (
+                                <textarea
+                                    name={field.name}
+                                    value={formData[field.name] || ''}
+                                    onChange={handleChange}
+                                    placeholder={field.placeholder}
+                                    required={field.required}
+                                    style={inputBaseStyle}
+                                    rows={field.rows || 4}
+                                />
+                            ) : field.type === 'select' ? (
+                                <select
+                                    name={field.name}
+                                    value={formData[field.name] || ''}
+                                    onChange={handleChange}
+                                    required={field.required}
+                                    style={inputBaseStyle}
+                                >
+                                    <option value="" disabled>{field.placeholder || '-- Select Option --'}</option>
+                                    {field.options.map((opt, i) => (
+                                        <option key={i} value={opt.value}>{opt.label}</option>
+                                    ))}
+                                </select>
+                            ) : field.type !== 'checkbox' ? (
+                                <input
+                                    name={field.name}
+                                    type={field.type || 'text'}
+                                    value={formData[field.name] || ''}
+                                    onChange={handleChange}
+                                    placeholder={field.placeholder}
+                                    required={field.required}
+                                    style={inputBaseStyle}
+                                />
+                            ) : null}
+                        </div>
+                    );
+                })}
             </div>
 
             <div style={{
@@ -131,8 +161,18 @@ export default function AdminForm({
     );
 }
 
+const checkboxStyle = {
+    width: '18px',
+    height: '18px',
+    borderRadius: '4px',
+    border: '2px solid rgba(255,255,255,0.2)',
+    cursor: 'pointer',
+    accentColor: '#00A6C0'
+};
+
 const inputBaseStyle = {
     width: '100%',
+    boxSizing: 'border-box',
     padding: '16px 20px',
     background: 'rgba(5, 10, 20, 0.5)',
     border: '1px solid rgba(255, 255, 255, 0.1)',

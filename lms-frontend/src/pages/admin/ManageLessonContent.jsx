@@ -101,7 +101,7 @@ export default function ManageLessonContent() {
 }
 
 const searchFieldStyle = {
-    width: '100%', padding: '14px 20px 14px 48px', background: 'rgba(5, 10, 20, 0.5)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px',
+    width: '100%', boxSizing: 'border-box', padding: '14px 20px 14px 48px', background: 'rgba(5, 10, 20, 0.5)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px',
     color: '#fff', fontSize: '14px', fontWeight: 600, outline: 'none', transition: 'all 0.2s'
 };
 

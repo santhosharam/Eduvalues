@@ -7,7 +7,7 @@ import toast from 'react-hot-toast'
 import { LogIn, Mail, Lock, Loader2, PlayCircle, Rocket, Smile } from 'lucide-react'
 
 export default function Login() {
-    const { login } = useAuth()
+    const { login, loginWithGoogle } = useAuth()
     const navigate = useNavigate()
     const location = useLocation()
     const [loading, setLoading] = useState(false)
@@ -27,7 +27,7 @@ export default function Login() {
                 navigate(from, { replace: true })
             }
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Login failed')
+            toast.error(err.message || 'Login failed')
         } finally {
             setLoading(false)
         }
@@ -98,6 +98,41 @@ export default function Login() {
 
                             <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', height: 64, borderRadius: 20, fontSize: 18 }}>
                                 {loading ? <Loader2 className="spin" size={24} /> : 'Start Playing!'}
+                            </button>
+
+                            <div style={{ position: 'relative', margin: '32px 0', textAlign: 'center' }}>
+                                <hr style={{ border: 'none', borderTop: '1px solid #eee' }} />
+                                <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: '#fff', padding: '0 12px', fontSize: 13, color: '#999', fontWeight: 600 }}>OR</span>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    try {
+                                        await loginWithGoogle()
+                                    } catch (err) {
+                                        toast.error('Google login failed')
+                                    }
+                                }}
+                                style={{
+                                    width: '100%',
+                                    height: 60,
+                                    borderRadius: 20,
+                                    border: '2px solid #EEE',
+                                    background: '#FFF',
+                                    color: '#555',
+                                    fontSize: 16,
+                                    fontWeight: 700,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: 12,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" style={{ width: 20 }} />
+                                Sign in with Google
                             </button>
                         </form>
 

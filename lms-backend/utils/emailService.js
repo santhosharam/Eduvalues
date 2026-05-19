@@ -1,9 +1,9 @@
-import nodemailer from 'nodemailer'
-import {
+const nodemailer = require('nodemailer')
+const {
     welcomeTemplate,
     enrollmentTemplate,
     completionTemplate
-} from './emailTemplates.js'
+} = require('./emailTemplates')
 
 /**
  * Robust Email Service configuration for EduValues, built for high-reliability 
@@ -19,6 +19,9 @@ const transporter = nodemailer.createTransport({
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
+    },
+    tls: {
+        rejectUnauthorized: false
     }
 })
 
@@ -46,7 +49,7 @@ const sendEmail = async ({ to, subject, html, text }) => {
 /**
  * Direct automations for common platform events.
  */
-export const emailAutomation = {
+const emailAutomation = {
     /** 
      * Automation trigger for a new student registration. 
      * Delivers the brand's 'Welcome to the Playground' message.
@@ -85,4 +88,8 @@ export const emailAutomation = {
             text: `Incredible job ${userName}! You've completed ${courseName}. View and download your certificate here: ${certificateLink}`
         })
     }
+}
+
+module.exports = {
+    emailAutomation
 }

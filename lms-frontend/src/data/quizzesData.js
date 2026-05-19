@@ -258,5 +258,135 @@ export const quizzesData = {
                                         { text: "Because the teacher said so", correct: false, feedback: "It's because the world is full of wonders to discover! 🌍" }
                                     ]
                                 }
+                            ],
+                            'The Whispering Wind': [
+                                {
+                                    question: "What did Wendy the Wind learn from wise Barnaby the old oak tree?",
+                                    options: [
+                                        { text: "Beautiful things take time, so be patient", correct: true, feedback: "Spot on! Patience is a super power! 💨✨" },
+                                        { text: "To blow flowers down", correct: false, feedback: "Oh no! Wendy wants flowers to bloom happily. 🌸" },
+                                        { text: "To run as fast as possible", correct: false, feedback: "Slowing down helps us enjoy the journey! 🐌" }
+                                    ]
+                                },
+                                {
+                                    question: "How did Wendy practice her new calm superpower?",
+                                    options: [
+                                        { text: "She screamed and made noise", correct: false, feedback: "That doesn't help us feel peaceful. ❌" },
+                                        { text: "She took a deep slow breath and smiled", correct: true, feedback: "Yes! Deep breaths help us wait calmly. 🌬️" },
+                                        { text: "She flew away immediately", correct: false, feedback: "Taking a moment to breathe is the way! 🎈" }
+                                    ]
+                                },
+                                {
+                                    question: "Why does Barnaby say breathing slowly is a wonderful idea?",
+                                    options: [
+                                        { text: "It makes waiting time peaceful and happy", correct: true, feedback: "Beautiful! Calm breaths make waiting fun! 💨🌸" },
+                                        { text: "To blow all the green leaves off", correct: false, feedback: "We want leaves to stay safe on the tree! 🌳" },
+                                        { text: "To go to sleep instantly", correct: false, feedback: "Calm breathing makes us feel happy and awake! ☀️" }
+                                    ]
+                                }
+                            ],
+                            'The Sharing Squirrel': [
+                                {
+                                    question: "Why was Sammy the Squirrel keeping all his acorns locked up?",
+                                    options: [
+                                        { text: "He wanted to throw them away", correct: false, feedback: "Sammy loved his golden acorns! 🌰" },
+                                        { text: "He was afraid they would run out", correct: true, feedback: "Yes! But sharing actually brings more joy! 🐿️" },
+                                        { text: "They were broken", correct: false, feedback: "They were beautiful and golden. ✨" }
+                                    ]
+                                },
+                                {
+                                    question: "How did Sammy feel after sharing his biggest acorn with Bella?",
+                                    options: [
+                                        { text: "Cold and sad", correct: false, feedback: "Sharing makes our hearts warmer! ❄️" },
+                                        { text: "Angry and upset", correct: false, feedback: "Bella's big smile made Sammy very happy. 😊" },
+                                        { text: "Warm, cozy, and super happy inside", correct: true, feedback: "Yes! Generosity leaves a golden sparkle! 💖" }
+                                    ]
+                                },
+                                {
+                                    question: "What is a wonderful thing you can share with a friend?",
+                                    options: [
+                                        { text: "A warm smile, a lovely toy, or a tasty snack", correct: true, feedback: "Spot on! Sharing makes friendship bloom! 🎁🧸" },
+                                        { text: "A loud angry shout", correct: false, feedback: "Shouting is not a sweet thing to share. ❌" },
+                                        { text: "Nothing, keep everything hidden", correct: false, feedback: "Sharing builds happy playgrounds! 🌟" }
+                                    ]
+                                }
+                            ],
+                            'Listening with Your Heart': [
+                                {
+                                    question: "When Pippa the Penguin was sad, what did Leo the Lion do?",
+                                    options: [
+                                        { text: "He roared his new song loudly", correct: false, feedback: "Leo realized quiet ears help more than big roars. 🦁" },
+                                        { text: "He sat quietly beside her and listened", correct: true, feedback: "Amazing! Heart-listening is a beautiful gift. ❤️" },
+                                        { text: "He went to play soccer alone", correct: false, feedback: "Being there for a friend is the kind choice. 🤝" }
+                                    ]
+                                },
+                                {
+                                    question: "Active listening helps our friends feel:",
+                                    options: [
+                                        { text: "Confused and tired", correct: false, feedback: "Listening carefully makes them feel loved! ✨" },
+                                        { text: "Loved, safe, and heard", correct: true, feedback: "Perfect! You have a wonderful, caring heart. 🌟" },
+                                        { text: "Angry and loud", correct: false, feedback: "Quiet ears bring peaceful smiles. 👂" }
+                                    ]
+                                },
+                                {
+                                    question: "How can we show someone we are really listening?",
+                                    options: [
+                                        { text: "Look at them and listen quietly without interrupting", correct: true, feedback: "Perfect! That shows real respect and care! 👀👂" },
+                                        { text: "Close our eyes and fall asleep", correct: false, feedback: "A sleeping friend can't listen to a story! 😴" },
+                                        { text: "Make funny faces and talk loudly", correct: false, feedback: "We should listen gently with quiet paws. 🤫" }
+                                    ]
+                                }
+                            ],
+                            'The Gentle Giant': [
+                                {
+                                    question: "What does Gerry the Elephant show us about true strength?",
+                                    options: [
+                                        { text: "It is about being soft, careful, and gentle", correct: true, feedback: "Yes! True heroes use strength to protect and care. 🐘🦋" },
+                                        { text: "It is about knocking down all trees", correct: false, feedback: "Elephants can do that, but Gerry chose kindness! 🌳" },
+                                        { text: "It is about shouting louder than others", correct: false, feedback: "Gentle whispers are much sweeter. 🤫" }
+                                    ]
+                                },
+                                {
+                                    question: "How should we walk if we are practicing Gerry's gentle footsteps?",
+                                    options: [
+                                        { text: "Loudly like heavy thunder", correct: false, feedback: "That might scare the butterflies! ⚡" },
+                                        { text: "As quiet as falling snow", correct: true, feedback: "Perfect! So careful and soft. ❄️✨" },
+                                        { text: "Jump up and down roughly", correct: false, feedback: "Gentle walking is peaceful and kind. 🦶" }
+                                    ]
+                                },
+                                {
+                                    question: "Which of the following is a beautiful way to be gentle at home?",
+                                    options: [
+                                        { text: "Hugging your family or pets carefully and softly", correct: true, feedback: "Perfect! Soft hugs make everyone feel safe! 🤗🐱" },
+                                        { text: "Slamming doors loudly", correct: false, feedback: "Slamming doors makes a scary noise! ❌" },
+                                        { text: "Throwing your crayons on the floor", correct: false, feedback: "Crayons should be handled with care. 🖍️" }
+                                    ]
+                                }
+                            ],
+                            'The Gratitude Tree': [
+                                {
+                                    question: "Gigi the Giraffe touched a leaf and named one thing she was:",
+                                    options: [
+                                        { text: "Sad about", correct: false, feedback: "No, she named things she was thankful for! 🦒" },
+                                        { text: "Thankful for", correct: true, feedback: "Yes! Counting our blessings brings sun in our hearts. ☀️" },
+                                        { text: "Scared of", correct: false, feedback: "She felt extremely brave and happy! 🌳" }
+                                    ]
+                                },
+                                {
+                                    question: "What does practicing gratitude daily help us see?",
+                                    options: [
+                                        { text: "All the beautiful gifts already around us", correct: true, feedback: "Exactly! Life is full of wonderful treasures. 🎁🌟" },
+                                        { text: "Only the things we don't have", correct: false, feedback: "Gratitude makes us appreciate what we have! ❤️" },
+                                        { text: "Nothing at all", correct: false, feedback: "It opens our eyes to beautiful smiles! 🌸" }
+                                    ]
+                                },
+                                {
+                                    question: "What are some sweet things you can say 'Thank You' for today?",
+                                    options: [
+                                        { text: "A yummy lunch, a warm hug, or a beautiful sunny day", correct: true, feedback: "Yes! Big gratitude for simple, beautiful things! ☀️🥪" },
+                                        { text: "Only when someone gives you a mountain of gold", correct: false, feedback: "Simple things bring the best warm smiles! 🎁" },
+                                        { text: "Nothing at all", correct: false, feedback: "Every day has tiny treasures to appreciate! 🌸" }
+                                    ]
+                                }
                             ]
                         };

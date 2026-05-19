@@ -1,17 +1,33 @@
 import { useNavigate } from 'react-router-dom'
 import { Star, BookOpen } from 'lucide-react'
+import { useAuth } from '../../context/AuthContext'
 
 export default function CourseCard({ course }) {
     const navigate = useNavigate()
+    const { user } = useAuth()
     if (!course) return null
 
-    // ✅ Normalize snake_case from Supabase to camelCase
+    const isEnrolled = user?.enrolledCourses?.some(c => (c.id || c._id) === (course.id || course._id)) || user?.role === 'admin'
     const lessons = course.lessons || []
     const shortDescription = course.short_description || course.shortDescription || 'Nurturing integrity and leadership through play.'
     const discountPrice = course.discount_price || course.discountPrice
     const priceDisplay = course.price === 0 ? 'Free' : `₹${discountPrice || course.price}`
     const rating = course.rating || 0
     const reviewsCount = course.reviews?.length || 0
+
+    const handleAction = (e) => {
+        e.stopPropagation()
+        if (isEnrolled) {
+            if (lessons.length > 0) {
+                const lessonId = lessons[0].id || lessons[0]._id
+                navigate(`/dashboard/lesson/${lessonId}`)
+            } else {
+                navigate(`/courses/${course.slug || course.id || course._id}`)
+            }
+        } else {
+            navigate(`/courses/${course.slug || course.id || course._id}`)
+        }
+    }
 
     return (
         <div className="kids-card" style={{ height: '100%', display: 'flex', flexDirection: 'column', cursor: 'pointer' }} onClick={() => navigate(`/courses/${course.slug || course.id || course._id}`)}>
@@ -45,7 +61,9 @@ export default function CourseCard({ course }) {
                     color: '#001F3F',
                     marginBottom: '12px',
                     lineHeight: 1.3,
-                    minHeight: '52px'
+                    minHeight: '52px',
+                    fontFamily: '"Fredoka", sans-serif',
+                    fontWeight: '900'
                 }}>
                     {course.title}
                 </h3>
@@ -85,7 +103,7 @@ export default function CourseCard({ course }) {
                     <div style={{ display: 'flex', gap: '8px' }}>
                         <button 
                             className="btn-outline" 
-                            style={{ height: '44px', padding: '0 12px', fontSize: '12px', borderRadius: '12px' }}
+                            style={{ padding: '8px 16px', fontSize: '12px', borderRadius: '20px' }}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 navigate(`/courses/${course.slug || course.id || course._id}`);
@@ -95,18 +113,10 @@ export default function CourseCard({ course }) {
                         </button>
                         <button
                             className="btn-primary"
-                            style={{ height: '44px', padding: '0 16px', fontSize: '12px', borderRadius: '12px', display: 'flex', alignItems: 'center', border: 'none', cursor: 'pointer' }}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                if (lessons.length > 0) {
-                                    const lessonId = lessons[0].id || lessons[0]._id;
-                                    navigate(`/dashboard/lesson/${lessonId}`);
-                                } else {
-                                    navigate(`/courses/${course.slug || course.id || course._id}`);
-                                }
-                            }}
+                            style={{ padding: '8px 16px', fontSize: '12px', borderRadius: '20px', display: 'flex', alignItems: 'center', border: 'none', cursor: 'pointer' }}
+                            onClick={handleAction}
                         >
-                            Start Now
+                            {isEnrolled ? 'Start Now' : 'Enroll Now'}
                         </button>
                     </div>
                 </div>

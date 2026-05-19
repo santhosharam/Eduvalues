@@ -1,14 +1,21 @@
-const Progress = require('../models/Progress')
-const Course = require('../models/Course')
-const Enrollment = require('../models/Enrollment')
-const Certificate = require('../models/Certificate')
+const supabase = require('../supabaseClient')
 const { v4: uuidv4 } = require('uuid')
 
 // GET /api/progress/:courseId
 exports.getCourseProgress = async (req, res) => {
     try {
-        const progress = await Progress.findOne({ student: req.user._id, courseId: req.params.courseId })
-        res.json({ progress: progress || { completedLessons: [], percent: 0 } })
+        const { data: progress, error } = await supabase
+            .from('enrollments')
+            .select('completed_lessons, progress')
+            .eq('student_id', req.user.id)
+            .eq('course_id', req.params.courseId)
+            .single()
+
+        if (error || !progress) {
+            return res.json({ progress: { completedLessons: [], percent: 0 } })
+        }
+        
+        res.json({ progress: { completedLessons: progress.completed_lessons || [], percent: progress.progress || 0 } })
     } catch (err) {
         res.status(500).json({ message: err.message })
     }
@@ -18,29 +25,46 @@ exports.getCourseProgress = async (req, res) => {
 exports.markLessonComplete = async (req, res) => {
     try {
         const { courseId, lessonId } = req.params
-        const studentId = req.user._id
+        const studentId = req.user.id
 
-        let progress = await Progress.findOne({ student: studentId, courseId: courseId })
-        if (!progress) {
-            progress = new Progress({ student: studentId, courseId: courseId, completedLessons: [] })
+        // Fetch current enrollment
+        const { data: enrollment, error: eErr } = await supabase
+            .from('enrollments')
+            .select('completed_lessons')
+            .eq('student_id', studentId)
+            .eq('course_id', courseId)
+            .single()
+
+        if (eErr || !enrollment) return res.status(404).json({ message: 'Enrollment not found' })
+
+        let completed = enrollment.completed_lessons || []
+        if (!completed.includes(lessonId)) {
+            completed.push(lessonId)
         }
-        if (!progress.completedLessons.map(String).includes(String(lessonId))) {
-            progress.completedLessons.push(lessonId)
-        }
-        progress.lastWatched = lessonId
-        await progress.save()
 
-        const course = await Course.findById(courseId)
-        const total = course.lessons.length
-        const percent = total > 0 ? Math.round((progress.completedLessons.length / total) * 100) : 0
+        // Calculate percent
+        const { data: lessons } = await supabase
+            .from('lessons')
+            .select('id', { count: 'exact' })
+            .eq('course_id', courseId)
 
-        // Auto-complete enrollment (REMOVED - now requires final assessment)
-        await Enrollment.findOneAndUpdate(
-            { student: studentId, courseId: courseId },
-            { progress: percent }
-        )
+        const total = lessons?.length || 1
+        const percent = Math.round((completed.length / total) * 100)
 
-        res.json({ percent, completedLessons: progress.completedLessons })
+        // Update enrollment
+        const { error: uErr } = await supabase
+            .from('enrollments')
+            .update({ 
+                completed_lessons: completed,
+                progress: percent,
+                last_watched_lesson_id: lessonId
+            })
+            .eq('student_id', studentId)
+            .eq('course_id', courseId)
+
+        if (uErr) throw uErr
+
+        res.json({ percent, completedLessons: completed })
     } catch (err) {
         res.status(500).json({ message: err.message })
     }
@@ -50,75 +74,64 @@ exports.markLessonComplete = async (req, res) => {
 exports.submitFinalAssessment = async (req, res) => {
     try {
         const { courseId } = req.params
-        const { answers } = req.body // Array of selected option indices
-        const studentId = req.user._id
+        const { answers } = req.body 
+        const studentId = req.user.id
 
-        const course = await Course.findById(courseId)
-        if (!course) return res.status(404).json({ message: 'Course not found' })
+        // Fetch course and assessment
+        const { data: assessment, error: aErr } = await supabase
+            .from('final_assessments')
+            .select('*')
+            .eq('course_id', courseId)
+            .single()
 
-        if (!course.finalQuiz || course.finalQuiz.length === 0) {
-            return res.status(400).json({ message: 'Final assessment not available for this course' })
-        }
+        if (aErr || !assessment) return res.status(404).json({ message: 'Assessment not found' })
 
-        // Check if all lessons are completed first
-        const progress = await Progress.findOne({ student: studentId, courseId: courseId })
-        if (!progress || progress.completedLessons.length < course.lessons.length) {
-            return res.status(400).json({ message: 'Please complete all lessons before taking the final assessment' })
+        // Check if all lessons are completed
+        const { data: enrollment } = await supabase
+            .from('enrollments')
+            .select('completed_lessons')
+            .eq('student_id', studentId)
+            .eq('course_id', courseId)
+            .single()
+
+        const { data: lessons } = await supabase.from('lessons').select('id').eq('course_id', courseId)
+        
+        if (!enrollment || enrollment.completed_lessons.length < lessons.length) {
+            return res.status(400).json({ message: 'Please complete all lessons first' })
         }
 
         // Calculate score
         let score = 0
-        course.finalQuiz.forEach((q, idx) => {
-            const correctIdx = q.options.findIndex(o => o.correct)
-            if (answers[idx] === correctIdx) {
-                score++
-            }
+        assessment.questions.forEach((q, idx) => {
+            if (answers[idx] === q.correctAnswer) score++
         })
 
-        const totalQuestions = course.finalQuiz.length
-        const passPercentage = 70 // 70% to pass
-        const userPercentage = (score / totalQuestions) * 100
+        const percent = (score / assessment.questions.length) * 100
+        const passed = percent >= assessment.passing_score
 
-        if (userPercentage >= passPercentage) {
-            // Mark enrollment as completed
-            await Enrollment.findOneAndUpdate(
-                { student: studentId, courseId: courseId },
-                { isCompleted: true, completedAt: new Date(), progress: 100 }
-            )
+        if (passed) {
+            // Update enrollment
+            await supabase
+                .from('enrollments')
+                .update({ is_completed: true, completed_at: new Date(), progress: 100 })
+                .eq('student_id', studentId)
+                .eq('course_id', courseId)
 
             // Generate certificate
-            const exists = await Certificate.findOne({ student: studentId, courseId: courseId })
-            let certificateId = exists?._id
-            if (!exists) {
-                const newCert = await Certificate.create({
-                    student: studentId,
-                    courseId: courseId,
-                    uniqueCode: uuidv4().slice(0, 12).toUpperCase(),
-                    certificateUrl: '', // In production, upload buffer from generateCertificatePDF
-                    issuedAt: new Date(),
-                })
-                certificateId = newCert._id
-            }
+            const uniqueCode = `CERT-${new Date().getFullYear()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+            const { data: certificate } = await supabase
+                .from('certificates')
+                .upsert({
+                    student_id: studentId,
+                    course_id: courseId,
+                    unique_code: uniqueCode
+                }, { onConflict: 'student_id,course_id' })
+                .select()
+                .single()
 
-            // Mock Email Notification
-            console.log(`Email sent to ${req.user.email}: Congratulations on passing the final assessment!`)
-
-            res.json({ 
-                success: true, 
-                score, 
-                totalQuestions, 
-                percentage: userPercentage,
-                message: 'Congratulations! You passed the final assessment.',
-                certificateId
-            })
+            res.json({ success: true, score, percent, passed: true, certificateId: certificate?.id })
         } else {
-            res.json({ 
-                success: false, 
-                score, 
-                totalQuestions, 
-                percentage: userPercentage,
-                message: 'You did not pass the final assessment. Please try again.' 
-            })
+            res.json({ success: false, score, percent, passed: false, message: 'You did not pass. Try again!' })
         }
     } catch (err) {
         res.status(500).json({ message: err.message })

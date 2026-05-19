@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import Navbar from '../../components/common/Navbar'
 import Footer from '../../components/common/Footer'
 import { getCourseBySlug } from '../../services/courseService'
@@ -17,6 +17,7 @@ export default function CourseDetail() {
     const { slug } = useParams()
     const { user } = useAuth()
     const navigate = useNavigate()
+    const location = useLocation()
     const [course, setCourse] = useState(null)
     const [loading, setLoading] = useState(true)
 
@@ -36,7 +37,6 @@ export default function CourseDetail() {
 
     // Safely extract the first lesson ID regardless of shape:
     // - Supabase: lessons = [{ id: 'uuid', ... }]
-    // - MongoDB:  lessons = [{ _id: 'objectid', ... }] or ['objectid-string']
     const getFirstLessonId = (lessons) => {
         if (!lessons || lessons.length === 0) return null
         const first = lessons[0]
@@ -66,11 +66,21 @@ export default function CourseDetail() {
 
     const isEnrolled = user?.enrolledCourses?.some(c => (c.id || c._id) === (course.id || course._id)) || user?.role === 'admin'
 
+    const handleBuy = () => {
+        if (!user) {
+            toast.error('Please login to purchase this adventure!')
+            navigate('/login', { state: { from: location } })
+            return
+        }
+        // Redirect to checkout with course ID
+        navigate(`/checkout/${course.id || course._id}`)
+    }
+
     return (
         <div style={{ minHeight: '100vh', background: '#fff' }}>
             <Navbar />
 
-            {/* --- Banner - Updated to Navy/Teal --- */}
+            {/* --- Banner --- */}
             <section style={{
                 background: '#001F3F',
                 color: '#fff',
@@ -78,11 +88,10 @@ export default function CourseDetail() {
                 position: 'relative',
                 overflow: 'hidden'
             }}>
-                {/* Decorative Elements - Updated to Teal */}
                 <div style={{ position: 'absolute', top: -100, left: -100, width: 400, height: 400, background: 'rgba(0, 166, 192, 0.25)', borderRadius: '50%' }} />
                 <div style={{ position: 'absolute', bottom: -50, right: -50, width: 300, height: 300, background: 'rgba(29, 209, 161, 0.15)', borderRadius: '50%' }} />
 
-                <div className="section-container" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) 400px', gap: 60, alignItems: 'center', position: 'relative', zIndex: 1 }}>
+                <div className="section-container mobile-stack" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) 400px', gap: 60, alignItems: 'center', position: 'relative', zIndex: 1 }}>
                     <div>
                         <Link to="/courses" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,0.7)', fontSize: 15, textDecoration: 'none', marginBottom: 24, fontWeight: 'bold' }}>
                             <ArrowLeft size={18} /> Back to Search
@@ -95,8 +104,8 @@ export default function CourseDetail() {
                                 {course.level || 'KIDS'}
                             </span>
                         </div>
-                        <h1 style={{ fontSize: 'clamp(32px, 5vw, 54px)', fontWeight: 'bold', marginBottom: 24, color: '#fff', lineHeight: 1.1 }}>{course.title}</h1>
-                        <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: 18, lineHeight: 1.7, marginBottom: 36, maxWidth: 640, fontWeight: 600 }}>{course.description}</p>
+                        <h1 style={{ fontSize: 'clamp(32px, 5vw, 54px)', fontWeight: '900', marginBottom: 24, color: '#fff', lineHeight: 1.1, fontFamily: '"Fredoka", sans-serif', textShadow: '0 4px 0 rgba(0,0,0,0.15)' }}>{course.title}</h1>
+                        <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: 18, lineHeight: 1.7, marginBottom: 36, maxWidth: 640, fontWeight: 600, fontFamily: '"Quicksand", sans-serif' }}>{course.description}</p>
 
                         <div style={{ display: 'flex', gap: 40, alignItems: 'center', flexWrap: 'wrap', marginBottom: 40 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -109,26 +118,57 @@ export default function CourseDetail() {
                             </div>
                         </div>
 
-                        {getFirstLessonId(course.lessons) ? (
-                            <Link
-                                to={`/dashboard/lesson/${getFirstLessonId(course.lessons)}`}
-                                className="btn-primary" style={{ height: 64, padding: '0 48px', fontSize: 18, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
-                            >
-                                🚀 Start Learning!
-                            </Link>
+                        {isEnrolled ? (
+                            getFirstLessonId(course.lessons) ? (
+                                <Link
+                                    to={`/dashboard/lesson/${getFirstLessonId(course.lessons)}`}
+                                    className="btn-primary" 
+                                    style={{ 
+                                        height: 64, 
+                                        padding: '0 48px', 
+                                        fontSize: 18, 
+                                        borderRadius: 30, 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        justifyContent: 'center', 
+                                        textDecoration: 'none',
+                                        background: 'linear-gradient(135deg, #1dd1a1, #10ac84)',
+                                        boxShadow: '0 8px 0 #0d8c6b, 0 15px 25px rgba(29, 209, 161, 0.4)'
+                                    }}
+                                >
+                                    🚀 Resume Learning!
+                                </Link>
+                            ) : (
+                                <button className="btn-primary" style={{ height: 64, opacity: 0.7, borderRadius: 30 }}>Lessons Coming Soon</button>
+                            )
                         ) : (
                             <button
-                                onClick={() => toast.error('Lessons not loaded yet. Please refresh the page.')}
+                                onClick={handleBuy}
                                 className="btn-primary" 
-                                style={{ height: 64, padding: '0 48px', fontSize: 18, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: 'none' }}
+                                style={{ 
+                                    height: 72, 
+                                    padding: '0 56px', 
+                                    fontSize: 20, 
+                                    borderRadius: 30, 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center', 
+                                    cursor: 'pointer', 
+                                    border: 'none', 
+                                    background: 'linear-gradient(135deg, #FFD000, #FFA800)',
+                                    color: '#001F3F',
+                                    fontWeight: 900,
+                                    fontFamily: 'Fredoka',
+                                    boxShadow: '0 8px 0 #d48b00, 0 15px 25px rgba(255, 208, 0, 0.35)'
+                                }}
                             >
-                                Start Course
+                                💳 Enroll for ₹{course.discount_price || course.discountPrice || course.price}
                             </button>
                         )}
                     </div>
 
                     {/* Preview Image Frame */}
-                    <div style={{ position: 'relative', width: '100%' }}>
+                    <div style={{ position: 'relative', width: '100%', maxWidth: 500, margin: '0 auto' }}>
                         <div style={{
                             borderRadius: '40% 60% 70% 30% / 50% 50% 50% 50%',
                             overflow: 'hidden',
@@ -152,7 +192,7 @@ export default function CourseDetail() {
             </section>
 
             {/* --- Content Grid --- */}
-            <main className="section-container" style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 60, padding: '80px 24px' }}>
+            <main className="section-container mobile-stack" style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 60, padding: '80px 24px' }}>
                 <div style={{ flex: 1 }}>
                     <div style={{ marginBottom: 64 }}>
                         <h2 style={{ fontSize: 32, marginBottom: 32, display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -180,7 +220,7 @@ export default function CourseDetail() {
                         <h2 style={{ fontSize: 32, marginBottom: 32, display: 'flex', alignItems: 'center', gap: 16 }}>
                             <Rocket size={32} color="#FF9F43" /> Course Journey
                         </h2>
-                        <div style={{ border: '3px solid #F4F7F9', borderRadius: '32px', overflow: 'hidden' }}>
+                        <div style={{ border: '3px solid #F1F1F1', borderRadius: '32px', overflow: 'hidden', boxShadow: '0 8px 0 #F1F1F1' }}>
                             {(course.lessons || []).length === 0 ? (
                                 <div style={{ padding: 48, textAlign: 'center', color: '#888' }}>
                                     No lessons added to this journey yet.
@@ -192,7 +232,7 @@ export default function CourseDetail() {
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'space-between',
-                                    borderBottom: idx !== course.lessons.length - 1 ? '3px solid #F4F7F9' : 'none'
+                                    borderBottom: idx !== course.lessons.length - 1 ? '3px solid #F1F1F1' : 'none'
                                 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
                                         <div style={{
@@ -211,8 +251,8 @@ export default function CourseDetail() {
                                             {idx + 1}
                                         </div>
                                         <div>
-                                            <div style={{ fontSize: 18, fontWeight: 800, color: '#2D3436' }}>Lesson {idx + 1} - {lesson.title}</div>
-                                            <div style={{ fontSize: 13, color: '#888', marginTop: 4 }}>{lesson.description || 'Values Exploration'}</div>
+                                            <div style={{ fontSize: 18, fontWeight: 900, color: '#001F3F', fontFamily: '"Fredoka", sans-serif' }}>Lesson {idx + 1} - {lesson.title}</div>
+                                            <div style={{ fontSize: 13, color: '#888', marginTop: 4, fontFamily: '"Quicksand", sans-serif', fontWeight: 600 }}>{lesson.description || 'Values Exploration'}</div>
                                         </div>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -274,29 +314,33 @@ export default function CourseDetail() {
                         border: '3px solid #F1F1F1',
                         position: 'sticky',
                         top: 120,
-                        boxShadow: 'var(--shadow-soft)',
+                        boxShadow: '0 10px 0 #F1F1F1',
                         textAlign: 'center'
                     }}>
                         <div style={{ fontSize: 56, fontWeight: 900, color: '#00A6C0', marginBottom: 12 }}>
-                            ₹{course.discountPrice || course.price}
+                            ₹{course.discount_price || course.discountPrice || course.price}
                         </div>
                         <p style={{ fontSize: 15, color: '#888', fontWeight: 600, marginBottom: 32 }}>Give your child the gift of values!</p>
 
-                        {getFirstLessonId(course.lessons) ? (
-                            <Link
-                                to={`/dashboard/lesson/${getFirstLessonId(course.lessons)}`}
-                                className="btn-primary"
-                                style={{ width: '100%', height: 64, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
-                            >
-                                🚀 Start Learning!
-                            </Link>
+                        {isEnrolled ? (
+                            getFirstLessonId(course.lessons) ? (
+                                <Link
+                                    to={`/dashboard/lesson/${getFirstLessonId(course.lessons)}`}
+                                    className="btn-primary"
+                                    style={{ width: '100%', height: 64, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
+                                >
+                                    🚀 Resume Adventure
+                                </Link>
+                            ) : (
+                                <button className="btn-primary" style={{ width: '100%', height: 64, borderRadius: 20, opacity: 0.7 }}>Lessons Soon</button>
+                            )
                         ) : (
                             <button
-                                onClick={() => toast.error('Lessons not loaded yet. Please refresh the page.')}
+                                onClick={handleBuy}
                                 className="btn-primary"
                                 style={{ width: '100%', height: 64, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: 'none' }}
                             >
-                                Start Course
+                                💳 Enroll Now
                             </button>
                         )}
 

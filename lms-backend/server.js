@@ -3,18 +3,15 @@ const express = require('express')
 const cors = require('cors')
 const morgan = require('morgan')
 const rateLimit = require('express-rate-limit')
-const connectDB = require('./config/db')
-
 const app = express()
 
-// Connect MongoDB
-// Connect MongoDB
-const startServer = async () => {
-    try {
-        await connectDB()
+// Initialization
+console.log('⚡ Using Supabase as the primary database. [Build: 2026-05-13_14:50]')
 
-        // Security headers & Private Network Access support
-        app.use((req, res, next) => {
+// Security headers & Private Network Access support
+app.use((req, res, next) => {
+            console.log(`[REQUEST] ${req.method} ${req.url}`)
+            
             res.setHeader('X-Content-Type-Options', 'nosniff')
             res.setHeader('X-Frame-Options', 'DENY')
             res.setHeader('X-XSS-Protection', '1; mode=block')
@@ -72,6 +69,8 @@ const startServer = async () => {
                 }
             },
             credentials: true,
+            allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
         }))
         app.use(express.json({ limit: '5mb' }))
         app.use(morgan('dev'))
@@ -84,6 +83,7 @@ const startServer = async () => {
         app.use('/api/progress', require('./routes/progressRoutes'))
         app.use('/api/payments', require('./routes/paymentRoutes'))
         app.use('/api/certificates', require('./routes/certificateRoutes'))
+        app.use('/api/assessments', require('./routes/assessmentRoutes'))
         app.use('/api/reviews', require('./routes/reviewRoutes'))
         app.use('/api/admin', require('./routes/adminRoutes'))
 
@@ -112,15 +112,9 @@ const startServer = async () => {
             })
         })
 
-        const PORT = process.env.PORT || 5000
-        if (process.env.NODE_ENV !== 'test') {
-            app.listen(PORT, () => console.log(`🚀 LMS Server running on port ${PORT}`))
-        }
-    } catch (err) {
-        console.error('Failed to start server:', err)
-    }
+const PORT = process.env.PORT || 5000
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
+    app.listen(PORT, () => console.log(`🚀 LMS Server running on port ${PORT}`))
 }
-
-startServer()
 
 module.exports = app

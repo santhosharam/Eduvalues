@@ -1,31 +1,48 @@
-const Review = require('../models/Review')
-const Course = require('../models/Course')
-const Enrollment = require('../models/Enrollment')
+const supabase = require('../supabaseClient')
 
 exports.submitReview = async (req, res) => {
     try {
         const { courseId, rating, comment } = req.body
-        const studentId = req.user._id
+        const studentId = req.user.id
 
-        // Verify enrollment
-        const enrollment = await Enrollment.findOne({ student: studentId, courseId: courseId })
-        if (!enrollment) return res.status(403).json({ message: 'You must be enrolled to review this course' })
+        // Verify enrollment in Supabase
+        const { data: enrollment, error: eErr } = await supabase
+            .from('enrollments')
+            .select('*')
+            .eq('student_id', studentId)
+            .eq('course_id', courseId)
+            .single()
 
-        const review = await Review.create({
-            courseId: courseId,
-            student: studentId,
-            rating,
-            comment
-        })
+        if (eErr || !enrollment) return res.status(403).json({ message: 'You must be enrolled to review this course' })
+
+        // Create review in Supabase
+        const { data: review, error: rErr } = await supabase
+            .from('reviews')
+            .insert([{
+                course_id: courseId,
+                student_id: studentId,
+                rating,
+                comment
+            }])
+            .select()
+            .single()
+
+        if (rErr) throw rErr
 
         // Update course rating (simple average)
-        const reviews = await Review.find({ courseId: courseId })
-        const avgRating = reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviews.length
+        const { data: reviews } = await supabase
+            .from('reviews')
+            .select('rating')
+            .eq('course_id', courseId)
 
-        await Course.findByIdAndUpdate(courseId, {
-            $push: { reviews: review._id },
-            rating: avgRating.toFixed(1)
-        })
+        if (reviews && reviews.length > 0) {
+            const avgRating = reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviews.length
+            
+            await supabase
+                .from('courses')
+                .update({ rating: parseFloat(avgRating.toFixed(1)) })
+                .eq('id', courseId)
+        }
 
         res.status(201).json({ review })
     } catch (err) {

@@ -65,10 +65,10 @@ export default function Courses() {
                     }}>
                         <Rocket size={18} /> THE PLAYGROUND IS OPEN!
                     </div>
-                    <h1 style={{ fontSize: '56px', fontWeight: 'bold', color: '#fff', marginBottom: '16px' }}>
+                    <h1 style={{ fontSize: '56px', fontWeight: '900', color: '#fff', marginBottom: '16px', fontFamily: '"Fredoka", sans-serif', textShadow: '0 4px 0 rgba(0,0,0,0.15)' }}>
                         Explore New Adventures
                     </h1>
-                    <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: 18, fontWeight: 600 }}>
+                    <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: 18, fontWeight: 600, fontFamily: '"Quicksand", sans-serif' }}>
                         Find the perfect playful journey for your little genius.
                     </p>
                 </div>
@@ -89,12 +89,12 @@ export default function Courses() {
                         background: '#fff',
                         padding: '36px',
                         borderRadius: '32px',
-                        border: '2px solid #F1F1F1',
+                        border: '3px solid #F1F1F1',
                         position: 'sticky',
                         top: 120,
-                        boxShadow: 'var(--shadow-soft)'
+                        boxShadow: '0 10px 0 #F1F1F1'
                     }}>
-                        <h2 style={{ fontSize: 24, marginBottom: 32, display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 32, display: 'flex', alignItems: 'center', gap: 12, fontFamily: '"Fredoka", sans-serif', color: '#001F3F' }}>
                             <Filter size={24} color="#00A6C0" /> Filter Fun
                         </h2>
 
@@ -141,7 +141,7 @@ export default function Courses() {
 
                         <button
                             className="btn-outline"
-                            style={{ width: '100%', height: 52, borderRadius: 16, fontSize: 14 }}
+                            style={{ width: '100%', padding: '12px 24px', borderRadius: 30, fontSize: 14 }}
                             onClick={() => { setSearchTerm(''); setLevelFilter(''); setCategoryFilter('') }}>
                             Reset All
                         </button>

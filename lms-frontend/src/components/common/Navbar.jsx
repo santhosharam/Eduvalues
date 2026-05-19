@@ -24,110 +24,157 @@ export default function Navbar() {
         { to: '/', label: 'Home' },
         { to: '/courses', label: 'Our Courses' },
         { to: '/blog', label: 'Insights' },
+        ...(user ? [{ to: '/dashboard/playground', label: 'Playground 🎮' }] : []),
         { to: '/contact', label: 'Call Us' },
         { to: '/dashboard', label: 'Account' },
     ]
 
     return (
         <header style={{
-            position: 'relative',
+            position: 'sticky',
+            top: 0,
             background: '#fff',
+            zIndex: 1000,
+            borderBottom: '3px solid #F1F1F1',
+            boxShadow: '0 8px 0 rgba(0,0,0,0.02)',
             transition: 'all 0.3s ease'
         }}>
-            {/* --- Top Info Bar --- */}
-            <div style={{ 
-                background: '#fff', 
-                color: '#555', 
-                padding: '12px 24px', 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center', 
-                borderBottom: '1px solid #f0f0f0',
-                fontSize: '13px',
-                fontWeight: 600
-            }}>
-                <div style={{ display: 'flex', gap: '30px', alignItems: 'center' }} className="nav-info-left">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <MapPin size={16} color="#00A6C0" /> Chennai
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <Phone size={16} color="#00A6C0" /> +91 98842 70368
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <Mail size={16} color="#00A6C0" /> eduvalues123@gmail.com
-                    </div>
-                </div>
-                <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                    <a href="#" style={{ color: '#555', transition: 'color 0.2s' }}>
-                        <Instagram size={18} />
-                    </a>
-                    <a href="#" style={{ color: '#555', transition: 'color 0.2s' }}>
-                        <Twitter size={18} />
-                    </a>
-                </div>
-            </div>
-
             {/* --- Main Navbar --- */}
-            <div className="section-container" style={{ height: '90px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="section-container" style={{ height: '76px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 24px' }}>
                 {/* Logo */}
                 <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12 }}>
                     <img
                         src="/logo.png"
                         alt="VE Value Education"
-                        style={{ height: '60px', width: 'auto' }}
+                        style={{ height: '52px', width: 'auto', transition: 'transform 0.2s' }}
+                        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05) rotate(-2deg)'}
+                        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                     />
                 </Link>
-
+ 
                 {/* Desktop Nav */}
                 <nav style={{ display: 'flex', gap: 32, alignItems: 'center' }} className="desktop-nav">
-                    {navLinks.map(({ to, label }) => (
-                        <Link key={to} to={to} style={{
-                            textDecoration: 'none',
-                            color: location.pathname === to ? '#00A6C0' : '#555',
-                            fontSize: 16,
-                            fontWeight: 700,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 8,
-                            position: 'relative',
-                            transition: 'color 0.2s'
+                    {navLinks.filter(l => l.to !== '/dashboard').map(({ to, label }) => {
+                        const isActive = location.pathname === to
+                        return (
+                            <Link key={to} to={to} style={{
+                                textDecoration: 'none',
+                                color: isActive ? '#00A6C0' : '#001F3F',
+                                fontSize: 16,
+                                fontWeight: 900,
+                                fontFamily: 'Fredoka',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 8,
+                                position: 'relative',
+                                transition: 'color 0.2s'
+                            }}>
+                                {label}
+                                {isActive && (
+                                    <span style={{
+                                        position: 'absolute',
+                                        bottom: -6,
+                                        left: 0,
+                                        width: '100%',
+                                        height: 3,
+                                        background: '#00A6C0',
+                                        borderRadius: 2
+                                    }} />
+                                )}
+                            </Link>
+                        )
+                    })}
+ 
+                    {user ? (
+                        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                            <Link to="/dashboard" style={{ 
+                                textDecoration: 'none', 
+                                color: '#001F3F', 
+                                fontSize: 15, 
+                                fontWeight: 900, 
+                                fontFamily: 'Fredoka',
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: 6,
+                                background: '#E0F7FA',
+                                padding: '8px 16px',
+                                borderRadius: 16,
+                                border: '2px solid #B2EBF2'
+                            }}>
+                                <User size={16} color="#00A6C0" /> Account
+                            </Link>
+                            <button onClick={logout} style={{ 
+                                background: 'none', 
+                                border: 'none', 
+                                color: '#94a3b8', 
+                                fontSize: 15, 
+                                fontWeight: 900, 
+                                fontFamily: 'Fredoka',
+                                cursor: 'pointer', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: 6 
+                            }}>
+                                <LogOut size={16} /> Logout
+                            </button>
+                        </div>
+                    ) : (
+                        <Link to="/login" className="btn-primary" style={{ 
+                            textDecoration: 'none', 
+                            padding: '10px 20px', 
+                            borderRadius: 16, 
+                            fontSize: 14, 
+                            fontWeight: 900,
+                            fontFamily: 'Fredoka',
+                            height: 'auto',
+                            background: '#00A6C0',
+                            color: '#fff',
+                            boxShadow: '0 4px 0 #00879d',
+                            border: 'none'
                         }}>
-                            {label}
+                            Sign In
                         </Link>
-                    ))}
-
+                    )}
                 </nav>
-
+ 
                 {/* Mobile Toggle */}
                 <button
                     onClick={() => setMenuOpen(!menuOpen)}
-                    style={{ background: '#F4F7F9', border: 'none', color: '#001F3F', padding: 10, borderRadius: 12, cursor: 'pointer' }}
+                    style={{ background: '#F4F7F9', border: '3px solid #E4EBF0', color: '#001F3F', padding: 10, borderRadius: 12, cursor: 'pointer', display: 'none' }}
                     className="mobile-toggle"
                 >
-                    {menuOpen ? <X size={24} /> : <Menu size={24} />}
+                    {menuOpen ? <X size={20} /> : <Menu size={20} />}
                 </button>
             </div>
-
+ 
             {/* Mobile Menu */}
             {menuOpen && (
-                <div style={{ position: 'absolute', top: '100%', left: 0, width: '100%', background: '#fff', padding: 24, boxShadow: '0 20px 40px rgba(0,0,0,0.1)', borderTop: '1px solid #eee' }}>
+                <div style={{ position: 'absolute', top: '100%', left: 0, width: '100%', background: '#fff', padding: 24, boxShadow: '0 15px 0 #F1F1F1', borderBottom: '3px solid #F1F1F1', zIndex: 1000 }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                        {navLinks.map(({ to, label }) => (
-                            <Link key={to} to={to} onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: '#555', fontSize: 18, fontWeight: 700 }}>{label}</Link>
+                        {navLinks.filter(l => l.to !== '/dashboard').map(({ to, label }) => (
+                            <Link key={to} to={to} onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: '#001F3F', fontSize: 18, fontWeight: 900, fontFamily: 'Fredoka' }}>{label}</Link>
                         ))}
-                        {/* Auth buttons removed - Login no longer required */}
+                        
+                        <div style={{ borderTop: '3px solid #F1F1F1', paddingTop: 20 }}>
+                            {user ? (
+                                <>
+                                    <Link to="/dashboard" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: '#001F3F', fontSize: 18, fontWeight: 900, fontFamily: 'Fredoka', display: 'block', marginBottom: 20 }}>
+                                        My Account
+                                    </Link>
+                                    <button onClick={() => { logout(); setMenuOpen(false); }} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: 18, fontWeight: 900, fontFamily: 'Fredoka', padding: 0 }}>Logout</button>
+                                </>
+                            ) : (
+                                <Link to="/login" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: '#00A6C0', fontSize: 18, fontWeight: 900, fontFamily: 'Fredoka' }}>Sign In</Link>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
-
+ 
             <style>{`
                 @media (max-width: 900px) {
                     .desktop-nav { display: none !important; }
                     .mobile-toggle { display: block !important; }
-                    .nav-info-left { display: none !important; }
-                }
-                @media (min-width: 901px) {
-                    .mobile-toggle { display: none !important; }
                 }
             `}</style>
         </header>

@@ -354,6 +354,19 @@ export default function LessonPage() {
                 .catch(err => {
                     console.error('Curriculum fetch error:', err)
                 })
+
+            // Sync database-stored progress with frontend session state
+            getCourseProgress(courseId)
+                .then(res => {
+                    const serverCompleted = res?.progress?.completedLessons || []
+                    const localCompleted = JSON.parse(localStorage.getItem('completedLessons') || '[]')
+                    const merged = [...new Set([...localCompleted, ...serverCompleted].map(String))]
+                    setCompletedLessons(merged)
+                    localStorage.setItem('completedLessons', JSON.stringify(merged))
+                })
+                .catch(err => {
+                    console.error('Error fetching course progress from server:', err)
+                })
         } else if (lesson) {
             console.warn('Lesson found but no valid course ID extracted:', lesson)
         }
@@ -407,15 +420,15 @@ export default function LessonPage() {
                 flexDirection: 'column'
             }}>
                 <div style={{ padding: '32px 24px', borderBottom: '2px solid #F8FAFB' }}>
-                    <div onClick={() => navigate('/courses')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, color: '#64748b', marginBottom: 20, fontSize: 13, fontWeight: 700 }}>
+                    <div onClick={() => navigate('/courses')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, color: '#64748b', marginBottom: 20, fontSize: 13, fontWeight: 900, fontFamily: 'Fredoka' }}>
                         <ArrowLeft size={16} /> EXIT COURSE
                     </div>
                     {/* Character Builders Curriculum Header */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                        <div style={{ width: 40, height: 40, background: '#00A6C0', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                        <div style={{ width: 40, height: 40, background: '#00A6C0', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: 'inset 0 -3px 0 rgba(0,0,0,0.1)' }}>
                             <BookOpen size={20} />
                         </div>
-                        <h2 style={{ fontSize: 18, color: '#001F3F', fontWeight: 900, lineHeight: 1.2 }}>Character Builders curriculum</h2>
+                        <h2 style={{ fontSize: 18, color: '#001F3F', fontWeight: 900, lineHeight: 1.2, fontFamily: '"Fredoka", sans-serif' }}>Character Builders</h2>
                     </div>
                 </div>
 
@@ -461,8 +474,8 @@ export default function LessonPage() {
                                     {isCompleted ? <CheckCircle size={16} /> : idx + 1}
                                 </div>
                                 <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: 14, fontWeight: 800, color: isCurrent ? '#001F3F' : '#64748b' }}>{l.title}</div>
-                                    <div style={{ fontSize: 11, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', marginTop: 2 }}>
+                                    <div style={{ fontSize: 14, fontWeight: 900, color: isCurrent ? '#001F3F' : '#64748b', fontFamily: 'Fredoka' }}>{l.title}</div>
+                                    <div style={{ fontSize: 11, fontWeight: 800, color: '#aaa', textTransform: 'uppercase', marginTop: 2, fontFamily: 'Fredoka' }}>
                                         {isCurrent ? 'Viewing' : isCompleted ? 'Completed' : isUnlocked ? 'Next Adventure' : 'Locked'}
                                     </div>
                                 </div>
@@ -539,7 +552,7 @@ export default function LessonPage() {
                         </div>
 
                         {/* --- Lesson Tabs Structure --- */}
-                        <div style={{ background: '#fff', borderRadius: '40px', boxShadow: '0 30px 60px rgba(0,0,0,0.05)', border: '2px solid #F1F1F1', marginBottom: 40, overflow: 'hidden' }}>
+                        <div style={{ background: '#fff', borderRadius: '40px', boxShadow: '0 15px 0 #F1F1F1', border: '3px solid #F1F1F1', marginBottom: 40, overflow: 'hidden' }}>
                             {/* Tab Switcher */}
                             <div style={{ display: 'flex', background: '#F8FAFB', borderBottom: '2px solid #F1F1F1' }}>
                                 {[                                    {id: 'content', label: 'Reading Time', icon: BookOpen, color: '#00A6C0'},
@@ -557,7 +570,7 @@ export default function LessonPage() {
                                                 padding: '24px 12px',
                                                 border: 'none',
                                                 background: isActive ? '#fff' : 'transparent',
-                                                borderBottom: isActive ? `4px solid ${t.color}` : '4px solid transparent',
+                                                borderBottom: isActive ? `5px solid ${t.color}` : '5px solid transparent',
                                                 color: isActive ? t.color : '#888',
                                                 fontSize: 16,
                                                 fontWeight: 900,
@@ -566,10 +579,11 @@ export default function LessonPage() {
                                                 flexDirection: 'column',
                                                 alignItems: 'center',
                                                 gap: 8,
+                                                fontFamily: 'Fredoka',
                                                 transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
                                             }}
                                         >
-                                            <t.icon size={24} color={isActive ? t.color : '#aaa'} />
+                                            <t.icon size={24} color={isActive ? t.color : '#aaa'} className={isActive ? 'animate-float' : ''} />
                                             <span style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 900 }}>{t.label}</span>
                                         </button>
                                     )
@@ -580,6 +594,15 @@ export default function LessonPage() {
                             <div style={{ padding: '60px 40px', minHeight: 450 }}>
                                 {activeTab === 'content' && (
                                     <div className="animate-fade-in" style={{ position: 'relative' }}>
+                                        {/* Reading Time Badge */}
+                                        {lesson.reading_time && (
+                                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
+                                                <div style={{ background: '#E0F7FA', color: '#00A6C0', padding: '8px 16px', borderRadius: 12, fontSize: 13, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                    <BookOpen size={16} /> READING TIME: {lesson.reading_time}
+                                                </div>
+                                            </div>
+                                        )}
+
                                         {/* Character Avatar */}
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 40 }}>
                                             <div style={{ 
@@ -627,27 +650,12 @@ export default function LessonPage() {
                                                     </div>
                                                 )}
                                             </div>
-
-                                            {/* Comic Highlights - only for non-comic viewer mode or decorative */}
-                                            {[
-                                                'Kindness', 'Honesty', 'Responsibility', 'Respect',
-                                                'Perseverance', 'Empathy', 'Gratitude', 'Courage', 'Integrity', 'Humility'
-                                            ].includes(lesson.title) && (
-                                                <>
-                                                    <div style={{ position: 'absolute', top: -20, right: 40, background: '#FFD700', color: '#000', padding: '8px 20px', borderRadius: '10px', fontWeight: 900, fontSize: 18, transform: 'rotate(5deg)', border: '3px solid #000' }}>
-                                                        WOW!
-                                                    </div>
-                                                    <div style={{ position: 'absolute', bottom: -15, left: 60, background: '#1DD1A1', color: '#fff', padding: '6px 16px', borderRadius: '10px', fontWeight: 900, fontSize: 14, transform: 'rotate(-3deg)', border: '3px solid #001F3F' }}>
-                                                        STORY TIME
-                                                    </div>
-                                                </>
-                                            )}
                                         </div>
                                         <div style={{ marginTop: 60, display: 'flex', justifyContent: 'center' }}>
                                             <button 
                                                 onClick={() => setActiveTab('summary')}
                                                 className="btn-primary" 
-                                                style={{ padding: '20px 48px', background: '#00A6C0', fontSize: 18, fontWeight: 900, borderRadius: 20 }}
+                                                style={{ padding: '20px 48px', background: '#00A6C0', fontSize: 18, fontWeight: 900, borderRadius: 30 }}
                                             >
                                                 Next Activity → Summary
                                             </button>
@@ -657,29 +665,33 @@ export default function LessonPage() {
 
                                 {activeTab === 'summary' && (
                                     <div className="animate-fade-in">
-                                        <h3 style={{ fontSize: 28, color: '#FF9F43', marginBottom: 32, fontWeight: 900 }}>Top 3 Lessons!</h3>
-                                        <div style={{ display: 'grid', gap: 24 }}>
-                                            {[
-                                                { title: "Believe in Yourself", desc: "No matter how small you feel, you have great power within!", icon: Star },
-                                                { title: "Stay Brave", desc: "True courage is being kind even when it's hard.", icon: Shield },
-                                                { title: "Keep Exploring", desc: "Every adventure teaches us something new and wonderful.", icon: Compass }
-                                            ].map((item, i) => (
-                                                <div key={i} style={{ display: 'flex', gap: 20, background: '#FFF9F1', padding: 24, borderRadius: 24, border: '2px solid #FFE8CC' }}>
-                                                    <div style={{ width: 56, height: 56, background: '#fff', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 8px 16px rgba(255, 159, 67, 0.15)' }}>
-                                                        <item.icon size={28} color="#FF9F43" />
-                                                    </div>
-                                                    <div>
-                                                        <div style={{ fontSize: 18, fontWeight: 900, color: '#001F3F', marginBottom: 4 }}>{item.title}</div>
-                                                        <div style={{ fontSize: 15, color: '#666', fontWeight: 600 }}>{item.desc}</div>
-                                                    </div>
+                                        <h3 style={{ fontSize: 28, color: '#FF9F43', marginBottom: 32, fontWeight: 900 }}>Adventure Summary!</h3>
+                                        <div style={{ background: '#FFF9F1', padding: '40px', borderRadius: '32px', border: '2px solid #FFE8CC', fontSize: 18, color: '#001F3F', lineHeight: 1.8, fontWeight: 600 }}>
+                                            {lesson.quick_summary || (
+                                                <div style={{ display: 'grid', gap: 24 }}>
+                                                    {[
+                                                        { title: "Believe in Yourself", desc: "No matter how small you feel, you have great power within!", icon: Star },
+                                                        { title: "Stay Brave", desc: "True courage is being kind even when it's hard.", icon: Shield },
+                                                        { title: "Keep Exploring", desc: "Every adventure teaches us something new and wonderful.", icon: Compass }
+                                                    ].map((item, i) => (
+                                                        <div key={i} style={{ display: 'flex', gap: 20, background: '#fff', padding: 20, borderRadius: 20 }}>
+                                                            <div style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '2px solid #FF9F43' }}>
+                                                                <item.icon size={20} color="#FF9F43" />
+                                                            </div>
+                                                            <div>
+                                                                <div style={{ fontSize: 16, fontWeight: 900 }}>{item.title}</div>
+                                                                <div style={{ fontSize: 14, color: '#666' }}>{item.desc}</div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
                                                 </div>
-                                            ))}
+                                            )}
                                         </div>
                                         <div style={{ marginTop: 60, display: 'flex', justifyContent: 'center' }}>
                                             <button 
                                                 onClick={() => setActiveTab('moral')}
                                                 className="btn-primary" 
-                                                style={{ padding: '20px 48px', background: '#FF9F43', fontSize: 18, fontWeight: 900, borderRadius: 20 }}
+                                                style={{ padding: '20px 48px', background: '#FF9F43', fontSize: 18, fontWeight: 900, borderRadius: 30 }}
                                             >
                                                 Next Activity → Deep Meaning
                                             </button>
@@ -702,20 +714,19 @@ export default function LessonPage() {
                                         }}>
                                             <Heart size={80} color="#FF6B6B" fill="#FF6B6B" />
                                         </div>
-                                        <h3 style={{ fontSize: 32, color: '#FF6B6B', fontWeight: 900, marginBottom: 20 }}>The Magic Word: KINDNESS</h3>
-                                        <p style={{ fontSize: 18, color: '#444', maxWidth: 600, margin: '0 auto', lineHeight: 1.8, fontWeight: 600 }}>
-                                            In this adventure, we learned that small acts of love can light up the entire world. 
-                                            Remember to be the spark of kindness in someone's day!
+                                        <h3 style={{ fontSize: 32, color: '#FF6B6B', fontWeight: 900, marginBottom: 20 }}>The Moral of the Story</h3>
+                                        <p style={{ fontSize: 20, color: '#444', maxWidth: 700, margin: '0 auto', lineHeight: 1.8, fontWeight: 700, fontStyle: 'italic' }}>
+                                            "{lesson.moral_value || "In this adventure, we learned that small acts of love can light up the entire world. Remember to be the spark of kindness in someone's day!"}"
                                         </p>
                                         <div style={{ marginTop: 40, padding: '20px 32px', background: '#F8FAFB', borderRadius: 20, display: 'inline-flex', gap: 12, alignItems: 'center', fontWeight: 800, color: '#001F3F' }}>
-                                            <Sparkles size={24} color="#FFD700" /> MISSION: Help a friend today!
+                                            <Sparkles size={24} color="#FFD700" /> MISSION: Apply this value today!
                                         </div>
 
                                         <div style={{ marginTop: 60, display: 'flex', justifyContent: 'center' }}>
                                             <button 
                                                 onClick={() => setActiveTab(quizQuestions.length > 0 ? 'quiz' : 'content')}
                                                 className="btn-primary" 
-                                                style={{ padding: '20px 48px', background: '#FF6B6B', fontSize: 18, fontWeight: 900, borderRadius: 20 }}
+                                                style={{ padding: '20px 48px', background: '#FF6B6B', fontSize: 18, fontWeight: 900, borderRadius: 30 }}
                                             >
                                                 {quizQuestions.length > 0 ? 'Ready for Brain Challenge? →' : 'Back to Adventure'}
                                             </button>
@@ -727,16 +738,47 @@ export default function LessonPage() {
                                     <div className="animate-fade-in">
                                         <h3 style={{ fontSize: 28, color: '#1DD1A1', marginBottom: 40, fontWeight: 900 }}>Brain Challenge</h3>
                                         {quizPassed ? (
-                                            <div style={{ textAlign: 'center', padding: 60, background: '#E8FDF5', borderRadius: 40, border: '4px solid #1DD1A1' }}>
-                                                <Trophy size={80} color="#1DD1A1" style={{ marginBottom: 24 }} />
-                                                <h4 style={{ fontSize: 32, color: '#001F3F', fontWeight: 900 }}>You're a Legend!</h4>
-                                                <p style={{ fontSize: 18, color: '#666', marginTop: 12, fontWeight: 700 }}>You have conquered this challenge and opened the next map!</p>
+                                            <div style={{ 
+                                                textAlign: 'center', 
+                                                padding: '60px 40px', 
+                                                background: 'linear-gradient(135deg, #E8FDF5 0%, #C6F6D5 100%)', 
+                                                borderRadius: 40, 
+                                                border: '4px solid #1DD1A1',
+                                                boxShadow: '0 20px 40px rgba(29, 209, 161, 0.15)',
+                                                position: 'relative',
+                                                overflow: 'hidden'
+                                            }} className="animate-fade-in">
+                                                {/* Decorative background celebrations */}
+                                                <div style={{ position: 'absolute', top: 20, left: 30, fontSize: 32, animation: 'float 3s ease-in-out infinite' }}>🎉</div>
+                                                <div style={{ position: 'absolute', bottom: 30, right: 40, fontSize: 32, animation: 'float 4s ease-in-out infinite' }}>🌟</div>
+                                                <div style={{ position: 'absolute', top: 40, right: 30, fontSize: 32, animation: 'float 3.5s ease-in-out infinite' }}>🎈</div>
+                                                <div style={{ position: 'absolute', bottom: 20, left: 40, fontSize: 32, animation: 'float 4.5s ease-in-out infinite' }}>✨</div>
+
+                                                <div style={{ 
+                                                    width: 130, 
+                                                    height: 130, 
+                                                    background: '#fff', 
+                                                    borderRadius: '50%', 
+                                                    display: 'inline-flex', 
+                                                    alignItems: 'center', 
+                                                    justifyContent: 'center',
+                                                    marginBottom: 28,
+                                                    boxShadow: '0 12px 24px rgba(29, 209, 161, 0.2)',
+                                                    border: '4px solid #1DD1A1',
+                                                    animation: 'pulse 2s infinite'
+                                                }}>
+                                                    <Trophy size={64} color="#1DD1A1" fill="#1DD1A1" />
+                                                </div>
+                                                <h4 style={{ fontSize: 36, color: '#001F3F', fontWeight: 900, fontFamily: 'Fredoka', marginBottom: 12 }}>You Are A Legend! 🏆</h4>
+                                                <p style={{ fontSize: 18, color: '#2D3748', marginTop: 12, fontWeight: 700, fontFamily: 'Fredoka', maxWidth: 450, margin: '0 auto' }}>
+                                                    Awesome! You have conquered this challenge and earned a new moral value badge! 🌟
+                                                </p>
                                             </div>
                                         ) : (
                                             <div style={{ display: 'grid', gap: 40 }}>
                                                 {quizQuestions.map((q, idx) => (
-                                                    <div key={q.id} style={{ background: '#F4F7F9', padding: '40px', borderRadius: '32px', border: '2px solid #EEE' }}>
-                                                        <h4 style={{ fontSize: 22, fontWeight: 900, color: '#001F3F', marginBottom: 24, lineHeight: 1.4 }}>{idx + 1}. {q.question}</h4>
+                                                    <div key={q.id} style={{ background: '#F4F7F9', padding: '40px', borderRadius: '32px', border: '3px solid #EEE', boxShadow: '0 10px 0 #EEE' }}>
+                                                        <h4 style={{ fontSize: 22, fontWeight: 900, color: '#001F3F', marginBottom: 24, lineHeight: 1.4, fontFamily: 'Fredoka' }}>{idx + 1}. {q.question}</h4>
                                                         <div style={{ display: 'grid', gap: 16 }}>
                                                             {q.options.map((opt, idxOpt) => {
                                                                 const isSelected = quizAnswers[idx] === idxOpt
@@ -749,18 +791,21 @@ export default function LessonPage() {
                                                                         style={{
                                                                             padding: '24px 32px',
                                                                             borderRadius: 20,
-                                                                            border: isCorrect ? '4px solid #1DD1A1' : isWrong ? '4px solid #FF6B6B' : isSelected ? '4px solid #00A6C0' : '4px solid #fff',
+                                                                            border: isCorrect ? '4px solid #1DD1A1' : isWrong ? '4px solid #FF6B6B' : isSelected ? '4px solid #00A6C0' : '3px solid #F1F1F1',
                                                                             background: isCorrect ? '#E8FDF5' : isWrong ? '#FFF0F0' : isSelected ? '#E0F7FA' : '#fff',
                                                                             fontSize: 18,
-                                                                            fontWeight: 800,
+                                                                            fontWeight: 900,
                                                                             color: '#001F3F',
                                                                             cursor: quizSubmitted ? 'default' : 'pointer',
                                                                             textAlign: 'left',
-                                                                            boxShadow: isSelected ? '0 10px 20px rgba(0, 166, 192, 0.1)' : '0 4px 10px rgba(0,0,0,0.02)',
-                                                                            transition: 'all 0.2s'
+                                                                            fontFamily: 'Fredoka',
+                                                                            boxShadow: isSelected ? '0 6px 0 #00A6C0' : '0 6px 0 #F1F1F1',
+                                                                            transition: 'all 0.2s',
+                                                                            position: 'relative',
+                                                                            top: isSelected ? '2px' : '0px'
                                                                         }}
                                                                     >
-                                                                        <span style={{ width: 40, height: 40, background: isSelected ? '#00A6C0' : '#F1F1F1', color: isSelected ? '#fff' : '#001F3F', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', marginRight: 16, fontSize: 14 }}>{idxOpt + 1}</span>
+                                                                        <span style={{ width: 40, height: 40, background: isSelected ? '#00A6C0' : '#F1F1F1', color: isSelected ? '#fff' : '#001F3F', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', marginRight: 16, fontSize: 14, fontWeight: 900 }}>{idxOpt + 1}</span>
                                                                         {opt.text}
                                                                     </button>
                                                                 )
@@ -786,16 +831,27 @@ export default function LessonPage() {
 
                                                                 if (score >= Math.ceil(quizQuestions.length * 0.6)) {
                                                                     setQuizPassed(true)
+                                                                    
+                                                                    // Save progress to Supabase
+                                                                    try {
+                                                                        const courseId = lesson.course_id || lesson.courseId;
+                                                                        await markLessonComplete(courseId, lessonId);
+                                                                    } catch (apiErr) {
+                                                                        console.warn('Could not sync lesson completion to database, saving locally:', apiErr);
+                                                                    }
+
                                                                     const newCompleted = [...new Set([...completedLessons, String(lessonId)])]
                                                                     setCompletedLessons(newCompleted)
                                                                     localStorage.setItem('completedLessons', JSON.stringify(newCompleted))
+                                                                    
                                                                     toast.success('CHALLENGE CONQUERED!', { duration: 3000 })
                                                                     trackEvent(AL_EVENTS.LESSON_COMPLETE, { lessonId });
                                                                 } else {
                                                                     toast.error(`Strong attempt! Scored ${score}/${quizQuestions.length}. Review and try again!`)
                                                                 }
                                                             } catch (err) {
-                                                                toast.error('Network congestion! Check your internet and try again.')
+                                                                console.error('Quiz submission error:', err);
+                                                                toast.error('Could not submit challenge. Please try again!')
                                                             } finally {
                                                                 setActionLoading(false);
                                                             }
@@ -843,10 +899,13 @@ export default function LessonPage() {
                                         )
                                     ) : (
                                         <div style={{ width: '100%', textAlign: 'center' }}>
-                                            <div style={{ marginBottom: 16, fontSize: 18, fontWeight: 800, color: '#001F3F' }}>
+                                            <div style={{ marginBottom: 16, fontSize: 18, fontWeight: 900, color: '#001F3F', fontFamily: 'Fredoka' }}>
                                                 You have completed all lessons!
                                             </div>
-                                            <Link to={`/dashboard/course/${lesson.courseId?._id || lesson.courseId || lesson.course_id}/final-exam`} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '24px 48px', fontSize: 22, borderRadius: 30, background: 'linear-gradient(135deg, #FF6B6B 0%, #FF9F43 100%)', boxShadow: '0 20px 40px rgba(255, 107, 107, 0.3)', fontWeight: 900, color: '#fff', textDecoration: 'none' }}>
+                                            <Link to={`/dashboard/course/${lesson.courseId?._id || lesson.courseId || lesson.course_id}/final-exam`} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '24px 48px', fontSize: 22, borderRadius: 30, background: 'linear-gradient(135deg, #FF6B6B 0%, #FF9F43 100%)', boxShadow: '0 8px 0 #cc4b4b, 0 20px 40px rgba(255, 107, 107, 0.3)', fontWeight: 900, color: '#fff', textDecoration: 'none', fontFamily: 'Fredoka', position: 'relative', top: 0 }}
+                                            onMouseEnter={e => { e.currentTarget.style.top = '-2px'; e.currentTarget.style.boxShadow = '0 10px 0 #cc4b4b, 0 20px 40px rgba(255, 107, 107, 0.4)'; }}
+                                            onMouseLeave={e => { e.currentTarget.style.top = '0'; e.currentTarget.style.boxShadow = '0 8px 0 #cc4b4b, 0 20px 40px rgba(255, 107, 107, 0.3)'; }}
+                                            onMouseDown={e => { e.currentTarget.style.top = '6px'; e.currentTarget.style.boxShadow = '0 2px 0 #cc4b4b, 0 5px 10px rgba(255,107,107,0.2)'; }}>
                                                 TAKE FINAL EXAM (20 QUESTIONS)
                                             </Link>
                                         </div>

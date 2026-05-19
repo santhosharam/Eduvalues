@@ -58,68 +58,95 @@ h6 {
   padding: 0 24px;
 }
 
-/* Playful Buttons - Updated to Teal/Navy */
+/* Playful Bouncy 3D Buttons - Tactile press animations */
 .btn-primary {
-  background: var(--primary-teal);
+  background: linear-gradient(135deg, #00D2D3, #00A6C0);
   color: #fff;
-  font-weight: 700;
-  padding: 14px 32px;
-  border-radius: var(--radius-lg);
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 800;
+  padding: 16px 36px;
+  border-radius: 50px;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  gap: 12px;
+  transition: all 0.15s cubic-bezier(0.25, 0.8, 0.25, 1);
   border: none;
   cursor: pointer;
-  box-shadow: 0 6px 0 rgba(0, 166, 192, 0.1);
+  box-shadow: 0 8px 0 #008fa6, 0 15px 25px rgba(0, 166, 192, 0.35);
   text-decoration: none;
-  font-size: 16px;
+  font-size: 18px;
+  position: relative;
+  top: 0;
 }
 
 .btn-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(0, 166, 192, 0.3);
-  background: #008fa6;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 0 #008fa6, 0 20px 30px rgba(0, 166, 192, 0.45);
+}
+
+.btn-primary:active {
+  top: 6px;
+  box-shadow: 0 2px 0 #008fa6, 0 5px 10px rgba(0, 166, 192, 0.2);
 }
 
 .btn-secondary {
-  background: var(--primary-navy);
+  background: linear-gradient(135deg, #FF9F43, #EE5A24);
   color: #fff;
-  font-weight: 700;
-  padding: 14px 32px;
-  border-radius: var(--radius-lg);
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 800;
+  padding: 16px 36px;
+  border-radius: 50px;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  transition: all 0.3s ease;
+  gap: 12px;
+  transition: all 0.15s cubic-bezier(0.25, 0.8, 0.25, 1);
   border: none;
   cursor: pointer;
+  box-shadow: 0 8px 0 #d35400, 0 15px 25px rgba(243, 156, 18, 0.35);
   text-decoration: none;
+  font-size: 18px;
+  position: relative;
+  top: 0;
 }
 
 .btn-secondary:hover {
-  background: #002a57;
   transform: translateY(-2px);
+  box-shadow: 0 10px 0 #d35400, 0 20px 30px rgba(243, 156, 18, 0.45);
+}
+
+.btn-secondary:active {
+  top: 6px;
+  box-shadow: 0 2px 0 #d35400, 0 5px 10px rgba(243, 156, 18, 0.2);
 }
 
 .btn-outline {
-  background: transparent;
+  background: #FFF;
   color: var(--primary-teal);
-  font-weight: 700;
-  padding: 12px 28px;
-  border-radius: var(--radius-lg);
-  border: 2px solid var(--primary-teal);
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 800;
+  padding: 14px 32px;
+  border-radius: 50px;
+  border: 3px solid var(--primary-teal);
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  transition: all 0.3s ease;
+  gap: 10px;
+  transition: all 0.15s ease;
   cursor: pointer;
   text-decoration: none;
+  box-shadow: 0 6px 0 var(--primary-teal);
+  position: relative;
+  top: 0;
 }
 
 .btn-outline:hover {
-  background: var(--primary-teal);
-  color: #fff;
+  background: #fdfdfd;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 0 var(--primary-teal);
+}
+
+.btn-outline:active {
+  top: 4px;
+  box-shadow: 0 2px 0 var(--primary-teal);
 }
 
 /* Input Fields */
@@ -140,61 +167,74 @@ h6 {
   box-shadow: 0 0 0 4px rgba(0, 166, 192, 0.1);
 }
 
-/* Cards */
+/* Cards - Puffy, bubbly shadows and smooth transformations */
 .kids-card {
   background: #fff;
-  border-radius: var(--radius-md);
-  border: 2px solid #F1F1F1;
+  border-radius: 30px;
+  border: 3px solid #F1F1F1;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 10px 0 #F1F1F1;
+  position: relative;
+  top: 0;
 }
 
 .kids-card:hover {
   transform: translateY(-8px);
   border-color: var(--primary-teal);
-  box-shadow: var(--shadow-hover);
+  box-shadow: 0 18px 0 var(--primary-teal), 0 20px 30px rgba(0, 166, 192, 0.15);
 }
 
 /* Badge Styles */
 .badge-onsite {
-  background: var(--accent-orange);
+  background: linear-gradient(135deg, #FF9F43, #FF7F50);
   color: #fff;
-  padding: 4px 12px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 12px;
+  padding: 6px 16px;
+  border-radius: 12px;
+  font-weight: 900;
+  font-size: 13px;
+  box-shadow: 0 4px 0 #d35400;
 }
 
 .badge-online {
-  background: var(--primary-teal);
+  background: linear-gradient(135deg, #00D2D3, #00A6C0);
   color: #fff;
-  padding: 4px 12px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 12px;
+  padding: 6px 16px;
+  border-radius: 12px;
+  font-weight: 900;
+  font-size: 13px;
+  box-shadow: 0 4px 0 #008fa6;
 }
 
-/* Animations */
+/* Bouncy Kids Animations */
 @keyframes float {
-  0% {
-    transform: translateY(0px);
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
   }
-
   50% {
-    transform: translateY(-15px);
+    transform: translateY(-8px) rotate(1deg);
   }
+}
 
-  100% {
-    transform: translateY(0px);
-  }
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .animate-float {
-  animation: float 4s ease-in-out infinite;
+  animation: float 6s ease-in-out infinite;
 }
 
 .spin {
-  animation: spin 1s linear infinite;
+  animation: spin 2s linear infinite;
+}
+
+.wiggle-hover {
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.wiggle-hover:hover {
+  transform: scale(1.04) rotate(-1deg);
 }
 
 @keyframes spin {
@@ -208,7 +248,48 @@ h6 {
 }
 
 @keyframes pulse {
-  0% { transform: scale(1); box-shadow: 0 15px 30px rgba(29, 209, 161, 0.3); }
-  50% { transform: scale(1.05); box-shadow: 0 20px 40px rgba(29, 209, 161, 0.5); }
-  100% { transform: scale(1); box-shadow: 0 15px 30px rgba(29, 209, 161, 0.3); }
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+/* ══ RESPONSIVE SYSTEM ════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  .section-container {
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --radius-lg: 32px;
+  }
+
+  .section-container {
+    padding: 0 16px;
+  }
+
+  h1 { font-size: 32px !important; }
+  h2 { font-size: 28px !important; }
+  h3 { font-size: 22px !important; }
+
+  .btn-primary, .btn-secondary, .btn-outline {
+    padding: 12px 24px;
+    font-size: 15px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .mobile-stack {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    gap: 16px !important;
+  }
+
+  .mobile-padding {
+    padding: 40px 20px !important;
+  }
 }

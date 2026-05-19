@@ -40,20 +40,20 @@ export default function StudentDashboard() {
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(0, 166, 192, 0.15)', color: '#00A6C0', padding: '10px 24px', borderRadius: '30px', fontSize: '14px', fontWeight: 800, marginBottom: 16 }}>
                             <Smile size={18} /> WELCOME BACK, EXPLORER!
                         </div>
-                        <h1 style={{ fontSize: 44, fontWeight: 'bold', color: '#001F3F', marginBottom: 8 }}>
+                        <h1 style={{ fontSize: 44, fontWeight: '900', color: '#001F3F', marginBottom: 8, fontFamily: '"Fredoka", sans-serif' }}>
                             Hi, <span style={{ color: '#00A6C0' }}>{user?.name?.split(' ')[0]}</span>!
                         </h1>
-                        <p style={{ color: '#888', fontSize: 18, fontWeight: 600 }}>Ready to unlock your next achievement today?</p>
+                        <p style={{ color: '#888', fontSize: 18, fontWeight: 600, fontFamily: '"Quicksand", sans-serif' }}>Ready to unlock your next achievement today?</p>
                     </div>
 
                     {/* Streak Counter (Playful) */}
-                    <div style={{ background: '#fff', padding: '16px 28px', borderRadius: '24px', border: '3px solid #F1F1F1', display: 'flex', alignItems: 'center', gap: 16, boxShadow: 'var(--shadow-soft)' }}>
+                    <div style={{ background: '#fff', padding: '16px 28px', borderRadius: '24px', border: '3px solid #F1F1F1', display: 'flex', alignItems: 'center', gap: 16, boxShadow: '0 8px 0 #F1F1F1' }}>
                         <div style={{ width: 48, height: 48, background: 'rgba(255, 159, 67, 0.15)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Flame size={24} color="#FF9F43" />
+                            <Flame size={24} color="#FF9F43" className="animate-float" />
                         </div>
                         <div style={{ textAlign: 'left' }}>
-                            <div style={{ fontWeight: 800, fontSize: 24 }}>3 Days</div>
-                            <div style={{ fontSize: 12, color: '#888', fontWeight: 700 }}>Learning Streak!</div>
+                            <div style={{ fontWeight: 900, fontSize: 24, fontFamily: '"Fredoka", sans-serif', color: '#FF9F43' }}>3 Days</div>
+                            <div style={{ fontSize: 12, color: '#888', fontWeight: 800, fontFamily: '"Fredoka", sans-serif' }}>Learning Streak!</div>
                         </div>
                     </div>
                 </div>
@@ -61,17 +61,17 @@ export default function StudentDashboard() {
                 {/* Stats Playground - Updated Icons */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 24, marginBottom: 64 }}>
                     {[
-                        { icon: Rocket, label: 'Adventures Joined', val: enrollments.length, color: '#001F3F', bg: 'rgba(0, 31, 63, 0.1)' },
-                        { icon: Activity, label: 'Currently Playing', val: inProgress.length, color: '#00A6C0', bg: 'rgba(0, 166, 192, 0.1)' },
-                        { icon: Trophy, label: 'Completed Missions', val: completed.length, color: '#1DD1A1', bg: 'rgba(29, 209, 161, 0.1)' },
-                        { icon: Award, label: 'Golden Badges', val: certs.length, color: '#FF9F43', bg: 'rgba(255, 159, 67, 0.1)' },
-                    ].map(({ icon: Icon, label, val, color, bg }) => (
-                        <div key={label} style={{ background: '#fff', padding: 32, borderRadius: '32px', border: '3px solid #F1F1F1', textAlign: 'center', boxShadow: '0 10px 20px rgba(0,0,0,0.02)' }}>
-                            <div style={{ width: 72, height: 72, background: bg, borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', transform: 'rotate(-5deg)' }}>
-                                <Icon size={32} color={color} />
+                        { icon: Rocket, label: 'Adventures Joined', val: enrollments.length, color: '#001F3F', bg: 'rgba(0, 31, 63, 0.1)', borderC: '#e5e7eb' },
+                        { icon: Activity, label: 'Currently Playing', val: inProgress.length, color: '#00A6C0', bg: 'rgba(0, 166, 192, 0.1)', borderC: '#00A6C0' },
+                        { icon: Trophy, label: 'Completed Missions', val: completed.length, color: '#1DD1A1', bg: 'rgba(29, 209, 161, 0.1)', borderC: '#1DD1A1' },
+                        { icon: Award, label: 'Golden Badges', val: certs.length, color: '#FF9F43', bg: 'rgba(255, 159, 67, 0.1)', borderC: '#FF9F43' },
+                    ].map(({ icon: Icon, label, val, color, bg, borderC }) => (
+                        <div key={label} style={{ background: '#fff', padding: 32, borderRadius: '32px', border: '3px solid #F1F1F1', textAlign: 'center', boxShadow: '0 10px 0 #F1F1F1', transition: 'all 0.2s' }} className="wiggle-hover">
+                            <div style={{ width: 72, height: 72, background: bg, borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', transform: 'rotate(-5deg)', boxShadow: 'inset 0 -4px 0 rgba(0,0,0,0.06)' }}>
+                                <Icon size={32} color={color} className="animate-float" />
                             </div>
-                            <div style={{ fontSize: 40, fontWeight: 900, color: '#333' }}>{val}</div>
-                            <p style={{ fontSize: 13, color: '#888', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 4 }}>{label}</p>
+                            <div style={{ fontSize: 40, fontWeight: 900, color: '#001F3F', fontFamily: '"Fredoka", sans-serif' }}>{val}</div>
+                            <p style={{ fontSize: 13, color: '#888', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 4, fontFamily: '"Fredoka", sans-serif' }}>{label}</p>
                         </div>
                     ))}
                 </div>
@@ -97,25 +97,32 @@ export default function StudentDashboard() {
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                                 {inProgress.map(e => (
-                                    <div key={e.id} style={{ background: '#fff', padding: 32, borderRadius: '40px', border: '2px solid #F1F1F1', display: 'grid', gridTemplateColumns: '160px 1fr auto', gap: 32, alignItems: 'center' }}>
-                                        <div style={{ height: 100, borderRadius: '20px', overflow: 'hidden' }}>
+                                    <div key={e.id} style={{ background: '#fff', padding: 32, borderRadius: '40px', border: '3px solid #F1F1F1', display: 'grid', gridTemplateColumns: '160px 1fr auto', gap: 32, alignItems: 'center', boxShadow: '0 8px 0 #F1F1F1' }} className="mobile-stack">
+                                        <div style={{ height: 100, borderRadius: '20px', overflow: 'hidden', border: '2px solid #F1F1F1' }}>
                                             <img src={e.course?.thumbnail || `https://picsum.photos/seed/${e.course?.id}/300/200`} alt={e.course?.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         </div>
                                         <div>
-                                            <h4 style={{ fontSize: 20, fontWeight: 800, color: '#333', marginBottom: 16 }}>{e.course?.title}</h4>
+                                            <h4 style={{ fontSize: 20, fontWeight: 900, color: '#001F3F', marginBottom: 16, fontFamily: '"Fredoka", sans-serif' }}>{e.course?.title}</h4>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-                                                <div style={{ flex: 1, height: 12, background: '#F1F1F1', borderRadius: 6, overflow: 'hidden' }}>
-                                                    <div style={{ width: `${e.progress || 0}%`, height: '100%', background: 'linear-gradient(90deg, #001F3F, #00A6C0)', borderRadius: 6 }} />
+                                                <div style={{ flex: 1, height: 14, background: '#F1F1F1', borderRadius: 8, overflow: 'hidden' }}>
+                                                    <div style={{ width: `${e.progress || 0}%`, height: '100%', background: 'linear-gradient(90deg, #1DD1A1, #00D2D3)', borderRadius: 8 }} />
                                                 </div>
-                                                <span style={{ fontSize: 15, fontWeight: 800, color: '#00A6C0' }}>{e.progress || 0}%</span>
+                                                <span style={{ fontSize: 15, fontWeight: 900, color: '#00A6C0', fontFamily: 'Fredoka' }}>{e.progress || 0}%</span>
                                             </div>
                                         </div>
                                         <Link 
-                                            to={`/dashboard/lesson/${e.lastWatched || (e.course?.lessons?.[0]?.id || e.course?.lessons?.[0])}`} 
+                                            to={e.progress >= 100 ? `/dashboard/course/${e.course_id || e.courseId}/final-exam` : `/dashboard/lesson/${e.lastWatched || (e.course?.lessons?.[0]?.id || e.course?.lessons?.[0])}`} 
                                             className="btn-primary" 
-                                            style={{ borderRadius: 16, height: 54, padding: '0 32px' }}
+                                            style={{ 
+                                                borderRadius: 16, 
+                                                height: 54, 
+                                                padding: '0 32px',
+                                                background: e.progress >= 100 ? '#FF9F43' : '#00A6C0',
+                                                boxShadow: e.progress >= 100 ? '0 10px 20px rgba(255, 159, 67, 0.2)' : 'none'
+                                            }}
                                         >
-                                            Resume <PlayCircle size={20} />
+                                            {e.progress >= 100 ? 'Final Challenge' : 'Resume'} 
+                                            {e.progress >= 100 ? <Trophy size={20} /> : <PlayCircle size={20} />}
                                         </Link>
                                     </div>
                                 ))}
@@ -125,7 +132,7 @@ export default function StudentDashboard() {
 
                     {/* Right Playground: Sidebar Achievements */}
                     <aside>
-                        <div style={{ background: '#fff', padding: 48, borderRadius: '48px', border: '3px solid #F1F1F1', textAlign: 'center', boxShadow: 'var(--shadow-soft)', marginBottom: 40 }}>
+                        <div style={{ background: '#fff', padding: 48, borderRadius: '48px', border: '3px solid #F1F1F1', textAlign: 'center', boxShadow: '0 10px 0 #F1F1F1', marginBottom: 40 }}>
                             <div style={{
                                 width: 120,
                                 height: 120,
@@ -138,9 +145,9 @@ export default function StudentDashboard() {
                             }}>
                                 <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name || 'User'}`} alt="Avatar" />
                             </div>
-                            <h3 style={{ fontSize: 24, color: '#001F3F', marginBottom: 6 }}>{user?.name}</h3>
-                            <p style={{ fontSize: 14, color: '#888', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 32 }}>Explorer Level 4</p>
-                            <Link to="/contact" className="btn-outline" style={{ width: '100%', borderRadius: 20 }}>
+                            <h3 style={{ fontSize: 24, color: '#001F3F', marginBottom: 6, fontWeight: 900, fontFamily: 'Fredoka' }}>{user?.name}</h3>
+                            <p style={{ fontSize: 14, color: '#888', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 32, fontFamily: 'Fredoka' }}>Explorer Level 4</p>
+                            <Link to="/contact" className="btn-outline" style={{ width: '100%', padding: '12px 24px', borderRadius: 30 }}>
                                 <MessageCircle size={18} /> Call Teacher
                             </Link>
                         </div>

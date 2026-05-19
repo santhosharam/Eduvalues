@@ -28,10 +28,11 @@ import Certificates from './pages/dashboard/Certificates'
 import FinalExamPage from './pages/dashboard/FinalExamPage'
 import FinalAssessment from './pages/dashboard/FinalAssessment'
 import Congratulations from './pages/dashboard/Congratulations'
+import Playground from './pages/dashboard/Playground'
 
 // ── Payment pages (removed - no checkout required) ─────────────────────────
-// import Checkout from './pages/payment/Checkout'
-// import PaymentConfirmation from './pages/payment/PaymentConfirmation'
+import Checkout from './pages/payment/Checkout'
+import PaymentConfirmation from './pages/payment/PaymentConfirmation'
 
 // ── Admin pages (protected + admin role) ────────────────────────
 import AdminDashboard from './pages/admin/Dashboard'
@@ -39,6 +40,7 @@ import ManageCourses from './pages/admin/ManageCourses'
 import ManageLessons from './pages/admin/ManageLessons'
 import ManageComics from './pages/admin/ManageComics'
 import ManageQuiz from './pages/admin/ManageQuiz'
+import ManageFinalExam from './pages/admin/ManageFinalExam'
 import ManageLessonContent from './pages/admin/ManageLessonContent'
 import ManageStudents from './pages/admin/ManageStudents'
 import ManagePayments from './pages/admin/ManagePayments'
@@ -80,21 +82,22 @@ export default function App() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/verify/:code" element={<CertificateVerify />} />
 
-          {/* ── Auth (Redirected - Login removed) ── */}
-          <Route path="/login" element={<Navigate to="/" replace />} />
-          <Route path="/admin/login" element={<Navigate to="/" replace />} />
-          <Route path="/register" element={<Navigate to="/" replace />} />
-          <Route path="/forgot-password" element={<Navigate to="/" replace />} />
+          {/* ── Auth ─────────────────────────────── */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
           {/* ── Protected (student) ────────────────── */}
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<StudentDashboard />} />
             <Route path="/dashboard/my-courses" element={<MyCourses />} />
             <Route path="/dashboard/certificates" element={<Certificates />} />
+            <Route path="/dashboard/playground" element={<Playground />} />
             <Route path="/dashboard/course/:courseId/final-assessment" element={<FinalAssessment />} />
             <Route path="/dashboard/course/:courseId/congratulations" element={<Congratulations />} />
-            <Route path="/checkout/:courseId" element={<Navigate to="/courses" replace />} />
-            <Route path="/payment/confirmation" element={<Navigate to="/courses" replace />} />
+            <Route path="/checkout/:courseId" element={<Checkout />} />
+            <Route path="/payment/confirmation" element={<PaymentConfirmation />} />
 
           </Route>
 
@@ -107,6 +110,7 @@ export default function App() {
             <Route path="/admin/quiz" element={<ManageLessonContent />} />
             <Route path="/admin/lessons/:lessonId/comics" element={<ManageComics />} />
             <Route path="/admin/lessons/:lessonId/quiz" element={<ManageQuiz />} />
+            <Route path="/admin/courses/:courseId/exam" element={<ManageFinalExam />} />
             <Route path="/admin/students" element={<ManageStudents />} />
             <Route path="/admin/payments" element={<ManagePayments />} />
             <Route path="/admin/certificates" element={<AdminCertificates />} />

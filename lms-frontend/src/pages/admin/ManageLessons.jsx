@@ -6,26 +6,43 @@ import toast from 'react-hot-toast';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminTable from '../../components/admin/AdminTable';
 import AdminModal from '../../components/admin/AdminModal';
-import AdminForm from '../../components/admin/AdminForm';
+import TabbedLessonForm from '../../components/admin/TabbedLessonForm';
 import { Plus, Edit, Trash2, Video, BookOpen, Layers, ChevronRight, Palette, HelpCircle } from 'lucide-react';
 
 const EMPTY_LESSON = { 
     title: '', 
     order_index: 1, 
     video_url: '', 
-    content: '', 
-    quick_summary: '', 
+    story: '', 
+    reading_time: '5 mins',
+    quick_summary: '',
     moral_value: '',
+    learning_goals: '',
+    parent_tip: '', 
+    qa_items: '',
+    todo_list: '',
     isFree: false 
 };
 
 const FORM_FIELDS = [
-    { name: 'title', label: 'Lesson Title', placeholder: 'e.g. Introduction to Variables', required: true },
+    { name: 'title', label: 'Lesson Title', placeholder: 'e.g. Kindness', required: true },
     { name: 'order_index', label: 'Order Index', type: 'number', required: true },
-    { name: 'video_url', label: 'Video URL', placeholder: 'YouTube/Vimeo embed or direct .mp4' },
-    { name: 'content', label: 'Main Story Text', type: 'textarea', placeholder: 'The main lesson content/story...', rows: 6 },
-    { name: 'quick_summary', label: 'Quick Summary', type: 'textarea', placeholder: 'A brief summary of the lesson...', rows: 3 },
-    { name: 'moral_value', label: 'Moral Value', type: 'textarea', placeholder: 'The moral of the story...', rows: 2 },
+    
+    { label: '--- LESSON METADATA ---', type: 'header' },
+    { name: 'reading_time', label: '⏱️ Reading Time', placeholder: 'e.g. 10 mins', required: true },
+    { name: 'quick_summary', label: '🚀 Quick Summary', type: 'textarea', placeholder: 'A short overview for the summary tab...', rows: 2 },
+    { name: 'moral_value', label: '💎 Moral Value', placeholder: 'The core lesson for the moral tab...', required: true },
+
+    { label: '--- LESSON ARCHITECTURE (STORY & GOALS) ---', type: 'header' },
+    { name: 'story', label: '📖 The Story', type: 'textarea', placeholder: 'The main narrative...', rows: 6, required: true },
+    { name: 'learning_goals', label: '🎯 What You\'ll Learn', type: 'textarea', placeholder: 'Bullet points (one per line)...', rows: 3 },
+    { name: 'parent_tip', label: '💡 Parent Tip', type: 'textarea', placeholder: 'Guidance for parents...', rows: 2 },
+    { name: 'qa_items', label: '💬 Text FAQ (Not the Quiz!)', type: 'textarea', placeholder: 'Add standard text Q&A here. (Use the Manage Quiz button in the table for MCQs)', rows: 4 },
+    { name: 'todo_list', label: '✅ To-Do List', type: 'textarea', placeholder: 'Action items (one per line)...', rows: 3 },
+    
+    { label: '--- ASSETS & SETTINGS ---', type: 'header' },
+    { name: 'video_url', label: '🎥 Video Link (Optional)', placeholder: 'YouTube/Vimeo link' },
+    { name: 'isFree', label: '🔓 Free Preview?', type: 'checkbox' },
 ];
 
 export default function ManageLessons() {
@@ -38,6 +55,53 @@ export default function ManageLessons() {
     const [actionLoading, setActionLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [editLesson, setEditLesson] = useState(null);
+
+    const buildContentHtml = (data) => {
+        const goals = data.learning_goals?.split('\n').filter(l => l.trim()).map(l => `<li>${l.trim()}</li>`).join('') || '';
+        const todos = data.todo_list?.split('\n').filter(l => l.trim()).map(l => `<li><strong>Item:</strong> ${l.trim()}</li>`).join('') || '';
+        
+        return `
+<div class="lesson-content">
+    <section class="story-section">
+        <h2 style="color: #FF6B6B;">Story: ${data.title}</h2>
+        <div style="display: flex; gap: 15px; margin-bottom: 20px; font-size: 0.9em; color: #666;">
+            <span>⏱️ <strong>Time:</strong> ${data.reading_time || '5 mins'}</span>
+            <span>💎 <strong>Moral:</strong> ${data.moral_value || 'N/A'}</span>
+        </div>
+        ${data.quick_summary ? `<p style="font-style: italic; background: #f9f9f9; padding: 10px; border-radius: 8px;"><strong>Summary:</strong> ${data.quick_summary}</p>` : ''}
+        <p>${data.story?.replace(/\n/g, '</p><p>')}</p>
+    </section>
+    
+    ${goals ? `
+    <section class="learn-section" style="background: #FFF5F5; padding: 20px; border-radius: 15px; margin: 20px 0;">
+        <h3 style="color: #FF6B6B;">What You'll Learn:</h3>
+        <ul>${goals}</ul>
+        ${data.parent_tip ? `<div class="parent-tip" style="border-left: 4px solid #FF6B6B; padding-left: 15px; margin-top: 15px;"><strong>Parent Tip:</strong> ${data.parent_tip}</div>` : ''}
+    </section>` : ''}
+
+    ${data.qa_items ? `
+    <section class="qa-section" style="background: #FFF9F1; padding: 20px; border-radius: 15px; margin-top: 20px;">
+        <h3 style="color: #FF9F43; margin-bottom: 15px;">Q&A</h3>
+        <div class="qa-content">
+            ${data.qa_items.split('|||').map(b => {
+                const parts = b.split('===');
+                if (!parts[0]) return '';
+                return `
+                <div style="margin-bottom: 15px; border-bottom: 1px solid #FFE8CC; padding-bottom: 10px;">
+                    <div style="font-weight: 800; color: #001F3F; margin-bottom: 5px;">Q: ${parts[0]}</div>
+                    <div style="color: #666;">A: ${parts[1] || ''}</div>
+                </div>`;
+            }).join('')}
+        </div>
+    </section>` : ''}
+
+    ${todos ? `
+    <section class="todo-section" style="background: #E8F5E9; padding: 20px; border-radius: 15px; margin-top: 20px;">
+        <h3 style="color: #2E7D32;">${data.title} To-Do List</h3>
+        <ul>${todos}</ul>
+    </section>` : ''}
+</div>`;
+    };
 
     useEffect(() => {
         getAllCourses({ all: true }).then(r => {
@@ -72,11 +136,17 @@ export default function ManageLessons() {
     const handleSave = async (data) => {
         setActionLoading(true);
         try {
+            const formattedData = {
+                ...data,
+                content: buildContentHtml(data),
+                course_id: selectedCourseId
+            };
+
             if (editLesson) {
-                await updateLesson(editLesson.id || editLesson._id, data);
+                await updateLesson(editLesson.id || editLesson._id, formattedData);
                 toast.success('Lesson content revised.');
             } else {
-                await createLesson({ ...data, course_id: selectedCourseId });
+                await createLesson(formattedData);
                 toast.success('Lesson appended to curriculum.');
             }
             setShowModal(false);
@@ -165,14 +235,14 @@ export default function ManageLessons() {
                 onClose={() => setShowModal(false)}
                 title={editLesson ? 'Refine Lesson Module' : 'Architect New Lesson'}
                 subtitle={selectedCourse ? `Target Course: ${selectedCourse.title}` : ''}
-                width={800}
+                width={900}
             >
-                <AdminForm
-                    fields={FORM_FIELDS}
+                <TabbedLessonForm
                     initialData={editLesson || { ...EMPTY_LESSON, order_index: lessons.length + 1 }}
                     loading={actionLoading}
                     onCancel={() => setShowModal(false)}
                     onSubmit={handleSave}
+                    isNew={!editLesson}
                 />
             </AdminModal>
         </AdminLayout>

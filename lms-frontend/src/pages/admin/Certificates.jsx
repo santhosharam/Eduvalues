@@ -19,7 +19,10 @@ export default function Certificates() {
         try {
             const r = await api.get('/admin/certificates');
             setCertificates(r.data.certificates || []);
-        } catch { toast.error('Failed to sync authentication registry'); }
+        } catch (err) { 
+            console.error('[CERT_FETCH_ERROR]', err);
+            toast.error(err.response?.data?.message || 'Failed to sync credential registry'); 
+        }
         finally { setLoading(false); }
     };
 
@@ -119,7 +122,7 @@ export default function Certificates() {
                         <td style={{ padding: '20px 32px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#f1f5f9', fontWeight: 700, fontSize: 13 }}>
                                 <BookOpen size={14} color="#00A6C0" />
-                                {cert.courseId?.title}
+                                {cert.courses?.title}
                             </div>
                         </td>
                         <td style={{ padding: '20px 32px' }}>

@@ -6,7 +6,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import AdminTable from '../../components/admin/AdminTable';
 import AdminModal from '../../components/admin/AdminModal';
 import AdminForm from '../../components/admin/AdminForm';
-import { Plus, Edit, Trash2, ArrowLeft, HelpCircle, CheckCircle2 } from 'lucide-react';
+import { Plus, Edit, Trash2, ArrowLeft, CheckCircle2 } from 'lucide-react';
 
 const FORM_FIELDS = [
     { name: 'question', label: 'Question Text', type: 'textarea', placeholder: 'Enter the question...', required: true, rows: 3 },
@@ -27,10 +27,10 @@ const FORM_FIELDS = [
     { name: 'order_index', label: 'Sort Order', type: 'number', required: true }
 ];
 
-export default function ManageQuiz() {
-    const { lessonId } = useParams();
+export default function ManageFinalExam() {
+    const { courseId } = useParams();
     const navigate = useNavigate();
-    const [lesson, setLesson] = useState(null);
+    const [course, setCourse] = useState(null);
     const [questions, setQuestions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -38,22 +38,13 @@ export default function ManageQuiz() {
     const [actionLoading, setActionLoading] = useState(false);
 
     useEffect(() => {
-        fetchInitialData();
-    }, [lessonId]);
+        fetchCourse();
+        fetchQuestions();
+    }, [courseId]);
 
-    useEffect(() => {
-        if (lesson) fetchQuestions();
-    }, [lesson]);
-
-    const fetchInitialData = async () => {
-        const { data, error } = await supabase
-            .from('lessons')
-            .select('title, course_id')
-            .eq('id', lessonId)
-            .single();
-        
-        if (error) toast.error('Error fetching lesson context');
-        else setLesson(data);
+    const fetchCourse = async () => {
+        const { data, error } = await supabase.from('courses').select('title').eq('id', courseId).single();
+        if (!error && data) setCourse(data);
     };
 
     const fetchQuestions = async () => {
@@ -62,15 +53,13 @@ export default function ManageQuiz() {
             const { data, error } = await supabase
                 .from('quizzes')
                 .select('*')
-                .eq('lesson_id', lessonId)
-                .eq('is_final_exam', false)
+                .eq('course_id', courseId)
+                .eq('is_final_exam', true)
                 .order('order_index', { ascending: true });
-            
             if (error) throw error;
             setQuestions(data || []);
         } catch (err) {
-            console.error('Fetch quiz error:', err);
-            toast.error(err.message || 'Failed to load questions');
+            toast.error('Failed to load final exam questions');
         } finally {
             setLoading(false);
         }
@@ -81,9 +70,8 @@ export default function ManageQuiz() {
         try {
             const payload = {
                 ...formData,
-                lesson_id: lessonId,
-                course_id: lesson.course_id,
-                is_final_exam: false
+                course_id: courseId,
+                is_final_exam: true
             };
 
             if (editQuestion) {
@@ -93,19 +81,19 @@ export default function ManageQuiz() {
             } else {
                 const { error } = await supabase.from('quizzes').insert([payload]);
                 if (error) throw error;
-                toast.success('Question added to database');
+                toast.success('Question added to final exam');
             }
             setShowModal(false);
             fetchQuestions();
         } catch (err) {
-            toast.error(err.message || 'Error saving quiz entry');
+            toast.error(err.message || 'Error saving question');
         } finally {
             setActionLoading(false);
         }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('IRREVERSIBLE: Delete this quiz question?')) return;
+        if (!window.confirm('Delete this final exam question?')) return;
         try {
             const { error } = await supabase.from('quizzes').delete().eq('id', id);
             if (error) throw error;
@@ -118,30 +106,29 @@ export default function ManageQuiz() {
 
     return (
         <AdminLayout
-            title="Quiz Builder"
-            subtitle={lesson ? `Lesson: ${lesson.title}` : 'Loading...'}
+            title="Final Exam Builder"
+            subtitle={course ? `Course: ${course.title}` : 'Loading...'}
         >
-            {/* Control Hub */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                 <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
-                    <button onClick={() => navigate('/admin/lessons')} style={backBtnStyle}>
-                        <ArrowLeft size={18} /> Back
+                    <button onClick={() => navigate('/admin/courses')} style={backBtnStyle}>
+                        <ArrowLeft size={18} /> Back to Courses
                     </button>
                     
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 20 }}>
-                        <div style={{ fontSize: 13, fontWeight: 900, color: questions.length >= 5 ? '#1DD1A1' : '#FF9F43' }}>
-                            QUIZ PROGRESS: {questions.length}/5 Questions
+                        <div style={{ fontSize: 13, fontWeight: 900, color: questions.length >= 20 ? '#1DD1A1' : '#FF9F43' }}>
+                            EXAM PROGRESS: {questions.length}/20 Questions
                         </div>
-                        {questions.length < 5 && (
+                        {questions.length < 20 && (
                             <div style={{ fontSize: 10, color: '#64748b', background: 'rgba(255,255,255,0.05)', padding: '4px 8px', borderRadius: 6 }}>
-                                Need 5 for Lesson Completion
+                                Need 20 for Certification
                             </div>
                         )}
                     </div>
                 </div>
 
                 <button onClick={() => { setEditQuestion(null); setShowModal(true); }} style={addBtnStyle}>
-                    <Plus size={18} /> New Question
+                    <Plus size={18} /> Add Question
                 </button>
             </div>
 
@@ -156,6 +143,7 @@ export default function ManageQuiz() {
                         </td>
                         <td style={{ padding: '20px 32px' }}>
                             <div style={{ color: '#fff', fontWeight: 700, fontSize: 13.5, maxWidth: 350 }}>{q.question}</div>
+                            <div style={{ color: '#FF9F43', fontSize: 10, fontWeight: 900, marginTop: 4 }}>FINAL EXAM MATERIAL</div>
                         </td>
                         <td style={{ padding: '20px 32px' }}>
                             <div style={{ fontSize: 11, color: '#64748b' }}>
@@ -178,8 +166,8 @@ export default function ManageQuiz() {
             <AdminModal
                 isOpen={showModal}
                 onClose={() => setShowModal(false)}
-                title={editQuestion ? 'Refine Question' : 'Architect Question'}
-                subtitle="Creating for Lesson Knowledge Check"
+                title={editQuestion ? 'Edit Final Exam Question' : 'Add Final Exam Question'}
+                subtitle="Ensure this question comprehensively tests the student's knowledge."
             >
                 <AdminForm
                     fields={FORM_FIELDS}
@@ -194,17 +182,7 @@ export default function ManageQuiz() {
 }
 
 const backBtnStyle = { background: 'none', border: 'none', color: '#64748b', fontWeight: 800, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 };
-
-const tabContainerStyle = { display: 'flex', background: 'rgba(255,255,255,0.03)', padding: '4px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' };
-
-const tabStyle = { padding: '8px 16px', borderRadius: '8px', border: 'none', background: 'none', color: '#64748b', fontSize: 12, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, transition: 'all 0.2s' };
-
-const activeTabStyle = { ...tabStyle, background: '#00A6C0', color: '#fff', boxShadow: '0 4px 12px rgba(0, 166, 192, 0.2)' };
-
 const addBtnStyle = { background: '#00A6C0', color: '#fff', padding: '12px 24px', borderRadius: '14px', border: 'none', fontWeight: 900, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 8px 16px rgba(0, 166, 192, 0.2)' };
-
 const badgeStyle = { width: 28, height: 28, borderRadius: '6px', background: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontWeight: 900, fontSize: 11 };
-
 const correctBadgeStyle = { padding: '4px 8px', borderRadius: '6px', background: 'rgba(29, 209, 161, 0.1)', color: '#1DD1A1', fontSize: 10, fontWeight: 900 };
-
 const actionBtnStyle = { width: 40, height: 40, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', cursor: 'pointer' };
