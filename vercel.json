@@ -16,7 +16,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "lms-backend/server.js"
+      "dest": "/lms-backend/server.js"
     },
     {
       "handle": "filesystem"
