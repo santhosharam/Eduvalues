@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/common/ProtectedRoute'
@@ -50,10 +51,27 @@ import AdminSettings from './pages/admin/Settings'
 // ── 404 ─────────────────────────────────────────────────────────
 import NotFound from './pages/NotFound'
 
+function OAuthRedirectHandler() {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  useEffect(() => {
+    if (window.location.hash && window.location.hash.includes('access_token=')) {
+      const timer = setTimeout(() => {
+        navigate('/dashboard', { replace: true })
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [location, navigate])
+
+  return null
+}
+
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <OAuthRedirectHandler />
         <Toaster
           position="top-right"
           toastOptions={{
