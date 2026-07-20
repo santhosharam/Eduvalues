@@ -6,7 +6,7 @@ import { initiatePayment, verifyPayment } from '../../services/paymentService'
 import { useAuth } from '../../context/AuthContext'
 import toast from 'react-hot-toast'
 import { Shield, CreditCard, CheckCircle, ArrowLeft, Rocket, Sparkles, Smile } from 'lucide-react'
-import api from '../../services/api'
+import { getCourseById } from '../../services/courseService'
 
 export default function Checkout() {
     const { courseId } = useParams()
@@ -18,8 +18,8 @@ export default function Checkout() {
 
     useEffect(() => {
         setPageLoading(true)
-        api.get(`/courses/id/${courseId}`)
-            .then(r => setCourse(r.data.course))
+        getCourseById(courseId)
+            .then(res => setCourse(res.data.course))
             .catch(err => {
                 console.error(err)
                 toast.error('Could not load adventure details.')
