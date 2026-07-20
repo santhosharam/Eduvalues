@@ -57,7 +57,9 @@ app.use((req, res, next) => {
         const allowedOrigins = [
             process.env.CLIENT_URL,
             'http://localhost:5173',
-            'https://eduvalues.vercel.app'
+            'https://eduvalues.vercel.app',
+            'https://www.eduvalues.in',
+            'https://eduvalues.in'
         ].filter(Boolean)
 
         app.use(cors({
