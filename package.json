@@ -3,10 +3,6 @@
     "version": "1.0.0",
     "description": "LearnHub LMS — React frontend + Node.js/Express backend",
     "private": true,
-    "workspaces": [
-        "lms-frontend",
-        "lms-backend"
-    ],
     "scripts": {
         "dev": "concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"cyan,magenta\" \"npm run dev --prefix lms-backend\" \"npm run dev --prefix lms-frontend\"",
         "install:all": "npm install --prefix lms-backend && npm install --prefix lms-frontend",
@@ -18,7 +14,20 @@
         "concurrently": "^9.1.2"
     },
     "dependencies": {
-        "@supabase/supabase-js": "^2.99.2",
-        "axios": "^1.15.2"
+        "@supabase/supabase-js": "^2.105.4",
+        "axios": "^1.15.2",
+        "bcryptjs": "^3.0.3",
+        "cors": "^2.8.6",
+        "dotenv": "^17.3.1",
+        "express": "^5.2.1",
+        "express-rate-limit": "^8.3.2",
+        "jsonwebtoken": "^9.0.3",
+        "morgan": "^1.10.1",
+        "multer": "^2.1.1",
+        "nodemailer": "^8.0.4",
+        "nodemon": "^3.1.14",
+        "pdfkit": "^0.17.2",
+        "razorpay": "^2.9.6",
+        "uuid": "^13.0.0"
     }
 }
