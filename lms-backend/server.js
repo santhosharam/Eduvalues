@@ -92,6 +92,28 @@ app.use((req, res, next) => {
         // Health check
         app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date(), version: '2.0.0' }))
 
+        // Diagnostics endpoint to debug environment variables on the hosted server
+        app.get('/api/diagnose', (req, res) => {
+            const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL
+            const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY
+            const razorpayKey = process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY
+            const razorpaySecret = process.env.RAZORPAY_SECRET
+            
+            res.json({
+                status: 'ok',
+                time: new Date(),
+                env: {
+                    NODE_ENV: process.env.NODE_ENV,
+                    VERCEL: process.env.VERCEL,
+                    PORT: process.env.PORT,
+                    SUPABASE_URL_configured: !!supabaseUrl,
+                    SUPABASE_KEY_configured: !!supabaseKey,
+                    RAZORPAY_KEY_configured: !!razorpayKey,
+                    RAZORPAY_SECRET_configured: !!razorpaySecret
+                }
+            })
+        })
+
         // 404 handler for unknown API routes
         app.use('/api', (req, res) => {
             // Only return JSON 404 if the request genuinely targeted the API

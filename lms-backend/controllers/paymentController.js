@@ -5,12 +5,14 @@ const supabase = require('../supabaseClient')
 let razorpay = null
 const getRazorpay = () => {
     if (!razorpay) {
-        if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_SECRET) {
-            throw new Error(`Razorpay API credentials are missing on the hosted server. (RAZORPAY_KEY_ID exists: ${!!process.env.RAZORPAY_KEY_ID}, RAZORPAY_SECRET exists: ${!!process.env.RAZORPAY_SECRET})`)
+        const keyId = process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY
+        const keySecret = process.env.RAZORPAY_SECRET
+        if (!keyId || !keySecret) {
+            throw new Error(`Razorpay API credentials are missing on the hosted server. (RAZORPAY_KEY_ID exists: ${!!keyId}, RAZORPAY_SECRET exists: ${!!keySecret})`)
         }
         razorpay = new Razorpay({
-            key_id: process.env.RAZORPAY_KEY_ID,
-            key_secret: process.env.RAZORPAY_SECRET,
+            key_id: keyId,
+            key_secret: keySecret,
         })
     }
     return razorpay
