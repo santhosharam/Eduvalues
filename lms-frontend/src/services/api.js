@@ -27,9 +27,11 @@ api.interceptors.request.use(async (config) => {
             config.headers['x-auth-token'] = token;
         }
 
-        // Emergency fallback: Append to query string
-        const separator = config.url.includes('?') ? '&' : '?';
-        config.url = `${config.url}${separator}token=${token}`;
+        // Emergency fallback: Append to query string (if not already appended)
+        if (!config.url.includes('token=')) {
+            const separator = config.url.includes('?') ? '&' : '?';
+            config.url = `${config.url}${separator}token=${token}`;
+        }
     }
     return config;
 }, (error) => {

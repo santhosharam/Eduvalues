@@ -2,10 +2,19 @@ const Razorpay = require('razorpay')
 const crypto = require('crypto')
 const supabase = require('../supabaseClient')
 
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_SECRET,
-})
+let razorpay = null
+const getRazorpay = () => {
+    if (!razorpay) {
+        if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_SECRET) {
+            throw new Error(`Razorpay API credentials are missing on the hosted server. (RAZORPAY_KEY_ID exists: ${!!process.env.RAZORPAY_KEY_ID}, RAZORPAY_SECRET exists: ${!!process.env.RAZORPAY_SECRET})`)
+        }
+        razorpay = new Razorpay({
+            key_id: process.env.RAZORPAY_KEY_ID,
+            key_secret: process.env.RAZORPAY_SECRET,
+        })
+    }
+    return razorpay
+}
 
 // POST /api/payments/initiate
 exports.initiatePayment = async (req, res) => {
@@ -43,7 +52,7 @@ exports.initiatePayment = async (req, res) => {
         }
 
         // 3. Create Razorpay Order
-        const order = await razorpay.orders.create({ 
+        const order = await getRazorpay().orders.create({ 
             amount, 
             currency: 'INR', 
             receipt: `rcpt_${Date.now()}` 
@@ -77,6 +86,11 @@ exports.initiatePayment = async (req, res) => {
 exports.verifyPayment = async (req, res) => {
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, courseId } = req.body
+        
+        if (!process.env.RAZORPAY_SECRET) {
+            throw new Error('Razorpay API secret (RAZORPAY_SECRET) is missing on the hosted server.')
+        }
+
         const body = razorpay_order_id + '|' + razorpay_payment_id
         const expectedSig = crypto.createHmac('sha256', process.env.RAZORPAY_SECRET).update(body).digest('hex')
         
