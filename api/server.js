@@ -5,7 +5,7 @@ try {
     console.error('Failed to load lms-backend:', err)
     const express = require('express')
     const fallbackApp = express()
-    fallbackApp.all('*', (req, res) => {
+    fallbackApp.use((req, res) => {
         res.status(500).json({
             success: false,
             error: 'Failed to load backend server',

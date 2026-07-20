@@ -1,5 +1,4 @@
 const supabase = require('../supabaseClient')
-const { v4: uuidv4 } = require('uuid')
 
 // GET /api/progress/:courseId
 exports.getCourseProgress = async (req, res) => {
