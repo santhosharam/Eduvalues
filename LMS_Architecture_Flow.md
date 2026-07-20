@@ -17,7 +17,7 @@ The Admin Panel is fully equipped to architect courses visually.
 *   **Token Persistence:** The `AuthContext` mirrors Supabase sessions into `localStorage` (`lms_token`).
 *   **Middleware Armor:** Every backend route passes through `authMiddleware.js`, verifying the JWT before permitting data access.
 
-## 3. Financial Gateway & Course Unlocking
+## 3. Financial Gateway & Course Unlockin
 *   **Razorpay Engine:** `Checkout.jsx` triggers the Razorpay modal.
 *   **Backend Verification:** `paymentController.js` validates the signature cryptographically.
 *   **Access Grant:** Upon validation, a record is struck in the `enrollments` table with `status: 'active'`.
