@@ -19,19 +19,11 @@
       "dest": "lms-backend/server.js"
     },
     {
-      "src": "/(assets|blog|lessons)/(.*)",
-      "dest": "/lms-frontend/$1/$2"
-    },
-    {
-      "src": "/(favicon.png|logo.png|vite.svg)",
-      "dest": "/lms-frontend/$1"
-    },
-    {
       "handle": "filesystem"
     },
     {
       "src": "/(.*)",
-      "dest": "/lms-frontend/index.html"
+      "dest": "/index.html"
     }
   ]
 }
