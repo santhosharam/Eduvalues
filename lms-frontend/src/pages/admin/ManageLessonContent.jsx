@@ -80,13 +80,13 @@ export default function ManageLessonContent() {
                         <td style={{ padding: '20px 32px', textAlign: 'right' }}>
                             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
                                 <button 
-                                    onClick={() => navigate(`/admin/lessons/${lesson.id}/comics`)} 
+                                    onClick={() => navigate(`/staff-room/lessons/${lesson.id}/comics`)} 
                                     style={{ ...actionBtnStyle, color: '#00A6C0', background: 'rgba(0,166,192,0.1)' }}
                                 >
                                     <Palette size={16} style={{ marginRight: 8 }} /> Comic Manager
                                 </button>
                                 <button 
-                                    onClick={() => navigate(`/admin/lessons/${lesson.id}/quiz`)} 
+                                    onClick={() => navigate(`/staff-room/lessons/${lesson.id}/quiz`)} 
                                     style={{ ...actionBtnStyle, color: '#FF9F43', background: 'rgba(255,159,67,0.1)' }}
                                 >
                                     <HelpCircle size={16} style={{ marginRight: 8 }} /> Quiz Builder

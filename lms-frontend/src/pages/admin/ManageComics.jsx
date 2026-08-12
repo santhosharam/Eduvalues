@@ -10,7 +10,7 @@ import { Plus, Edit, Trash2, ArrowLeft, Image as ImageIcon } from 'lucide-react'
 
 const FORM_FIELDS = [
     { name: 'panel_number', label: 'Panel Number', type: 'number', required: true },
-    { name: 'image_url', label: 'Image URL', placeholder: 'e.g. /comics/lesson1/panel1.png', required: true },
+    { name: 'image_url', label: 'Panel Image', type: 'image', required: true },
     { name: 'caption', label: 'Caption', type: 'textarea', placeholder: 'Dialogue or description...', rows: 3 },
 ];
 
@@ -30,7 +30,7 @@ export default function ManageComics() {
     }, [lessonId]);
 
     const fetchLessonData = async () => {
-        const { data, error } = await supabase.from('lessons').select('title').eq('id', lessonId).single();
+        const { data, error } = await supabase.from('lessons').select('title, course_id').eq('id', lessonId).single();
         if (error) toast.error('Error fetching lesson');
         else setLesson(data);
     };
@@ -56,17 +56,21 @@ export default function ManageComics() {
     const handleSave = async (formData) => {
         setActionLoading(true);
         try {
+            // Strip out auxiliary properties that are only used for the file upload path.
+            // The comic_panels table only contains id, lesson_id, panel_number, image_url, caption, etc.
+            const { course_id, lesson_id, ...saveData } = formData;
+
             if (editPanel) {
                 const { error } = await supabase
                     .from('comic_panels')
-                    .update(formData)
+                    .update(saveData)
                     .eq('id', editPanel.id);
                 if (error) throw error;
                 toast.success('Panel updated');
             } else {
                 const { error } = await supabase
                     .from('comic_panels')
-                    .insert([{ ...formData, lesson_id: lessonId }]);
+                    .insert([{ ...saveData, lesson_id: lessonId }]);
                 if (error) throw error;
                 toast.success('Panel added');
             }
@@ -98,7 +102,7 @@ export default function ManageComics() {
             subtitle={lesson ? `Designing Panels for: ${lesson.title}` : 'Loading lesson...'}
         >
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '32px' }}>
-                <button onClick={() => navigate('/admin/lessons')} style={backBtnStyle}>
+                <button onClick={() => navigate('/staff-room/lessons')} style={backBtnStyle}>
                     <ArrowLeft size={18} /> Back to Lessons
                 </button>
                 <button onClick={() => { setEditPanel(null); setShowModal(true); }} style={addBtnStyle}>
@@ -145,7 +149,7 @@ export default function ManageComics() {
             >
                 <AdminForm
                     fields={FORM_FIELDS}
-                    initialData={editPanel || { panel_number: panels.length + 1, image_url: '', caption: '' }}
+                    initialData={editPanel || { panel_number: panels.length + 1, image_url: '', caption: '', course_id: lesson?.course_id, lesson_id: lessonId }}
                     loading={actionLoading}
                     onCancel={() => setShowModal(false)}
                     onSubmit={handleSave}

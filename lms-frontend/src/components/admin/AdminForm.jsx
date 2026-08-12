@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import { Save, X, Loader2 } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Save, X, Loader2, UploadCloud, ImageIcon, CheckCircle, Trash2, Edit } from 'lucide-react';
+import toast from 'react-hot-toast';
+import api from '../../services/api';
 
 export default function AdminForm({
     onSubmit,
@@ -9,6 +11,50 @@ export default function AdminForm({
     onCancel
 }) {
     const [formData, setFormData] = useState(initialData);
+    const [uploadingField, setUploadingField] = useState(null);
+    const fileInputRefs = useRef({});
+
+    const handleImageUpload = async (e, fieldName) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Reset input so selecting the same file again triggers onChange
+        if (fileInputRefs.current[fieldName]) {
+            fileInputRefs.current[fieldName].value = '';
+        }
+
+        // Validate size (5MB) and type
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            return toast.error('Only JPG, PNG, and WebP images are allowed.');
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            return toast.error('Image must be smaller than 5 MB.');
+        }
+
+        setUploadingField(fieldName);
+        const data = new FormData();
+        data.append('image', file);
+        
+        // Pass IDs if they exist for folder routing
+        if (formData.courseId || formData.course_id) data.append('courseId', formData.courseId || formData.course_id);
+        if (formData.lessonId || formData.lesson_id) data.append('lessonId', formData.lessonId || formData.lesson_id);
+
+        try {
+            const res = await api.post('/upload', data, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            setFormData(prev => ({ ...prev, [fieldName]: res.data.url }));
+            toast.success('Image uploaded and verified.');
+        } catch (err) {
+            console.error('Upload error:', err);
+            toast.error(err.response?.data?.message || err.message || 'Image upload failed. Please try again.');
+        } finally {
+            setUploadingField(null);
+        }
+    };
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -64,17 +110,76 @@ export default function AdminForm({
                             {field.type === 'textarea' ? (
                                 <textarea
                                     name={field.name}
-                                    value={formData[field.name] || ''}
+                                    value={formData[field.name] ?? ''}
                                     onChange={handleChange}
                                     placeholder={field.placeholder}
-                                    required={field.required}
+                                    required={field.required && !formData[field.name]}
                                     style={inputBaseStyle}
                                     rows={field.rows || 4}
                                 />
+                            ) : field.type === 'image' ? (
+                                <div style={{ 
+                                    border: '2px dashed rgba(255,255,255,0.1)', 
+                                    borderRadius: '16px', 
+                                    padding: '24px', 
+                                    textAlign: 'center',
+                                    background: 'rgba(5, 10, 20, 0.3)',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    gap: 16,
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                }}>
+                                    <input 
+                                        type="file" 
+                                        accept="image/jpeg, image/png, image/webp" 
+                                        style={{ display: 'none' }}
+                                        ref={el => fileInputRefs.current[field.name] = el}
+                                        onChange={(e) => handleImageUpload(e, field.name)}
+                                    />
+                                    
+                                    {formData[field.name] ? (
+                                        <div style={{ position: 'relative', width: '100%', maxWidth: 300, borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                            <img src={formData[field.name]} alt="Preview" style={{ width: '100%', display: 'block', objectFit: 'cover' }} />
+                                            <div style={{ position: 'absolute', top: 8, right: 8, display: 'flex', gap: 8 }}>
+                                                <button type="button" onClick={() => fileInputRefs.current[field.name]?.click()} style={{ background: 'rgba(0,0,0,0.7)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                    <Edit size={14} /> Replace
+                                                </button>
+                                                <button type="button" onClick={() => setFormData(prev => ({...prev, [field.name]: ''}))} style={{ background: 'rgba(255,0,0,0.7)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                    <Trash2 size={14} /> Remove
+                                                </button>
+                                            </div>
+                                            <div style={{ position: 'absolute', bottom: 8, left: 8, background: 'rgba(29, 209, 161, 0.9)', color: '#000', padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 900, display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                <CheckCircle size={14} /> Uploaded
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(0, 166, 192, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00A6C0' }}>
+                                                {uploadingField === field.name ? <Loader2 size={32} className="spin" /> : <UploadCloud size={32} />}
+                                            </div>
+                                            <div>
+                                                <div style={{ fontSize: 14, fontWeight: 800, color: '#f1f5f9' }}>
+                                                    {uploadingField === field.name ? 'Uploading to secure storage...' : 'Click to select an image'}
+                                                </div>
+                                                <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>Supports JPG, PNG, WebP (Max 5MB)</div>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                disabled={uploadingField === field.name}
+                                                onClick={() => fileInputRefs.current[field.name]?.click()}
+                                                style={{ padding: '10px 24px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontWeight: 800, fontSize: 13, cursor: uploadingField === field.name ? 'not-allowed' : 'pointer' }}
+                                            >
+                                                Browse Files
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
                             ) : field.type === 'select' ? (
                                 <select
                                     name={field.name}
-                                    value={formData[field.name] || ''}
+                                    value={formData[field.name] ?? ''}
                                     onChange={handleChange}
                                     required={field.required}
                                     style={inputBaseStyle}
@@ -88,7 +193,7 @@ export default function AdminForm({
                                 <input
                                     name={field.name}
                                     type={field.type || 'text'}
-                                    value={formData[field.name] || ''}
+                                    value={formData[field.name] ?? ''}
                                     onChange={handleChange}
                                     placeholder={field.placeholder}
                                     required={field.required}

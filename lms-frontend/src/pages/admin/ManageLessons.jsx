@@ -221,8 +221,8 @@ export default function ManageLessons() {
                         <td style={{ padding: '20px 32px', textAlign: 'right' }}>
                             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                                 <button onClick={() => { setEditLesson(lesson); setShowModal(true); }} style={actionBtnStyle} title="Edit Lesson"><Edit size={16} /></button>
-                                <button onClick={() => navigate(`/admin/lessons/${lesson.id || lesson._id}/comics`)} style={{ ...actionBtnStyle, color: '#00A6C0', background: 'rgba(0,166,192,0.1)' }} title="Manage Comics"><Palette size={16} /></button>
-                                <button onClick={() => navigate(`/admin/lessons/${lesson.id || lesson._id}/quiz`)} style={{ ...actionBtnStyle, color: '#FF9F43', background: 'rgba(255,159,67,0.1)' }} title="Manage Quiz"><HelpCircle size={16} /></button>
+                                <button onClick={() => navigate(`/staff-room/lessons/${lesson.id || lesson._id}/comics`)} style={{ ...actionBtnStyle, color: '#00A6C0', background: 'rgba(0,166,192,0.1)' }} title="Manage Comics"><Palette size={16} /></button>
+                                <button onClick={() => navigate(`/staff-room/lessons/${lesson.id || lesson._id}/quiz`)} style={{ ...actionBtnStyle, color: '#FF9F43', background: 'rgba(255,159,67,0.1)' }} title="Manage Quiz"><HelpCircle size={16} /></button>
                                 <button onClick={() => handleDelete(lesson.id || lesson._id)} style={{ ...actionBtnStyle, color: '#FF6B6B' }} title="Delete"><Trash2 size={16} /></button>
                             </div>
                         </td>

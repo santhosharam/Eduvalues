@@ -13,7 +13,7 @@ export default function AdminRoute() {
     }
 
     if (!user || user.role !== 'admin') {
-        return <Navigate to="/admin/login" replace />
+        return <Navigate to="/staff-room/login" replace />
     }
 
     return <Outlet />

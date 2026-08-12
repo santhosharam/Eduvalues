@@ -13,7 +13,10 @@ exports.getCourses = async (req, res) => {
             
         const { data: courses, error } = await query
         
-        if (error) throw error
+        if (error) {
+            console.error('[COURSES_QUERY_ERROR]', error)
+            return res.status(500).json({ message: 'Unable to load courses', error: error.message, code: error.code })
+        }
 
         // Sort lessons by order_index
         if (courses) {
@@ -26,6 +29,7 @@ exports.getCourses = async (req, res) => {
 
         res.json({ courses })
     } catch (err) {
+        console.error('[COURSES_HANDLER_ERROR]', err)
         res.status(500).json({ message: err.message })
     }
 }
@@ -42,16 +46,34 @@ exports.getCourseBySlug = async (req, res) => {
             .single()
 
         if (error || !course) {
-            return res.status(404).json({ message: 'Course not found' })
+            console.error('[COURSE_BY_SLUG_QUERY_ERROR]', error)
+            if (!course) return res.status(404).json({ message: 'Course not found' })
+            return res.status(500).json({ message: 'Unable to load course', error: error.message, code: error.code })
         }
 
         // Sort lessons by order_index
         if (course.lessons && Array.isArray(course.lessons)) {
             course.lessons.sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
         }
-        
-        res.json({ course })
+
+        // Fetch reviews separately and fail gracefully if reviews table/relationship missing
+        let reviews = []
+        try {
+            const { data: rdata, error: rErr } = await supabase
+                .from('reviews')
+                .select('id, rating, comment, student_name, student_id, created_at')
+                .eq('course_id', course.id)
+                .order('created_at', { ascending: false })
+
+            if (!rErr && Array.isArray(rdata)) reviews = rdata
+            else if (rErr) console.warn('[COURSE_BY_SLUG] reviews load error:', rErr.message || rErr)
+        } catch (rex) {
+            console.warn('[COURSE_BY_SLUG] Exception fetching reviews:', rex.message || rex)
+        }
+
+        res.json({ course: { ...course, reviews } })
     } catch (err) {
+        console.error('[COURSE_BY_SLUG_HANDLER_ERROR]', err)
         res.status(500).json({ message: err.message })
     }
 }
@@ -68,17 +90,34 @@ exports.getCourseById = async (req, res) => {
             .single()
 
         if (error || !course) {
-            console.log(`[DEBUG] Course not found in Supabase for: ${identifier}`)
-            return res.status(404).json({ message: 'Course not found' })
+            console.error('[COURSE_BY_ID_QUERY_ERROR]', { identifier, error })
+            if (!course) return res.status(404).json({ message: 'Course not found' })
+            return res.status(500).json({ message: 'Unable to load course', error: error.message, code: error.code })
         }
 
         // Sort lessons by order_index
         if (course.lessons && Array.isArray(course.lessons)) {
             course.lessons.sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
         }
-        
-        res.json({ course })
+
+        // Fetch reviews separately and fall back to empty array if necessary
+        let reviews = []
+        try {
+            const { data: rdata, error: rErr } = await supabase
+                .from('reviews')
+                .select('id, rating, comment, student_name, student_id, created_at')
+                .eq('course_id', course.id)
+                .order('created_at', { ascending: false })
+
+            if (!rErr && Array.isArray(rdata)) reviews = rdata
+            else if (rErr) console.warn('[COURSE_BY_ID] reviews load error:', rErr.message || rErr)
+        } catch (rex) {
+            console.warn('[COURSE_BY_ID] Exception fetching reviews:', rex.message || rex)
+        }
+
+        res.json({ course: { ...course, reviews } })
     } catch (err) {
+        console.error('[COURSE_BY_ID_HANDLER_ERROR]', err)
         res.status(500).json({ message: err.message })
     }
 }
@@ -102,8 +141,47 @@ exports.createCourse = async (req, res) => {
         } = req.body
         
         if (!title) throw new Error('Course title is required')
+
+        // 1. Validate Base Price
+        let parsedPrice = 0;
+        if (price !== undefined && price !== null && price !== '') {
+            parsedPrice = Number(price);
+            if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+                return res.status(400).json({ message: 'Please enter a valid non-negative base price.' });
+            }
+        }
+
+        // 2. Validate Discount Price
+        let parsedDiscount = null;
+        if (discount_price !== undefined && discount_price !== null && discount_price !== '') {
+            parsedDiscount = Number(discount_price);
+            if (!Number.isFinite(parsedDiscount) || parsedDiscount < 0) {
+                return res.status(400).json({ message: 'Please enter a valid non-negative discount price.' });
+            }
+        }
+
+        // 3. Slug Generation
+        let baseSlug = title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        if (!baseSlug) baseSlug = 'course';
         
-        const slug = title.toLowerCase().trim().replace(/ /g, '-').replace(/[^\w-]+/g, '')
+        let slug = baseSlug;
+        let slugCounter = 1;
+        let isUnique = false;
+        
+        while (!isUnique) {
+            const { data: existing } = await supabase
+                .from('courses')
+                .select('id')
+                .eq('slug', slug)
+                .single();
+                
+            if (existing) {
+                slugCounter++;
+                slug = `${baseSlug}-${slugCounter}`;
+            } else {
+                isUnique = true;
+            }
+        }
 
         const { data: course, error } = await supabase
             .from('courses')
@@ -113,8 +191,8 @@ exports.createCourse = async (req, res) => {
                 description,
                 short_description,
                 instructor,
-                price: Number(price) || 0,
-                discount_price: discount_price ? Number(discount_price) : null,
+                price: parsedPrice,
+                discount_price: parsedDiscount,
                 category,
                 level: level || 'beginner',
                 duration,
@@ -124,7 +202,13 @@ exports.createCourse = async (req, res) => {
             .select()
             .single()
 
-        if (error) throw error
+        if (error) {
+            if (error.code === '23505') {
+                 return res.status(400).json({ message: 'A course with this exact identifier already exists. Please adjust the title.' });
+            }
+            throw error;
+        }
+        
         console.log('✅ [DATABASE] Course created successfully:', course.id);
         res.status(201).json({ course })
     } catch (err) {
@@ -136,9 +220,18 @@ exports.createCourse = async (req, res) => {
 // PUT /api/courses/:id (admin)
 exports.updateCourse = async (req, res) => {
     try {
+        const updateData = { ...req.body }
+        
+        // Strip out relational fields that are fetched via nested Supabase queries 
+        // but do not exist as physical columns on the courses table.
+        delete updateData.lessons
+        delete updateData.reviews
+        delete updateData.id
+        delete updateData._id
+
         const { data: course, error } = await supabase
             .from('courses')
-            .update(req.body)
+            .update(updateData)
             .eq('id', req.params.id)
             .select()
             .single()
@@ -224,7 +317,7 @@ exports.submitFinalExam = async (req, res) => {
                 .upsert({
                     student_id: req.user.id,
                     course_id: courseId,
-                    unique_code: uniqueCode
+                    certificate_code: uniqueCode
                 }, { onConflict: 'student_id,course_id' })
                 .select()
                 .single()
