@@ -766,82 +766,16 @@ export default function Home() {
                                 Parent Verified
                             </h3>
                             <p style={{ color: '#666', fontSize: '15px', fontWeight: 600, lineHeight: 1.6, marginBottom: '24px' }}>
-                                "The progress tracker is brilliant. Seeing Joey receive his printed Certificate of Completion was an extremely emotional moment!"
+                                "The progress tracker is brilliant. Seeing my child receive their printed Certificate of Completion was an extremely emotional moment!"
                             </p>
                             <div style={{ fontWeight: 800, color: '#FF9F43', fontSize: '16px' }}>
-                                — Sarah J., Proud Mom
+                                — Verified Parent
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* ══ TESTIMONIALS SECTION ═════════════════════════════════ */}
-            <section style={{ padding: '80px 24px', background: '#FFFDF9' }}>
-                <div className="section-container" style={{ textAlign: 'center' }}>
-                    <div style={{ color: '#FFB08E', fontWeight: 900, letterSpacing: 2, fontSize: 13, marginBottom: 12, textTransform: 'uppercase', fontFamily: '"Fredoka", sans-serif' }}>WHAT PARENTS SAY</div>
-                    <h2 style={{ fontSize: '56px', fontWeight: 900, color: '#001F3F', marginBottom: '80px', fontFamily: '"Fredoka", sans-serif' }}>Happy Families</h2>
-
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                        gap: '40px'
-                    }}>
-                        {TESTIMONIALS.map((t, i) => (
-                            <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                {/* Bubble */}
-                                <div className="kids-card wiggle-hover" style={{
-                                    backgroundColor: t.bgColor,
-                                    padding: '40px',
-                                    borderRadius: '40px',
-                                    border: `3px dashed ${t.borderColor}`,
-                                    boxShadow: '0 10px 0 ' + t.borderColor,
-                                    position: 'relative',
-                                    marginBottom: '30px',
-                                    textAlign: 'center'
-                                }}>
-                                    {/* Quote Marks - Top Left */}
-                                    <div style={{ position: 'absolute', top: -15, left: 30, backgroundColor: t.quoteColor, padding: 8, borderRadius: 10, color: '#fff' }}>
-                                        <Quote size={20} fill="#fff" />
-                                    </div>
-
-                                    <p style={{ fontStyle: 'italic', color: '#444', lineHeight: 1.8, fontSize: 16, fontWeight: 600 }}>
-                                        "{t.text}"
-                                    </p>
-
-                                    {/* Quote Marks - Bottom Right */}
-                                    <div style={{ position: 'absolute', bottom: -15, right: 30, backgroundColor: t.quoteColor, padding: 8, borderRadius: 10, color: '#fff' }}>
-                                        <Quote size={20} fill="#fff" transform="rotate(180)" />
-                                    </div>
-
-                                    {/* Speech Bubble Tail */}
-                                    <div style={{ position: 'absolute', bottom: -18, left: '50%', transform: 'translateX(-50%)', width: 40, height: 20 }}>
-                                        <svg viewBox="0 0 40 20" style={{ fill: t.bgColor, width: '100%', height: '100%' }}>
-                                            <path d="M0,0 L40,0 L20,20 Z" />
-                                            <path d="M0,0 L20,20 L40,0" fill="none" stroke={t.borderColor} strokeWidth="3" strokeDasharray="6,4" />
-                                        </svg>
-                                    </div>
-                                </div>
-
-                                {/* User Info */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 16, textAlign: 'left', width: '100%', paddingLeft: 10 }}>
-                                    <img
-                                        src={t.avatar}
-                                        alt={t.name}
-                                        style={{ width: 60, height: 60, borderRadius: '50%', objectFit: 'cover', border: '3px solid #eee' }}
-                                    />
-                                    <div>
-                                        <div style={{ fontWeight: 800, fontSize: 18, color: '#001F3F', fontFamily: 'Fredoka' }}>{t.name}</div>
-                                        <div style={{ fontSize: 14, color: '#888', fontWeight: 600 }}>Parent of {t.child}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* ══ CTA SECTION ═══════════════════════════════════════ */}
             <section style={{ padding: '60px 24px' }}>
                 <div className="section-container">
                     <div style={{
