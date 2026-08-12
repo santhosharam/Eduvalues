@@ -186,7 +186,7 @@ export default function TabbedLessonForm({ initialData, onSubmit, onCancel, load
                         ) : (
                             <>
                                 <p style={{ color: '#94a3b8', fontSize: 14, marginBottom: 24, maxWidth: 400, margin: '0 auto 24px' }}>The quizzes are managed in their own dedicated builder with separate inputs for options and correct answers to keep things organized.</p>
-                                <a href={`/admin/lessons/${initialData.id || initialData._id}/quiz`} style={{ display: 'inline-flex', padding: '12px 24px', background: '#1DD1A1', color: '#001F3F', borderRadius: 12, fontWeight: 800, textDecoration: 'none' }}>Open Quiz Builder</a>
+                                <a href={`/staff-room/lessons/${initialData.id || initialData._id}/quiz`} style={{ display: 'inline-flex', padding: '12px 24px', background: '#1DD1A1', color: '#001F3F', borderRadius: 12, fontWeight: 800, textDecoration: 'none' }}>Open Quiz Builder</a>
                             </>
                         )}
                     </div>
@@ -204,7 +204,7 @@ export default function TabbedLessonForm({ initialData, onSubmit, onCancel, load
                                     ⚠️ Save lesson first to manage panels
                                 </div>
                             ) : (
-                                <a href={`/admin/lessons/${initialData.id || initialData._id}/comics`} style={{ display: 'inline-flex', padding: '10px 20px', background: '#00A6C0', color: '#fff', borderRadius: 12, fontWeight: 800, textDecoration: 'none', whiteSpace: 'nowrap' }}>Manage Panels</a>
+                                <a href={`/staff-room/lessons/${initialData.id || initialData._id}/comics`} style={{ display: 'inline-flex', padding: '10px 20px', background: '#00A6C0', color: '#fff', borderRadius: 12, fontWeight: 800, textDecoration: 'none', whiteSpace: 'nowrap' }}>Manage Panels</a>
                             )}
                         </div>
                     </div>

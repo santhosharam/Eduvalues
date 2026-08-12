@@ -111,7 +111,7 @@ export default function ManageFinalExam() {
         >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                 <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
-                    <button onClick={() => navigate('/admin/courses')} style={backBtnStyle}>
+                    <button onClick={() => navigate('/staff-room/courses')} style={backBtnStyle}>
                         <ArrowLeft size={18} /> Back to Courses
                     </button>
                     

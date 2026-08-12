@@ -7,15 +7,15 @@ import {
 } from 'lucide-react';
 
 const NAV_ITEMS = [
-    { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
-    { to: '/admin/courses', icon: BookOpen, label: 'Courses' },
-    { to: '/admin/lessons', icon: Video, label: 'Lessons' },
-    { to: '/admin/comics', icon: Palette, label: 'Comics Manager' },
-    { to: '/admin/quiz', icon: HelpCircle, label: 'Quiz Builder' },
-    { to: '/admin/students', icon: Users, label: 'Students' },
-    { to: '/admin/payments', icon: CreditCard, label: 'Payments' },
-    { to: '/admin/certificates', icon: Award, label: 'Certificates' },
-    { to: '/admin/settings', icon: Settings, label: 'Settings' },
+    { to: '/staff-room', icon: LayoutDashboard, label: 'Dashboard', exact: true },
+    { to: '/staff-room/courses', icon: BookOpen, label: 'Courses' },
+    { to: '/staff-room/lessons', icon: Video, label: 'Lessons' },
+    { to: '/staff-room/comics', icon: Palette, label: 'Comics Manager' },
+    { to: '/staff-room/quiz', icon: HelpCircle, label: 'Quiz Builder' },
+    { to: '/staff-room/students', icon: Users, label: 'Students' },
+    { to: '/staff-room/payments', icon: CreditCard, label: 'Payments' },
+    { to: '/staff-room/certificates', icon: Award, label: 'Certificates' },
+    { to: '/staff-room/settings', icon: Settings, label: 'Settings' },
 ];
 
 export default function AdminSidebar({ isOpen, onClose }) {

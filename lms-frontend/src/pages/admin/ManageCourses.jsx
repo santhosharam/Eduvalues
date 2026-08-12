@@ -163,7 +163,7 @@ export default function ManageCourses() {
                         </td>
                         <td style={{ padding: '20px 32px', textAlign: 'right' }}>
                             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-                                <button onClick={() => navigate(`/admin/courses/${course.id || course._id}/exam`)} style={{ ...actionBtnStyle, color: '#1DD1A1', background: 'rgba(29,209,161,0.1)' }} title="Final Exam Builder"><CheckCircle size={16} /></button>
+                                <button onClick={() => navigate(`/staff-room/courses/${course.id || course._id}/exam`)} style={{ ...actionBtnStyle, color: '#1DD1A1', background: 'rgba(29,209,161,0.1)' }} title="Final Exam Builder"><CheckCircle size={16} /></button>
                                 <button onClick={() => openEdit(course)} style={actionBtnStyle} title="Modify Parameters"><Edit size={16} /></button>
                                 <button onClick={() => handleDelete(course.id || course._id)} style={{ ...actionBtnStyle, color: '#FF6B6B' }} title="Purge Record"><Trash2 size={16} /></button>
                             </div>

@@ -65,10 +65,10 @@ export default function Dashboard() {
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px' }}>
                         {[
-                            { label: 'Create Course', to: '/admin/courses', icon: Plus, color: '#00A6C0', desc: 'Add new educational content' },
-                            { label: 'View Students', to: '/admin/students', icon: Users, color: '#FF9F43', desc: 'Manage your active community' },
-                            { label: 'Monitor Payments', to: '/admin/payments', icon: CreditCard, color: '#1DD1A1', desc: 'Audit platform transactions' },
-                            { label: 'System Settings', to: '/admin/settings', icon: BookOpen, color: '#FF6B6B', desc: 'Configure platform parameters' },
+                            { label: 'Create Course', to: '/staff-room/courses', icon: Plus, color: '#00A6C0', desc: 'Add new educational content' },
+                            { label: 'View Students', to: '/staff-room/students', icon: Users, color: '#FF9F43', desc: 'Manage your active community' },
+                            { label: 'Monitor Payments', to: '/staff-room/payments', icon: CreditCard, color: '#1DD1A1', desc: 'Audit platform transactions' },
+                            { label: 'System Settings', to: '/staff-room/settings', icon: BookOpen, color: '#FF6B6B', desc: 'Configure platform parameters' },
                         ].map((action, i) => (
                             <Link key={i} to={action.to} style={{
                                 textDecoration: 'none',
