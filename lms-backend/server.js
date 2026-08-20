@@ -57,6 +57,9 @@ app.use((req, res, next) => {
         const allowedOrigins = [
             process.env.CLIENT_URL,
             'http://localhost:5173',
+            'http://localhost:5174',
+            'http://127.0.0.1:5173',
+            'http://127.0.0.1:5174',
             'https://eduvalues.vercel.app',
             'https://www.eduvalues.in',
             'https://eduvalues.in'
@@ -96,8 +99,8 @@ app.use((req, res, next) => {
         app.get('/api/diagnose', (req, res) => {
             const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL
             const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY
-            const razorpayKey = process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY
-            const razorpaySecret = process.env.RAZORPAY_SECRET
+            const razorpayKey = process.env.RAZORPAY_KEY_ID
+            const razorpaySecret = process.env.RAZORPAY_KEY_SECRET
             
             res.json({
                 status: 'ok',
@@ -109,7 +112,7 @@ app.use((req, res, next) => {
                     SUPABASE_URL_configured: !!supabaseUrl,
                     SUPABASE_KEY_configured: !!supabaseKey,
                     RAZORPAY_KEY_configured: !!razorpayKey,
-                    RAZORPAY_SECRET_configured: !!razorpaySecret
+                    RAZORPAY_KEY_SECRET_configured: !!razorpaySecret
                 }
             })
         })

@@ -43,8 +43,13 @@ export default function Checkout() {
                 return
             }
 
+            console.log('[RAZORPAY_DIAGNOSTIC] Key ID passed to checkout:', import.meta.env.VITE_RAZORPAY_KEY_ID ? import.meta.env.VITE_RAZORPAY_KEY_ID.substring(0, 10) + '...' : 'UNDEFINED')
+            console.log('[RAZORPAY_DIAGNOSTIC] Order ID:', data.orderId)
+            console.log('[RAZORPAY_DIAGNOSTIC] Amount:', data.amount)
+            console.log('[RAZORPAY_DIAGNOSTIC] Currency: INR')
+
             const options = {
-                key: import.meta.env.VITE_RAZORPAY_KEY,
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID || import.meta.env.VITE_RAZORPAY_KEY,
                 amount: data.amount,
                 currency: 'INR',
                 name: 'VE Value Education',

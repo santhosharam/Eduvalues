@@ -5,11 +5,13 @@ const supabase = require('../supabaseClient')
 let razorpay = null
 const getRazorpay = () => {
     if (!razorpay) {
-        const keyId = process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY
-        const keySecret = process.env.RAZORPAY_SECRET
+        const keyId = process.env.RAZORPAY_KEY_ID?.trim()
+        const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim()
         if (!keyId || !keySecret) {
-            throw new Error(`Razorpay API credentials are missing on the hosted server. (RAZORPAY_KEY_ID exists: ${!!keyId}, RAZORPAY_SECRET exists: ${!!keySecret})`)
+            console.error('[PAYMENT_ERROR] Razorpay API credentials missing.')
+            throw new Error(`Razorpay API credentials are missing on the hosted server. (RAZORPAY_KEY_ID exists: ${!!keyId}, RAZORPAY_KEY_SECRET exists: ${!!keySecret})`)
         }
+        console.log(`[PAYMENT] Initializing Razorpay with Key ID: ${keyId.substring(0, 10)}...`)
         razorpay = new Razorpay({
             key_id: keyId,
             key_secret: keySecret,
@@ -79,8 +81,9 @@ exports.initiatePayment = async (req, res) => {
         
         return res.json({ orderId: order.id, amount })
     } catch (err) {
-        console.error(`[PAYMENT_CRITICAL_ERROR] ${err.message}`)
-        return res.status(500).json({ message: err.message })
+        const errorMessage = err.error?.description || err.message || 'Internal Payment Error'
+        console.error(`[PAYMENT_CRITICAL_ERROR] ${errorMessage}`)
+        return res.status(500).json({ message: errorMessage })
     }
 }
 
@@ -89,12 +92,12 @@ exports.verifyPayment = async (req, res) => {
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, courseId } = req.body
         
-        if (!process.env.RAZORPAY_SECRET) {
-            throw new Error('Razorpay API secret (RAZORPAY_SECRET) is missing on the hosted server.')
+        if (!process.env.RAZORPAY_KEY_SECRET) {
+            throw new Error('Razorpay API secret (RAZORPAY_KEY_SECRET) is missing on the hosted server.')
         }
 
         const body = razorpay_order_id + '|' + razorpay_payment_id
-        const expectedSig = crypto.createHmac('sha256', process.env.RAZORPAY_SECRET).update(body).digest('hex')
+        const expectedSig = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(body).digest('hex')
         
         if (expectedSig !== razorpay_signature) {
             return res.status(400).json({ message: 'Invalid signature detected.' })
