@@ -116,7 +116,7 @@ export default function CourseCard({ course }) {
                             style={{ padding: '8px 16px', fontSize: '12px', borderRadius: '20px', display: 'flex', alignItems: 'center', border: 'none', cursor: 'pointer' }}
                             onClick={handleAction}
                         >
-                            {isEnrolled ? 'Start Now' : 'Enroll Now'}
+                            {isEnrolled ? 'View Course' : 'Enroll Now'}
                         </button>
                     </div>
                 </div>

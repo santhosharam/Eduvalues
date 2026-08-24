@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect, useContext } from 'react'
 import api from '../services/api'
 import { supabase } from '../supabaseClient'
+import { getMyEnrollments } from '../services/enrollmentService'
 
 const AuthContext = createContext()
 
@@ -18,6 +19,21 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
+    const fetchAndSetUser = async (baseUser) => {
+        if (!baseUser) {
+            setUser(null)
+            return null
+        }
+        try {
+            const res = await getMyEnrollments()
+            baseUser.enrolledCourses = res.data?.enrollments?.map(e => e.course) || []
+        } catch (e) {
+            baseUser.enrolledCourses = []
+        }
+        setUser(baseUser)
+        return baseUser
+    }
+
     useEffect(() => {
         const initAuth = async () => {
             try {
@@ -28,7 +44,7 @@ export const AuthProvider = ({ children }) => {
                 } else {
                     console.warn('⚠️ No active session found during init')
                 }
-                setUser(mapSupabaseUser(session?.user))
+                await fetchAndSetUser(mapSupabaseUser(session?.user))
             } catch (err) {
                 console.error('Auth Init Error:', err)
             } finally {
@@ -45,7 +61,7 @@ export const AuthProvider = ({ children }) => {
             } else {
                 localStorage.removeItem('lms_token')
             }
-            setUser(mapSupabaseUser(session?.user))
+            fetchAndSetUser(mapSupabaseUser(session?.user))
         })
 
         return () => subscription.unsubscribe()
@@ -61,8 +77,7 @@ export const AuthProvider = ({ children }) => {
         }
 
         const mapped = mapSupabaseUser(data.user)
-        setUser(mapped)
-        return mapped
+        return await fetchAndSetUser(mapped)
     }
 
     const register = async ({ name, email, password }) => {
@@ -78,8 +93,7 @@ export const AuthProvider = ({ children }) => {
         })
         if (error) throw error
         const mapped = mapSupabaseUser(data.user)
-        setUser(mapped)
-        return mapped
+        return await fetchAndSetUser(mapped)
     }
 
     const loginWithGoogle = async () => {

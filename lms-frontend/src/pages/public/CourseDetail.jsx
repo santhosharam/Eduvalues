@@ -136,7 +136,7 @@ export default function CourseDetail() {
                                         boxShadow: '0 8px 0 #0d8c6b, 0 15px 25px rgba(29, 209, 161, 0.4)'
                                     }}
                                 >
-                                    🚀 Resume Learning!
+                                    🚀 View Course
                                 </Link>
                             ) : (
                                 <button className="btn-primary" style={{ height: 64, opacity: 0.7, borderRadius: 30 }}>Lessons Coming Soon</button>
@@ -329,7 +329,7 @@ export default function CourseDetail() {
                                     className="btn-primary"
                                     style={{ width: '100%', height: 64, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
                                 >
-                                    🚀 Resume Adventure
+                                    🚀 View Course
                                 </Link>
                             ) : (
                                 <button className="btn-primary" style={{ width: '100%', height: 64, borderRadius: 20, opacity: 0.7 }}>Lessons Soon</button>

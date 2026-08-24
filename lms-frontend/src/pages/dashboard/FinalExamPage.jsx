@@ -147,12 +147,21 @@ export default function FinalExamPage() {
             await new Promise(resolve => setTimeout(resolve, 500))
             
             const element = certificateRef.current
+            const originalScrollY = window.scrollY;
+            window.scrollTo(0, 0);
+            
             const canvas = await html2canvas(element, {
                 scale: 2, // Higher quality
                 useCORS: true,
                 logging: false,
-                backgroundColor: '#ffffff'
+                backgroundColor: '#ffffff',
+                scrollX: 0,
+                scrollY: 0,
+                width: element.scrollWidth,
+                height: element.scrollHeight
             })
+            
+            window.scrollTo(0, originalScrollY);
             
             const imgData = canvas.toDataURL('image/png')
             const pdf = new jsPDF({

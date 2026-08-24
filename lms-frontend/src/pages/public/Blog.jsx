@@ -3,111 +3,27 @@ import Footer from '../../components/common/Footer'
 import { Link } from 'react-router-dom'
 import { Calendar, User, ArrowRight, BookOpen, Clock } from 'lucide-react'
 
-// Real blog data from eduvalues.in
-const BLOG_POSTS = [
-    {
-        id: 'insight-1',
-        title: "The Future of Personalized Learning: How Technology is Shaping Value-Based Education",
-        excerpt: "Exploring how modern educational tools are no longer just about information transfer, but about cultivating character, integrity, and empathy in the digital generation. We delve into the intersection of technology and ethics.",
-        image: "/blog/insight-personal-learning.png",
-        author: "EduValues Insight Team",
-        date: "March 31, 2024",
-        category: "EdTech Insights",
-        readTime: "10 min read"
-    },
-    {
-        id: 'insight-2',
-        title: "Beyond Academic Success: Why 'Human Values' Are the Most Needed Skill of 2024",
-        excerpt: "In an era dominated by AI and automation, certain human traits remain irreplaceable. We dive into why empathy, ethics, and critical thinking are becoming the cornerstone of the global workforce.",
-        image: "/blog/insight-human-values.png",
-        author: "EduValues Insight Team",
-        date: "March 28, 2024",
-        category: "Global Education",
-        readTime: "8 min read"
-    },
-    {
-        id: 1,
-        title: "What are the easy dance form to learn for beginners?",
-        excerpt: "Learn about the most accessible dance styles for those just starting their journey into the world of movement and music.",
-        image: "/blog/dance.png",
-        author: "EduValues Team",
-        date: "October 8, 2021",
-        category: "Dance",
-        readTime: "6 min read"
-    },
-    {
-        id: 2,
-        title: "Most essential UX design principle for new comers.",
-        excerpt: "Understanding the core principles of User Experience design is crucial for any beginner entering the tech industry.",
-        image: "/blog/ux-ui.png",
-        author: "EduValues Team",
-        date: "October 8, 2021",
-        category: "UX/UI Design",
-        readTime: "7 min read"
-    },
-    {
-        id: 3,
-        title: "10 most easy steps to master chord progression in guitar.",
-        excerpt: "A step-by-step guide to understanding and playing beautiful chord sequences on your guitar.",
-        image: "/blog/music.png",
-        author: "EduValues Team",
-        date: "October 8, 2021",
-        category: "Music",
-        readTime: "8 min read"
-    },
-    {
-        id: 4,
-        title: "What is photoshop and what is it used for?",
-        excerpt: "A comprehensive look at Adobe Photoshop and its role in modern graphic design and photo editing.",
-        image: "/blog/graphic-design.png",
-        author: "EduValues Team",
-        date: "October 8, 2021",
-        category: "Graphic Designing",
-        readTime: "5 min read"
-    },
-    {
-        id: 5,
-        title: "How to become Social Media Manager in 11 steps?",
-        excerpt: "Your roadmap to building a successful career managing social media presence for brands and businesses.",
-        image: "/blog/social-media.png",
-        author: "EduValues Team",
-        date: "October 8, 2021",
-        category: "Marketing",
-        readTime: "9 min read"
-    },
-    {
-        id: 6,
-        title: "Character sketch examples for creative writing.",
-        excerpt: "Learn how to breathe life into your fictional characters with detailed and vivid character sketches.",
-        image: "/blog/creative-writing.png",
-        author: "EduValues Team",
-        date: "October 8, 2021",
-        category: "Creative Writing",
-        readTime: "6 min read"
-    },
-    {
-        id: 7,
-        title: "The importance of Information Technology – Why is it so important?",
-        excerpt: "Discover why IT is the backbone of modern society and how it impacts our daily lives and global economy.",
-        image: "/blog/it-tech.png",
-        author: "EduValues Team",
-        date: "October 8, 2021",
-        category: "Information Technology",
-        readTime: "7 min read"
-    },
-    {
-        id: 8,
-        title: "Is creativity most valuable skill for designer?",
-        excerpt: "Exploring the debate on whether raw creativity or technical skill is more important in the design world.",
-        image: "/blog/design-thinking.png",
-        author: "EduValues Team",
-        date: "October 8, 2021",
-        category: "Design",
-        readTime: "5 min read"
-    }
-]
+import { useState, useEffect } from 'react'
+import api from '../../services/api'
+import { Loader2 } from 'lucide-react'
 
 export default function Blog() {
+    const [blogs, setBlogs] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
+
+    useEffect(() => {
+        api.get('/blogs')
+            .then(res => {
+                setBlogs(res.data.blogs || [])
+                setLoading(false)
+            })
+            .catch(err => {
+                console.error(err)
+                setError('Failed to load insights. Please try again later.')
+                setLoading(false)
+            })
+    }, [])
     return (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F4F7F9' }}>
             <Navbar />
@@ -145,12 +61,26 @@ export default function Blog() {
 
             {/* --- BLOG LIST SECTION --- */}
             <main className="section-container" style={{ padding: '80px 24px', flex: 1 }}>
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))',
-                    gap: '40px'
-                }}>
-                    {BLOG_POSTS.map(post => (
+                {loading ? (
+                    <div style={{ textAlign: 'center', padding: '100px 0' }}>
+                        <Loader2 className="spin" size={48} color="#00A6C0" style={{ margin: '0 auto' }} />
+                        <p style={{ marginTop: 16, color: '#666', fontWeight: 600 }}>Loading Insights...</p>
+                    </div>
+                ) : error ? (
+                    <div style={{ textAlign: 'center', padding: '100px 0', color: '#E74C3C' }}>
+                        <p style={{ fontWeight: 600 }}>{error}</p>
+                    </div>
+                ) : blogs.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '100px 0', color: '#666' }}>
+                        <p style={{ fontWeight: 600 }}>No insights available right now.</p>
+                    </div>
+                ) : (
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))',
+                        gap: '40px'
+                    }}>
+                        {blogs.map(post => (
                         <article key={post.id} style={{
                             background: '#fff',
                             borderRadius: '32px',
@@ -227,8 +157,9 @@ export default function Blog() {
                                 </div>
                             </div>
                         </article>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
             </main>
 
             <Footer />
