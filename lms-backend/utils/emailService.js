@@ -120,6 +120,26 @@ const emailAutomation = {
     },
 
     /**
+     * Automation trigger for emailing the high-res PNG certificate image attachment.
+     */
+    sendCertificateImageAttachment: async (userEmail, userName, imageBuffer, uniqueCode) => {
+        const sanitized = userName.replace(/[^a-zA-Z0-9_-]/g, '_')
+        return await sendEmail({
+            to: userEmail,
+            subject: `Your EduValues Course Certificate - ${uniqueCode}`,
+            html: `<div style="font-family: Arial, sans-serif; padding: 20px; color: #333;"><h2 style="color: #001F3F;">Congratulations, ${userName}! 🏆</h2><p>You have successfully completed your course on EduValues. Please find your official high-resolution certificate image attached to this email.</p><p style="margin-top: 20px; color: #64748b;">Verification Code: <strong>${uniqueCode}</strong></p><hr /><p style="font-size: 12px; color: #94a3b8;">EduValues LMS &bull; Character & Value Education</p></div>`,
+            text: `Dear ${userName},\n\nCongratulations on successfully completing your course with EduValues!\n\nPlease find your official high-resolution course certificate image attached to this email.\n\nVerification Code: ${uniqueCode}\n\nRegards,\nEduValues Team`,
+            attachments: [
+                {
+                    filename: `Certificate_${sanitized}.png`,
+                    content: imageBuffer,
+                    contentType: 'image/png'
+                }
+            ]
+        })
+    },
+
+    /**
      * Automation trigger for contact form submissions.
      */
     sendContactSubmission: async ({ name, email, phone, message }) => {

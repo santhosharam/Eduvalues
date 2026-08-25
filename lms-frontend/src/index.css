@@ -293,4 +293,12 @@ h6 {
   .mobile-padding {
     padding: 40px 20px !important;
   }
+
+  div[data-react-hot-toast] {
+    top: 90px !important;
+    left: 16px !important;
+    right: 16px !important;
+    max-width: calc(100vw - 32px) !important;
+    box-sizing: border-box !important;
+  }
 }

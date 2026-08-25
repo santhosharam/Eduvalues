@@ -233,21 +233,47 @@ export default function FinalExamPage() {
         setActionLoading(true)
         try {
             const certId = await ensureCertificateId()
-            const res = await downloadCertificate(certId)
-            const blob = new Blob([res.data], { type: 'application/pdf' })
-            const url = window.URL.createObjectURL(blob)
-            const link = document.createElement('a')
-            link.href = url
-            const sanitized = (studentName || user?.name || 'Student').replace(/\s+/g, '_')
-            link.setAttribute('download', `Certificate_${sanitized}.pdf`)
-            document.body.appendChild(link)
-            link.click()
-            link.remove()
-            window.URL.revokeObjectURL(url)
-            toast.success('Certificate downloaded successfully! 📄')
+            if (!certId) {
+                toast.error('Unable to find your certificate.')
+                return
+            }
+
+            const element = document.getElementById('certificate-image-render')
+            if (!element) {
+                toast.error('Certificate is not ready. Please try again.')
+                return
+            }
+
+            const canvas = await html2canvas(element, {
+                width: 1122,
+                height: 793,
+                scale: 2,
+                useCORS: true,
+                allowTaint: false,
+                backgroundColor: '#ffffff',
+                logging: false
+            })
+
+            canvas.toBlob((blob) => {
+                if (!blob) {
+                    toast.error('Unable to create certificate image.')
+                    return
+                }
+
+                const url = URL.createObjectURL(blob)
+                const link = document.createElement('a')
+                link.href = url
+                const sanitized = (studentName || user?.name || 'Student').replace(/[^a-zA-Z0-9_-]/g, '_')
+                link.download = `Certificate_${sanitized}.png`
+                document.body.appendChild(link)
+                link.click()
+                link.remove()
+                URL.revokeObjectURL(url)
+                toast.success('Certificate image downloaded successfully! 🖼️')
+            }, 'image/png')
         } catch (err) {
             console.error('Download error:', err)
-            toast.error(err.response?.data?.message || err.message || 'Could not download PDF. Please try again or use the Print option.')
+            toast.error('Could not generate certificate image. Please try again.')
         } finally {
             setActionLoading(false)
         }
@@ -261,16 +287,57 @@ export default function FinalExamPage() {
         setIsEmailing(true)
         try {
             const certId = await ensureCertificateId()
-            const res = await emailCertificate(certId)
-            if (res.data?.success) {
-                toast.success(res.data.message || 'Certificate sent successfully! 📧')
-            } else {
-                toast.error('Could not send the certificate.')
+            if (!certId) {
+                toast.error('Unable to find your certificate.')
+                setIsEmailing(false)
+                return
             }
+
+            const element = document.getElementById('certificate-image-render')
+            if (!element) {
+                toast.error('Certificate is not ready. Please try again.')
+                setIsEmailing(false)
+                return
+            }
+
+            const canvas = await html2canvas(element, {
+                width: 1122,
+                height: 793,
+                scale: 2,
+                useCORS: true,
+                allowTaint: false,
+                backgroundColor: '#ffffff',
+                logging: false
+            })
+
+            canvas.toBlob(async (blob) => {
+                if (!blob) {
+                    toast.error('Unable to create certificate image for email.')
+                    setIsEmailing(false)
+                    return
+                }
+
+                try {
+                    const formData = new FormData()
+                    const sanitized = (studentName || user?.name || 'Student').replace(/[^a-zA-Z0-9_-]/g, '_')
+                    formData.append('image', blob, `Certificate_${sanitized}.png`)
+
+                    const res = await emailCertificateImage(certId, formData)
+                    if (res.data?.success) {
+                        toast.success(res.data.message || 'Certificate image sent successfully to your email! 📧')
+                    } else {
+                        toast.error(res.data?.message || 'Could not send certificate email.')
+                    }
+                } catch (err) {
+                    console.error('Email certificate error:', err)
+                    toast.error(err.response?.data?.message || 'Something went wrong while sending the email.')
+                } finally {
+                    setIsEmailing(false)
+                }
+            }, 'image/png')
         } catch (err) {
             console.error('Email certificate error:', err)
-            toast.error(err.response?.data?.message || err.message || 'Something went wrong while sending the email.')
-        } finally {
+            toast.error('Something went wrong while capturing certificate image.')
             setIsEmailing(false)
         }
     }
@@ -295,12 +362,100 @@ export default function FinalExamPage() {
     // Certificate View
     if (submitted && score >= 15) {
         const today = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })
+        const displayStudentName = studentName || user?.name || 'Your Name'
+        const displayCourseTitle = course?.title || 'Character Builders: Essential Life Values for Kids'
 
         return (
             <div style={{ minHeight: '100vh', background: '#F8FAFB', paddingBottom: 100 }}>
                 <Navbar />
 
-                <div className="section-container" style={{ maxWidth: 900, marginTop: 60 }}>
+                {/* Offscreen Dedicated Unscaled Certificate Render Area for html2canvas (1122x793) */}
+                <div
+                    id="certificate-image-render"
+                    style={{
+                        position: 'absolute',
+                        left: '-10000px',
+                        top: 0,
+                        width: 1122,
+                        height: 793,
+                        background: '#ffffff',
+                        padding: 60,
+                        boxSizing: 'border-box',
+                        border: '20px solid #001F3F',
+                        textAlign: 'center',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        overflow: 'hidden'
+                    }}
+                >
+                    <div style={{ position: 'absolute', inset: 10, border: '2px solid #00A6C0', pointerEvents: 'none' }} />
+
+                    <div style={{ position: 'relative', zIndex: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+                            <img src="/logo.png" alt="VE" style={{ height: 80 }} />
+                        </div>
+
+                        <h4 style={{ fontSize: 24, fontWeight: 800, color: '#00A6C0', letterSpacing: 4, textTransform: 'uppercase', marginBottom: 30 }}>Certificate of Achievement</h4>
+
+                        <p style={{ fontSize: 20, color: '#64748b', fontStyle: 'italic', marginBottom: 10 }}>This is to certify that</p>
+
+                        <h2 style={{
+                            fontSize: displayStudentName.length > 40 ? 32 : displayStudentName.length > 25 ? 42 : 54,
+                            fontWeight: 900,
+                            color: '#001F3F',
+                            borderBottom: '3px solid #F1F1F1',
+                            display: 'inline-block',
+                            width: '100%',
+                            maxWidth: 850,
+                            paddingBottom: 10,
+                            marginBottom: 20,
+                            fontFamily: 'serif',
+                            overflowWrap: 'break-word',
+                            wordBreak: 'normal',
+                            textAlign: 'center',
+                            lineHeight: 1.2
+                        }}>
+                            {displayStudentName}
+                        </h2>
+
+                        <p style={{ fontSize: 20, color: '#64748b', fontStyle: 'italic', marginBottom: 10 }}>has successfully completed the course</p>
+
+                        <h3 style={{
+                            fontSize: displayCourseTitle.length > 60 ? 20 : displayCourseTitle.length > 40 ? 24 : 28,
+                            fontWeight: 800,
+                            color: '#00A6C0',
+                            width: '100%',
+                            maxWidth: 850,
+                            margin: '0 auto 30px',
+                            overflowWrap: 'break-word',
+                            wordBreak: 'normal',
+                            textAlign: 'center',
+                            lineHeight: 1.3
+                        }}>
+                            {displayCourseTitle}
+                        </h3>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 40, padding: '0 60px' }}>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: 20, fontWeight: 800, borderBottom: '1px solid #333', paddingBottom: 5, marginBottom: 5 }}>{today}</div>
+                                <div style={{ color: '#888', fontSize: 13, fontWeight: 700 }}>DATE</div>
+                            </div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
+                                    <Award size={40} color="#FFD700" />
+                                </div>
+                                <div style={{ color: '#888', fontSize: 13, fontWeight: 700 }}>OFFICIAL SEAL</div>
+                            </div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: 20, fontWeight: 800, borderBottom: '1px solid #333', paddingBottom: 5, marginBottom: 5 }}>Admin VE</div>
+                                <div style={{ color: '#888', fontSize: 13, fontWeight: 700 }}>INSTRUCTOR</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="section-container" style={{ maxWidth: 900, marginTop: 60, width: '100%', boxSizing: 'border-box' }}>
                     <div style={{ textAlign: 'center', marginBottom: 40 }} className="no-print">
                         <Trophy size={80} color="#FFD700" style={{ marginBottom: 20 }} className="animate-float" />
                         <h1 style={{ fontSize: 56, color: '#001F3F', fontWeight: '900', fontFamily: 'Fredoka', textShadow: '0 4px 0 rgba(0,0,0,0.1)' }}>YOU DID IT!</h1>
@@ -313,7 +468,7 @@ export default function FinalExamPage() {
                                 placeholder="e.g. Aditi Sharma"
                                 value={studentName}
                                 onChange={(e) => setStudentName(e.target.value)}
-                                style={{ width: '100%', padding: '16px 24px', borderRadius: 16, border: '3px solid #00A6C0', fontSize: 18, fontWeight: 700, textAlign: 'center', color: '#001F3F' }}
+                                style={{ width: '100%', padding: '16px 24px', borderRadius: 16, border: '3px solid #00A6C0', fontSize: 18, fontWeight: 700, textAlign: 'center', color: '#001F3F', boxSizing: 'border-box' }}
                             />
                         </div>
 
@@ -347,14 +502,16 @@ export default function FinalExamPage() {
                         )}
                     </div>
 
-                    {/* Certificate Preview */}
+                    {/* Certificate Visible Preview Container */}
                     <div 
                         ref={wrapperRef} 
                         style={{ 
                             width: '100%', 
+                            maxWidth: '100%',
                             display: 'flex', 
                             justifyContent: 'center', 
                             overflow: 'hidden',
+                            boxSizing: 'border-box',
                             height: previewScale < 1 ? 793 * previewScale : 'auto'
                         }}
                     >
@@ -377,49 +534,75 @@ export default function FinalExamPage() {
                                 overflow: 'hidden',
                                 transform: `scale(${previewScale})`,
                                 transformOrigin: 'top center',
-                                flexShrink: 0
+                                flexShrink: 0,
+                                boxSizing: 'border-box'
                             }}
                         >
-                        {/* Decorative Borders */}
-                        <div style={{ position: 'absolute', inset: 10, border: '2px solid #00A6C0' }} />
+                            <div style={{ position: 'absolute', inset: 10, border: '2px solid #00A6C0' }} />
 
-                        <div style={{ position: 'relative', zIndex: 1 }}>
-                            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-                                <img src="/logo.png" alt="VE" style={{ height: 80 }} />
-                            </div>
-
-                            <h4 style={{ fontSize: 24, fontWeight: 800, color: '#00A6C0', letterSpacing: 4, textTransform: 'uppercase', marginBottom: 30 }}>Certificate of Achievement</h4>
-
-                            <p style={{ fontSize: 20, color: '#64748b', fontStyle: 'italic', marginBottom: 10 }}>This is to certify that</p>
-
-                            <h2 style={{ fontSize: 56, fontWeight: 900, color: '#001F3F', borderBottom: '3px solid #F1F1F1', display: 'inline-block', minWidth: 400, maxWidth: 900, paddingBottom: 10, marginBottom: 30, fontFamily: 'serif' }}>
-                                {studentName || 'Your Name'}
-                            </h2>
-
-                            <p style={{ fontSize: 20, color: '#64748b', fontStyle: 'italic', marginBottom: 10 }}>has successfully completed the course</p>
-
-                            <h3 style={{ fontSize: 28, fontWeight: 800, color: '#00A6C0', marginBottom: 40 }}>
-                                {course?.title || 'Character Builders: Essential Life Values for Kids'}
-                            </h3>
-
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 40, padding: '0 60px' }}>
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: 20, fontWeight: 800, borderBottom: '1px solid #333', paddingBottom: 5, marginBottom: 5 }}>{today}</div>
-                                    <div style={{ color: '#888', fontSize: 13, fontWeight: 700 }}>DATE</div>
+                            <div style={{ position: 'relative', zIndex: 1 }}>
+                                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+                                    <img src="/logo.png" alt="VE" style={{ height: 80 }} />
                                 </div>
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
-                                        <Award size={40} color="#FFD700" />
+
+                                <h4 style={{ fontSize: 24, fontWeight: 800, color: '#00A6C0', letterSpacing: 4, textTransform: 'uppercase', marginBottom: 30 }}>Certificate of Achievement</h4>
+
+                                <p style={{ fontSize: 20, color: '#64748b', fontStyle: 'italic', marginBottom: 10 }}>This is to certify that</p>
+
+                                <h2 style={{
+                                    fontSize: displayStudentName.length > 40 ? 32 : displayStudentName.length > 25 ? 42 : 54,
+                                    fontWeight: 900,
+                                    color: '#001F3F',
+                                    borderBottom: '3px solid #F1F1F1',
+                                    display: 'inline-block',
+                                    width: '100%',
+                                    maxWidth: 850,
+                                    paddingBottom: 10,
+                                    marginBottom: 20,
+                                    fontFamily: 'serif',
+                                    overflowWrap: 'break-word',
+                                    wordBreak: 'normal',
+                                    textAlign: 'center',
+                                    lineHeight: 1.2
+                                }}>
+                                    {displayStudentName}
+                                </h2>
+
+                                <p style={{ fontSize: 20, color: '#64748b', fontStyle: 'italic', marginBottom: 10 }}>has successfully completed the course</p>
+
+                                <h3 style={{
+                                    fontSize: displayCourseTitle.length > 60 ? 20 : displayCourseTitle.length > 40 ? 24 : 28,
+                                    fontWeight: 800,
+                                    color: '#00A6C0',
+                                    width: '100%',
+                                    maxWidth: 850,
+                                    margin: '0 auto 30px',
+                                    overflowWrap: 'break-word',
+                                    wordBreak: 'normal',
+                                    textAlign: 'center',
+                                    lineHeight: 1.3
+                                }}>
+                                    {displayCourseTitle}
+                                </h3>
+
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 40, padding: '0 60px' }}>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: 20, fontWeight: 800, borderBottom: '1px solid #333', paddingBottom: 5, marginBottom: 5 }}>{today}</div>
+                                        <div style={{ color: '#888', fontSize: 13, fontWeight: 700 }}>DATE</div>
                                     </div>
-                                    <div style={{ color: '#888', fontSize: 13, fontWeight: 700 }}>OFFICIAL SEAL</div>
-                                </div>
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: 20, fontWeight: 800, borderBottom: '1px solid #333', paddingBottom: 5, marginBottom: 5 }}>Admin VE</div>
-                                    <div style={{ color: '#888', fontSize: 13, fontWeight: 700 }}>INSTRUCTOR</div>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
+                                            <Award size={40} color="#FFD700" />
+                                        </div>
+                                        <div style={{ color: '#888', fontSize: 13, fontWeight: 700 }}>OFFICIAL SEAL</div>
+                                    </div>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <div style={{ fontSize: 20, fontWeight: 800, borderBottom: '1px solid #333', paddingBottom: 5, marginBottom: 5 }}>Admin VE</div>
+                                        <div style={{ color: '#888', fontSize: 13, fontWeight: 700 }}>INSTRUCTOR</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
                     </div>
                 </div>
 

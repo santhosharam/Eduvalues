@@ -288,4 +288,57 @@ exports.emailCertificate = async (req, res) => {
     }
 }
 
+// POST /api/certificates/email-image/:id
+exports.emailCertificateImage = async (req, res) => {
+    try {
+        const { data: cert, error } = await supabase
+            .from('certificates')
+            .select('*, courses(title, instructor)')
+            .eq('id', req.params.id)
+            .single()
+
+        if (error || !cert) return res.status(404).json({ message: 'Certificate not found' })
+
+        if (cert.student_id !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Not authorized' })
+        }
+
+        const { data: { user } } = await supabase.auth.admin.getUserById(cert.student_id)
+        const studentName = user?.user_metadata?.full_name || 'Student'
+        const studentEmail = user?.email || req.user.email
+
+        if (!studentEmail) {
+            return res.status(400).json({ message: 'User does not have an associated email' })
+        }
+
+        let imageBuffer
+        if (req.file && req.file.buffer) {
+            imageBuffer = req.file.buffer
+        } else if (req.body && req.body.imageBuffer) {
+            imageBuffer = Buffer.from(req.body.imageBuffer, 'base64')
+        }
+
+        if (!imageBuffer || imageBuffer.length < 1000) {
+            return res.status(400).json({ message: 'Uploaded certificate image is invalid or empty' })
+        }
+
+        const emailResult = await emailAutomation.sendCertificateImageAttachment(
+            studentEmail,
+            studentName,
+            imageBuffer,
+            cert.unique_code || 'CERT-VERIFIED'
+        )
+
+        if (emailResult.success) {
+            res.json({ success: true, message: 'Certificate image sent successfully to your registered email.' })
+        } else {
+            res.status(500).json({ success: false, message: 'Unable to send certificate image email. Please try again.' })
+        }
+    } catch (err) {
+        console.error('[EMAIL_CERTIFICATE_IMAGE_ERROR]', err)
+        res.status(500).json({ message: err.message })
+    }
+}
+
 module.exports.generateCertificatePDF = generateCertificatePDF
+
