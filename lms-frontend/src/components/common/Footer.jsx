@@ -4,6 +4,7 @@ import {
     MapPin, Mail, Phone, Smile, Compass,
     Star, Heart, Sparkles
 } from 'lucide-react'
+import { contactInfo } from '../../config/contactConfig'
 
 export default function Footer() {
     return (
@@ -38,21 +39,26 @@ export default function Footer() {
                     <div>
                         <h4 style={{ fontSize: 20, marginBottom: 24, color: '#001F3F' }}>Explore</h4>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                            {['Insights', 'Our Courses', 'Testimonials', 'Contact Us'].map(l => (
-                                <Link key={l} to={l === 'Insights' ? '/blog' : '/'} style={{ color: '#666', textDecoration: 'none', fontSize: 15, fontWeight: 600 }}>{l}</Link>
+                            {[
+                                { label: 'Insights & Stories', path: '/blog' },
+                                { label: 'Our Courses', path: '/courses' },
+                                { label: 'Testimonials', path: '/' },
+                                { label: 'Contact Us', path: '/contact' }
+                            ].map(l => (
+                                <Link key={l.label} to={l.path} style={{ color: '#666', textDecoration: 'none', fontSize: 15, fontWeight: 600 }}>{l.label}</Link>
                             ))}
                         </div>
                     </div>
 
                     {/* Fun Stuff */}
                     <div>
-                        <h2 style={{ fontSize: 20, marginBottom: 24, color: '#00A6C0' }}>Fun Corner</h2>
+                        <h4 style={{ fontSize: 20, marginBottom: 24, color: '#001F3F' }}>Fun Corner</h4>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                             <div style={{ fontSize: 15, color: '#666', fontWeight: 600 }}>
                                 Free Puzzles
                             </div>
                             <div style={{ fontSize: 15, color: '#666', fontWeight: 600 }}>
-                                Daily Ethics
+                                Daily Drills
                             </div>
                             <div style={{ fontSize: 15, color: '#666', fontWeight: 600 }}>
                                 Arts & Crafts
@@ -60,39 +66,13 @@ export default function Footer() {
                         </div>
                     </div>
 
-                    {/* Subscribe */}
+                    {/* Contact */}
                     <div>
-                        <h4 style={{ fontSize: 20, marginBottom: 24, color: '#001F3F' }}>Parent Newsletter</h4>
-                        <p style={{ fontSize: 13, color: '#888', marginBottom: 20 }}>Get tips on ethical parenting and creative learning.</p>
-                        <div style={{ position: 'relative' }}>
-                            <input
-                                type="text"
-                                placeholder="Your email here..."
-                                style={{
-                                    width: '100%',
-                                    padding: '16px',
-                                    borderRadius: '40px',
-                                    border: '2px solid #F1F1F1',
-                                    outline: 'none',
-                                    fontFamily: 'Quicksand',
-                                    fontSize: '14px'
-                                }}
-                            />
-                            <button style={{
-                                position: 'absolute',
-                                right: 6,
-                                top: 6,
-                                height: 44,
-                                padding: '0 20px',
-                                background: '#00A6C0',
-                                border: 'none',
-                                borderRadius: '30px',
-                                color: '#fff',
-                                fontWeight: 800,
-                                fontSize: 12
-                            }}>
-                                JOIN
-                            </button>
+                        <h4 style={{ fontSize: 20, marginBottom: 24, color: '#001F3F' }}>Contact Us</h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                            <a href={`mailto:${contactInfo.email}`} style={{ color: '#666', textDecoration: 'none', fontSize: 15, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <Mail size={16} /> {contactInfo.email}
+                            </a>
                         </div>
                     </div>
                 </div>

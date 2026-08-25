@@ -3,17 +3,51 @@ import Navbar from '../../components/common/Navbar'
 import Footer from '../../components/common/Footer'
 import ProgressBar from '../../components/course/ProgressBar'
 import { getMyEnrollments } from '../../services/enrollmentService'
+import { getMyCertificates } from '../../services/certificateService'
 import { Link } from 'react-router-dom'
-import { BookOpen, CheckCircle } from 'lucide-react'
+import { BookOpen, CheckCircle, Download, ExternalLink, Loader } from 'lucide-react'
+import api from '../../services/api'
+import toast from 'react-hot-toast'
 
 export default function MyCourses() {
     const [enrollments, setEnrollments] = useState([])
+    const [certificates, setCertificates] = useState([])
     const [tab, setTab] = useState('all')
     const [loading, setLoading] = useState(true)
+    const [downloading, setDownloading] = useState(null)
 
     useEffect(() => {
-        getMyEnrollments().then(r => setEnrollments(r.data.enrollments || [])).catch(() => { }).finally(() => setLoading(false))
+        Promise.all([
+            getMyEnrollments(),
+            getMyCertificates()
+        ]).then(([eRes, cRes]) => {
+            setEnrollments(eRes.data.enrollments || [])
+            setCertificates(cRes.data.certificates || [])
+        }).catch(() => { }).finally(() => setLoading(false))
     }, [])
+
+    const handleDownload = async (cert) => {
+        const certId = cert.id || cert._id
+        setDownloading(certId)
+        try {
+            const response = await api.get(`/certificates/download/${certId}`, {
+                responseType: 'blob',
+            })
+            const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
+            const link = document.createElement('a')
+            link.href = url
+            link.setAttribute('download', `certificate-${cert.unique_code}.pdf`)
+            document.body.appendChild(link)
+            link.click()
+            link.remove()
+            window.URL.revokeObjectURL(url)
+            toast.success('Certificate downloaded!')
+        } catch {
+            toast.error('Failed to download certificate')
+        } finally {
+            setDownloading(null)
+        }
+    }
 
     const filtered = tab === 'all' ? enrollments : tab === 'completed' ? enrollments.filter(e => e.isCompleted) : enrollments.filter(e => !e.isCompleted)
 
@@ -42,7 +76,9 @@ export default function MyCourses() {
                     </div>
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                        {filtered.map(e => (
+                        {filtered.map(e => {
+                            const cert = certificates.find(c => c.course_id === e.course_id || c.course?.id === e.course_id)
+                            return (
                             <div key={e.id || e._id} className="glass-card" style={{ padding: 24, display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap' }}>
                                 <img src={e.course?.thumbnail || `https://picsum.photos/seed/${e.course?.id || e.course?._id}/120/80`} alt="" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 10, flexShrink: 0 }} />
                                 <div style={{ flex: 1, minWidth: 200 }}>
@@ -53,15 +89,34 @@ export default function MyCourses() {
                                     <p style={{ color: '#64748b', fontSize: 13, marginBottom: 12 }}>by {e.course?.instructor}</p>
                                     <ProgressBar percent={e.progress || 0} />
                                 </div>
-                                <Link 
-                                    to={`/dashboard/lesson/${e.last_watched_lesson_id || e.lastWatched || (e.course?.lessons?.[0]?.id || e.course?.lessons?.[0]?._id || e.course?.lessons?.[0])}`} 
-                                    className="btn-primary" 
-                                    style={{ padding: '9px 20px', fontSize: 13, flexShrink: 0 }}
-                                >
-                                    {e.isCompleted ? 'Review' : 'Continue'}
-                                </Link>
+                                <div style={{ display: 'flex', gap: 10, flexShrink: 0, flexWrap: 'wrap' }}>
+                                    <Link 
+                                        to={`/dashboard/lesson/${e.last_watched_lesson_id || e.lastWatched || (e.course?.lessons?.[0]?.id || e.course?.lessons?.[0]?._id || e.course?.lessons?.[0])}`} 
+                                        className="btn-primary" 
+                                        style={{ padding: '9px 20px', fontSize: 13 }}
+                                    >
+                                        {e.isCompleted ? 'Review' : 'Continue'}
+                                    </Link>
+                                    
+                                    {e.isCompleted && cert && (
+                                        <>
+                                            <a href={`/verify/${cert.unique_code}`} target="_blank" rel="noreferrer"
+                                                className="btn-secondary"
+                                                style={{ padding: '9px 20px', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                <ExternalLink size={14} /> View Certificate
+                                            </a>
+                                            <button onClick={() => handleDownload(cert)} className="btn-primary"
+                                                disabled={downloading === (cert.id || cert._id)}
+                                                style={{ padding: '9px 20px', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, background: '#10b981' }}>
+                                                {downloading === (cert.id || cert._id)
+                                                    ? <><Loader size={14} style={{ animation: 'spin 1s linear infinite' }} /> ...</>
+                                                    : <><Download size={14} /> Download Certificate</>}
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
                             </div>
-                        ))}
+                        )})}
                     </div>
                 )}
             </div>

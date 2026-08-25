@@ -75,13 +75,26 @@ exports.downloadCertificate = async (req, res) => {
         doc.fontSize(11).font('Helvetica-Bold').fillColor('#818cf8').text('CERTIFICATE OF COMPLETION', 0, 55, { align: 'center' })
         doc.fontSize(42).font('Helvetica-Bold').fillColor('#f1f5f9').text('EduValues', 0, 80, { align: 'center' })
 
-        doc.fontSize(14).font('Helvetica').fillColor('#94a3b8').text('This certifies that', 0, 160, { align: 'center' })
-        doc.fontSize(32).font('Helvetica-Bold').fillColor('#6366f1').text(studentName, 0, 185, { align: 'center' })
-        doc.fontSize(14).font('Helvetica').fillColor('#94a3b8').text('has successfully completed the course', 0, 230, { align: 'center' })
-        doc.fontSize(22).font('Helvetica-Bold').fillColor('#f1f5f9').text(cert.courses.title, 60, 255, { align: 'center', width: doc.page.width - 120 })
+        let currentY = 160;
+        doc.fontSize(14).font('Helvetica').fillColor('#94a3b8').text('This certifies that', 0, currentY, { align: 'center' })
+        
+        currentY = doc.y + 10;
+        doc.fontSize(32).font('Helvetica-Bold').fillColor('#6366f1').text(studentName, 60, currentY, { align: 'center', width: doc.page.width - 120 })
+        
+        currentY = doc.y + 20;
+        doc.fontSize(14).font('Helvetica').fillColor('#94a3b8').text('has successfully completed the course', 0, currentY, { align: 'center' })
+        
+        currentY = doc.y + 10;
+        doc.fontSize(22).font('Helvetica-Bold').fillColor('#f1f5f9').text(cert.courses.title, 60, currentY, { align: 'center', width: doc.page.width - 120 })
 
+        // Ensure bottom footer is pushed down properly but doesn't overflow page
+        const footerY = Math.max(doc.y + 40, 360);
         const issuedStr = new Date(cert.issued_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
-        doc.fontSize(12).font('Helvetica').fillColor('#64748b').text(`Issued on: ${issuedStr}`, 80, 360).text(`Verification Code: ${cert.unique_code}`, { align: 'right' })
+        
+        // Print issued date on the left and verification code on the right
+        doc.fontSize(12).font('Helvetica').fillColor('#64748b')
+           .text(`Issued on: ${issuedStr}`, 80, footerY)
+           .text(`Verification Code: ${cert.unique_code}`, 80, footerY, { align: 'right', width: doc.page.width - 160 })
 
         doc.end()
     } catch (err) {

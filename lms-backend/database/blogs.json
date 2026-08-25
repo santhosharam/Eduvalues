@@ -1,102 +1,35 @@
 [
     {
         "id": "insight-1",
-        "title": "The Future of Personalized Learning: How Technology is Shaping Value-Based Education",
-        "excerpt": "Exploring how modern educational tools are no longer just about information transfer, but about cultivating character, integrity, and empathy in the digital generation. We delve into the intersection of technology and ethics.",
+        "title": "Nurturing personal character in digital world",
+        "url": "https://www.atemate.com/blog/emotional-intelligence-in-the-digital-age-nurturing-genuine-relationships-in-a-virtual-world",
         "image": "/blog/insight-personal-learning.png",
-        "author": "EduValues Insight Team",
+        "excerpt": "Discover how to foster empathy, integrity, and creativity in children as they navigate modern technology. Learn actionable strategies for encouraging responsible digital behavior and maintaining genuine human relationships in an increasingly digital world.",
+        "author": "EduValues Team",
         "date": "March 31, 2024",
-        "category": "EdTech Insights",
+        "category": "Parenting",
         "readTime": "10 min read"
     },
     {
         "id": "insight-2",
-        "title": "Beyond Academic Success: Why 'Human Values' Are the Most Needed Skill of 2024",
-        "excerpt": "In an era dominated by AI and automation, certain human traits remain irreplaceable. We dive into why empathy, ethics, and critical thinking are becoming the cornerstone of the global workforce.",
+        "title": "The vital role of moral values in early education",
+        "url": "https://vvnassandh.com/importance-of-early-moral-education-in-a-childs-development/",
         "image": "/blog/insight-human-values.png",
-        "author": "EduValues Insight Team",
+        "excerpt": "Explore the profound impact of early education in helping children develop essential traits like kindness, honesty, respect, and responsibility. Understand how building strong moral foundations and empathy early on shapes their character and positively influences their future behavior.",
+        "author": "EduValues Team",
         "date": "March 28, 2024",
-        "category": "Global Education",
+        "category": "Education",
         "readTime": "8 min read"
     },
     {
-        "id": 1,
-        "title": "What are the easy dance form to learn for beginners?",
-        "excerpt": "Learn about the most accessible dance styles for those just starting their journey into the world of movement and music.",
+        "id": "insight-3",
+        "title": "Fun daily sharing games to play with toddlers",
+        "url": "https://montessorigeneration.com/blogs/montessori/playing-at-home-with-toddler",
         "image": "/blog/dance.png",
+        "excerpt": "Engage your little ones with simple, playful activities designed to help toddlers learn the joys of sharing and cooperation. Discover fun daily games that naturally encourage communication, turn-taking, and the development of positive social habits.",
         "author": "EduValues Team",
         "date": "October 8, 2021",
-        "category": "Dance",
-        "readTime": "6 min read"
-    },
-    {
-        "id": 2,
-        "title": "Most essential UX design principle for new comers.",
-        "excerpt": "Understanding the core principles of User Experience design is crucial for any beginner entering the tech industry.",
-        "image": "/blog/ux-ui.png",
-        "author": "EduValues Team",
-        "date": "October 8, 2021",
-        "category": "UX/UI Design",
-        "readTime": "7 min read"
-    },
-    {
-        "id": 3,
-        "title": "10 most easy steps to master chord progression in guitar.",
-        "excerpt": "A step-by-step guide to understanding and playing beautiful chord sequences on your guitar.",
-        "image": "/blog/music.png",
-        "author": "EduValues Team",
-        "date": "October 8, 2021",
-        "category": "Music",
-        "readTime": "8 min read"
-    },
-    {
-        "id": 4,
-        "title": "What is photoshop and what is it used for?",
-        "excerpt": "A comprehensive look at Adobe Photoshop and its role in modern graphic design and photo editing.",
-        "image": "/blog/graphic-design.png",
-        "author": "EduValues Team",
-        "date": "October 8, 2021",
-        "category": "Graphic Designing",
-        "readTime": "5 min read"
-    },
-    {
-        "id": 5,
-        "title": "How to become Social Media Manager in 11 steps?",
-        "excerpt": "Your roadmap to building a successful career managing social media presence for brands and businesses.",
-        "image": "/blog/social-media.png",
-        "author": "EduValues Team",
-        "date": "October 8, 2021",
-        "category": "Marketing",
-        "readTime": "9 min read"
-    },
-    {
-        "id": 6,
-        "title": "Character sketch examples for creative writing.",
-        "excerpt": "Learn how to breathe life into your fictional characters with detailed and vivid character sketches.",
-        "image": "/blog/creative-writing.png",
-        "author": "EduValues Team",
-        "date": "October 8, 2021",
-        "category": "Creative Writing",
-        "readTime": "6 min read"
-    },
-    {
-        "id": 7,
-        "title": "The importance of Information Technology – Why is it so important?",
-        "excerpt": "Discover why IT is the backbone of modern society and how it impacts our daily lives and global economy.",
-        "image": "/blog/it-tech.png",
-        "author": "EduValues Team",
-        "date": "October 8, 2021",
-        "category": "Information Technology",
-        "readTime": "7 min read"
-    },
-    {
-        "id": 8,
-        "title": "Is creativity most valuable skill for designer?",
-        "excerpt": "Exploring the debate on whether raw creativity or technical skill is more important in the design world.",
-        "image": "/blog/design-thinking.png",
-        "author": "EduValues Team",
-        "date": "October 8, 2021",
-        "category": "Design",
+        "category": "Activities",
         "readTime": "5 min read"
     }
 ]

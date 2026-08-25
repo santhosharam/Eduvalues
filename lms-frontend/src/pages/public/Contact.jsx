@@ -1,8 +1,9 @@
 import Navbar from '../../components/common/Navbar'
 import Footer from '../../components/common/Footer'
 import { useState } from 'react'
-import { Send, CheckCircle, Pencil, Star, Sparkles } from 'lucide-react'
+import { Send, CheckCircle, Pencil, Star, Sparkles, Mail } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { contactInfo } from '../../config/contactConfig'
 
 export default function Contact() {
     const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' })
@@ -149,12 +150,20 @@ export default function Contact() {
                             fontWeight: 900,
                             marginBottom: '24px',
                             lineHeight: 1.2
-                        }}>Our Education Partners</h2>
+                        }}>Get In Touch</h2>
 
-                        <p style={{ color: '#888', marginBottom: '40px', fontSize: 16, lineHeight: 1.7 }}>
+                        <p style={{ color: '#888', marginBottom: '20px', fontSize: 16, lineHeight: 1.7 }}>
                             We are always looking for passionate educators and institutions to join our mission.
                             Send us a message and we will get back to you shortly.
                         </p>
+                        
+                        <div style={{ marginBottom: '40px', fontSize: 18, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <Mail size={24} color="#00A6C0" />
+                            Email us at:{' '}
+                            <a href={`mailto:${contactInfo.email}`} style={{ color: '#00A6C0', textDecoration: 'none' }}>
+                                {contactInfo.email}
+                            </a>
+                        </div>
 
                         {sent ? (
                             <div style={{
