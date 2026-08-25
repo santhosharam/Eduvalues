@@ -108,17 +108,34 @@ export default function FinalExamPage() {
 
         const checkCertificate = async () => {
             try {
-                const { data: certData, error: certError } = await supabase
+                let courseUUID = resolvedId;
+                const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(resolvedId);
+
+                if (!isUuid) {
+                    const { data: cData } = await supabase
+                        .from('courses')
+                        .select('id')
+                        .eq('slug', courseId)
+                        .maybeSingle();
+                    if (cData?.id) {
+                        courseUUID = cData.id;
+                        setResolvedId(cData.id);
+                    } else {
+                        return;
+                    }
+                }
+
+                const { data: certData } = await supabase
                     .from('certificates')
                     .select('*')
                     .eq('student_id', user.id)
-                    .eq('course_id', resolvedId)
+                    .eq('course_id', courseUUID)
                     .maybeSingle();
 
                 if (certData) {
                     setSubmitted(true);
                     setScore(20); // Bypass quiz and show certificate
-                    setCertificateId(certData.id)
+                    setCertificateId(certData.id);
                 }
             } catch (err) {
                 console.error('Error checking certificate:', err);
@@ -126,7 +143,56 @@ export default function FinalExamPage() {
         };
 
         checkCertificate();
-    }, [user, resolvedId]);
+    }, [user, resolvedId, courseId]);
+
+    const ensureCertificateId = async () => {
+        if (certificateId) return certificateId;
+
+        if (!user?.id) {
+            throw new Error('User session is missing or expired. Please log in again.');
+        }
+
+        let targetCourseId = resolvedId;
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(targetCourseId);
+        
+        if (!isUuid && courseId) {
+            const { data: cData } = await supabase
+                .from('courses')
+                .select('id')
+                .eq('slug', courseId)
+                .maybeSingle();
+            if (cData?.id) {
+                targetCourseId = cData.id;
+                setResolvedId(cData.id);
+            }
+        }
+
+        if (!targetCourseId) {
+            throw new Error('Course ID reference could not be resolved.');
+        }
+
+        // 1. Check if certificate already exists in database
+        const { data: certData } = await supabase
+            .from('certificates')
+            .select('id')
+            .eq('student_id', user.id)
+            .eq('course_id', targetCourseId)
+            .maybeSingle();
+
+        if (certData?.id) {
+            setCertificateId(certData.id);
+            return certData.id;
+        }
+
+        // 2. If certificate does not exist yet in DB, issue it via completion API (upsert)
+        const completionRes = await completeCourse(targetCourseId);
+        if (completionRes.data?.certificateId) {
+            setCertificateId(completionRes.data.certificateId);
+            return completionRes.data.certificateId;
+        }
+
+        throw new Error('Unable to issue or retrieve certificate record.');
+    };
 
     const handleSubmit = async () => {
         if (Object.keys(answers).length < questions.length) {
@@ -164,19 +230,15 @@ export default function FinalExamPage() {
     }
 
     const handleDownload = async () => {
-        if (!certificateId) {
-            toast.error('Certificate ID is missing. Please refresh the page.')
-            return
-        }
-        
         setActionLoading(true)
         try {
-            const res = await downloadCertificate(certificateId)
+            const certId = await ensureCertificateId()
+            const res = await downloadCertificate(certId)
             const blob = new Blob([res.data], { type: 'application/pdf' })
             const url = window.URL.createObjectURL(blob)
             const link = document.createElement('a')
             link.href = url
-            const sanitized = (studentName || 'Student').replace(/\s+/g, '_')
+            const sanitized = (studentName || user?.name || 'Student').replace(/\s+/g, '_')
             link.setAttribute('download', `Certificate_${sanitized}.pdf`)
             document.body.appendChild(link)
             link.click()
@@ -185,7 +247,7 @@ export default function FinalExamPage() {
             toast.success('Certificate downloaded successfully! 📄')
         } catch (err) {
             console.error('Download error:', err)
-            toast.error('Could not download PDF. Please try again or use the Print option.')
+            toast.error(err.response?.data?.message || err.message || 'Could not download PDF. Please try again or use the Print option.')
         } finally {
             setActionLoading(false)
         }
@@ -196,14 +258,10 @@ export default function FinalExamPage() {
     }
 
     const handleEmailCertificate = async () => {
-        if (!certificateId) {
-            toast.error('Certificate ID is missing. Please refresh the page.')
-            return
-        }
-
         setIsEmailing(true)
         try {
-            const res = await emailCertificate(certificateId)
+            const certId = await ensureCertificateId()
+            const res = await emailCertificate(certId)
             if (res.data?.success) {
                 toast.success(res.data.message || 'Certificate sent successfully! 📧')
             } else {
@@ -211,7 +269,7 @@ export default function FinalExamPage() {
             }
         } catch (err) {
             console.error('Email certificate error:', err)
-            toast.error(err.response?.data?.message || 'Something went wrong while sending the email.')
+            toast.error(err.response?.data?.message || err.message || 'Something went wrong while sending the email.')
         } finally {
             setIsEmailing(false)
         }
