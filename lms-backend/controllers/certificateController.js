@@ -314,45 +314,57 @@ exports.completeCourse = async (req, res) => {
 // POST /api/certificates/email/:id
 exports.emailCertificate = async (req, res) => {
     try {
+        if (!req.params.id) {
+            return res.status(400).json({ message: 'Certificate ID is required' })
+        }
+
         const { data: cert, error } = await supabase
             .from('certificates')
             .select('*, courses(title, instructor)')
             .eq('id', req.params.id)
-            .single()
+            .maybeSingle()
 
         if (error || !cert) return res.status(404).json({ message: 'Certificate not found' })
 
         if (cert.student_id !== req.user.id && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Not authorized' })
+            return res.status(403).json({ message: 'You are not authorized to email this certificate' })
         }
 
         const { data: { user } } = await supabase.auth.admin.getUserById(cert.student_id)
-        const studentName = user?.user_metadata?.full_name || 'Student'
+        const studentName = user?.user_metadata?.full_name || req.user.name || 'Student'
         const studentEmail = user?.email || req.user.email
 
         if (!studentEmail) {
-            return res.status(400).json({ message: 'User does not have an associated email' })
+            return res.status(400).json({ message: 'User does not have an associated email address' })
         }
+
+        const verificationCode = cert.certificate_code || cert.unique_code || 'CERT-VERIFIED'
 
         const pdfBuffer = await generateCertificatePDF({
             ...cert,
-            studentName
+            studentName,
+            certificate_code: verificationCode
         })
 
         if (!pdfBuffer || pdfBuffer.length === 0) {
             return res.status(500).json({ message: 'Failed to generate certificate PDF' })
         }
 
-        const emailResult = await emailAutomation.sendCertificateAttachment(studentEmail, studentName, pdfBuffer, cert.unique_code)
+        const emailResult = await emailAutomation.sendCertificateAttachment(
+            studentEmail,
+            studentName,
+            pdfBuffer,
+            verificationCode
+        )
 
         if (emailResult.success) {
             res.json({ success: true, message: 'Certificate sent successfully to your registered email.' })
         } else {
-            res.status(500).json({ success: false, message: 'Unable to send certificate. Please try again.' })
+            res.status(500).json({ success: false, message: emailResult.error || 'Unable to send certificate email. Please try again.' })
         }
     } catch (err) {
         console.error('[EMAIL_CERTIFICATE_ERROR]', err)
-        res.status(500).json({ message: err.message })
+        res.status(500).json({ message: err.message || 'Failed to generate or send certificate email' })
     }
 }
 

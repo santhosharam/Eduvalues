@@ -9,7 +9,7 @@ router.get('/my', protect, getMyCertificates)
 router.get('/verify/:code', verifyCertificate)       // public
 router.get('/download/:id', protect, downloadCertificate)
 router.post('/complete', protect, completeCourse)
+router.post('/email/:id', protect, emailCertificate)
 router.post('/email-image/:id', protect, upload.single('image'), emailCertificateImage)
-router.post('/email/:id', protect, upload.single('image'), emailCertificateImage)
 
 module.exports = router
