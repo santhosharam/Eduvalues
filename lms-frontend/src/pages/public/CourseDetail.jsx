@@ -192,7 +192,7 @@ export default function CourseDetail() {
             </section>
 
             {/* --- Content Grid --- */}
-            <main className="section-container mobile-stack" style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 60, padding: '80px 24px' }}>
+            <main className="section-container mobile-stack mobile-padding" style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 60, padding: '80px 24px' }}>
                 <div style={{ flex: 1 }}>
                     <div style={{ marginBottom: 64 }}>
                         <h2 style={{ fontSize: 32, marginBottom: 32, display: 'flex', alignItems: 'center', gap: 16 }}>

@@ -102,7 +102,7 @@ export default function Checkout() {
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F4F7F9' }}>
             <Navbar />
             
-            <main className="section-container" style={{ flex: 1, padding: '60px 24px 100px', maxWidth: 1100, margin: '0 auto', width: '100%' }}>
+            <main className="section-container mobile-padding" style={{ flex: 1, padding: '60px 24px 100px', maxWidth: 1100, margin: '0 auto', width: '100%' }}>
                 <button 
                     onClick={() => navigate(-1)} 
                     style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', color: '#888', fontWeight: 800, marginBottom: 32, cursor: 'pointer' }}

@@ -202,7 +202,7 @@ export default function Home() {
             ))}
 
             {/* ══ HERO SECTION ═══════════════════════════════════════ */}
-            <section style={{
+            <section className="mobile-padding" style={{
                 position: 'relative',
                 minHeight: '90vh',
                 display: 'flex',
@@ -392,7 +392,7 @@ export default function Home() {
             </section>
 
             {/* ══ THE MAGICAL JOURNEY MAP ═══════════════════════════ */}
-            <section style={{ padding: '80px 24px', background: '#FFFDF9', position: 'relative' }}>
+            <section className="mobile-padding" style={{ padding: '80px 24px', background: '#FFFDF9', position: 'relative' }}>
                 <div className="section-container" style={{ textAlign: 'center' }}>
                     <div style={{ marginBottom: '64px' }}>
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#FFF0EB', padding: '10px 24px', borderRadius: '40px', border: '2px solid #FFD8CC', marginBottom: 16 }}>
@@ -505,7 +505,7 @@ export default function Home() {
             </section>
 
             {/* ══ PLAYGROUND INTERACTIVE FEATURES ═══════════════════ */}
-            <section style={{ padding: '60px 24px', background: '#F4F7F9', position: 'relative' }}>
+            <section className="mobile-padding" style={{ padding: '60px 24px', background: '#F4F7F9', position: 'relative' }}>
                 <div className="section-container" style={{ textAlign: 'center' }}>
                     <div style={{ marginBottom: '64px' }}>
                         <h2 style={{
@@ -596,7 +596,7 @@ export default function Home() {
             </section>
 
             {/* ══ KIDS ADVENTURE COURSES ════════════════════════════ */}
-            <section style={{ background: '#FFFDF9', padding: '80px 24px', position: 'relative' }}>
+            <section className="mobile-padding" style={{ background: '#FFFDF9', padding: '80px 24px', position: 'relative' }}>
                 <div className="section-container">
                     <div style={{
                         display: 'flex',
@@ -653,7 +653,7 @@ export default function Home() {
             </section>
 
             {/* ══ LATEST INSIGHTS SECTION ═══════════════════════════ */}
-            <section style={{ padding: '40px 24px', background: '#F4F7F9' }}>
+            <section className="mobile-padding" style={{ padding: '40px 24px', background: '#F4F7F9' }}>
                 <div className="section-container">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '64px', flexWrap: 'wrap', gap: 20 }}>
                         <div>
@@ -708,7 +708,7 @@ export default function Home() {
             </section>
 
             {/* ══ PARENTS TRUST SECTION ═════════════════════════════ */}
-            <section style={{ padding: '80px 24px', background: 'linear-gradient(180deg, #FFFDF9 0%, #FFF5EE 100%)', position: 'relative' }}>
+            <section className="mobile-padding" style={{ padding: '80px 24px', background: 'linear-gradient(180deg, #FFFDF9 0%, #FFF5EE 100%)', position: 'relative' }}>
                 <div className="section-container mobile-stack" style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: '60px', alignItems: 'center' }}>
                     <div>
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#EBF5FF', padding: '8px 20px', borderRadius: '40px', border: '2px solid #CCEAFF', marginBottom: 20 }}>

@@ -179,7 +179,7 @@ export default function Contact() {
                             </div>
                         ) : (
                             <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '20px' }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                <div className="mobile-stack" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                                     <input
                                         type="text"
                                         placeholder="Name"

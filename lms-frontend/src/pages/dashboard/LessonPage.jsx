@@ -552,9 +552,9 @@ export default function LessonPage() {
                         </div>
 
                         {/* --- Lesson Tabs Structure --- */}
-                        <div style={{ background: '#fff', borderRadius: '40px', boxShadow: '0 15px 0 #F1F1F1', border: '3px solid #F1F1F1', marginBottom: 40, overflow: 'hidden' }}>
+                        <div className="lesson-tabs-container">
                             {/* Tab Switcher */}
-                            <div style={{ display: 'flex', background: '#F8FAFB', borderBottom: '2px solid #F1F1F1' }}>
+                            <div className="lesson-tab-switcher">
                                 {[                                    {id: 'content', label: 'Reading Time', icon: BookOpen, color: '#00A6C0'},
                                     {id: 'summary', label: 'Quick Summary', icon: Rocket, color: '#FF9F43'},
                                     {id: 'moral', label: 'Moral Value', icon: Heart, color: '#FF6B6B'},
@@ -565,22 +565,11 @@ export default function LessonPage() {
                                         <button
                                             key={t.id}
                                             onClick={() => setActiveTab(t.id)}
+                                            className="lesson-tab-button"
                                             style={{
-                                                flex: 1,
-                                                padding: '24px 12px',
-                                                border: 'none',
                                                 background: isActive ? '#fff' : 'transparent',
                                                 borderBottom: isActive ? `5px solid ${t.color}` : '5px solid transparent',
-                                                color: isActive ? t.color : '#888',
-                                                fontSize: 16,
-                                                fontWeight: 900,
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                alignItems: 'center',
-                                                gap: 8,
-                                                fontFamily: 'Fredoka',
-                                                transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                                                color: isActive ? t.color : '#888'
                                             }}
                                         >
                                             <t.icon size={24} color={isActive ? t.color : '#aaa'} className={isActive ? 'animate-float' : ''} />
@@ -591,7 +580,7 @@ export default function LessonPage() {
                             </div>
 
                             {/* Tab Content Area */}
-                            <div style={{ padding: '60px 40px', minHeight: 450 }}>
+                            <div className="lesson-tab-content-area">
                                 {activeTab === 'content' && (
                                     <div className="animate-fade-in" style={{ position: 'relative' }}>
                                         {/* Reading Time Badge */}
@@ -604,7 +593,7 @@ export default function LessonPage() {
                                         )}
 
                                         {/* Character Avatar */}
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 40 }}>
+                                        <div className="lesson-character-avatar">
                                             <div style={{ 
                                                 width: 80, 
                                                 height: 80, 
@@ -902,7 +891,7 @@ export default function LessonPage() {
                                             <div style={{ marginBottom: 16, fontSize: 18, fontWeight: 900, color: '#001F3F', fontFamily: 'Fredoka' }}>
                                                 You have completed all lessons!
                                             </div>
-                                            <Link to={`/dashboard/course/${lesson.courseId?._id || lesson.courseId || lesson.course_id}/final-exam`} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '24px 48px', fontSize: 22, borderRadius: 30, background: 'linear-gradient(135deg, #FF6B6B 0%, #FF9F43 100%)', boxShadow: '0 8px 0 #cc4b4b, 0 20px 40px rgba(255, 107, 107, 0.3)', fontWeight: 900, color: '#fff', textDecoration: 'none', fontFamily: 'Fredoka', position: 'relative', top: 0 }}
+                                            <Link to={`/dashboard/course/${lesson.courseId?._id || lesson.courseId || lesson.course_id}/final-exam`} className="btn-primary mobile-stack-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '24px 48px', fontSize: 22, borderRadius: 30, background: 'linear-gradient(135deg, #FF6B6B 0%, #FF9F43 100%)', boxShadow: '0 8px 0 #cc4b4b, 0 20px 40px rgba(255, 107, 107, 0.3)', fontWeight: 900, color: '#fff', textDecoration: 'none', fontFamily: 'Fredoka', position: 'relative', top: 0 }}
                                             onMouseEnter={e => { e.currentTarget.style.top = '-2px'; e.currentTarget.style.boxShadow = '0 10px 0 #cc4b4b, 0 20px 40px rgba(255, 107, 107, 0.4)'; }}
                                             onMouseLeave={e => { e.currentTarget.style.top = '0'; e.currentTarget.style.boxShadow = '0 8px 0 #cc4b4b, 0 20px 40px rgba(255, 107, 107, 0.3)'; }}
                                             onMouseDown={e => { e.currentTarget.style.top = '6px'; e.currentTarget.style.boxShadow = '0 2px 0 #cc4b4b, 0 5px 10px rgba(255,107,107,0.2)'; }}>
@@ -929,10 +918,105 @@ export default function LessonPage() {
                     from { opacity: 0; transform: translateY(10px); }
                     to { opacity: 1; transform: translateY(0); }
                 }
+                
+                .lesson-tabs-container {
+                    background: #fff;
+                    border-radius: 40px;
+                    box-shadow: 0 15px 0 #F1F1F1;
+                    border: 3px solid #F1F1F1;
+                    margin-bottom: 40px;
+                    overflow: hidden;
+                }
+                
+                .lesson-tab-switcher {
+                    display: flex;
+                    background: #F8FAFB;
+                    border-bottom: 2px solid #F1F1F1;
+                }
+                
+                .lesson-tab-button {
+                    flex: 1;
+                    padding: 24px 12px;
+                    border: none;
+                    font-size: 16px;
+                    font-weight: 900;
+                    cursor: pointer;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 8px;
+                    font-family: 'Fredoka', sans-serif;
+                    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                }
+                
+                .lesson-tab-content-area {
+                    padding: 60px 40px;
+                    min-height: 450px;
+                }
+                
+                .lesson-character-avatar {
+                    display: flex;
+                    align-items: center;
+                    gap: 20px;
+                    margin-bottom: 40px;
+                }
+
                 @media (max-width: 1024px) {
                     .lesson-sidebar { display: none !important; }
                     .main-content-layout { margin-left: 0 !important; }
                     .mobile-progress-bar { display: block !important; }
+                }
+
+                @media (max-width: 768px) {
+                    .lesson-tabs-container {
+                        border-radius: 24px;
+                    }
+                    
+                    /* Make tabs scroll horizontally on mobile so they don't squish */
+                    .lesson-tab-switcher {
+                        overflow-x: auto;
+                        -webkit-overflow-scrolling: touch;
+                        scrollbar-width: none; /* Firefox */
+                    }
+                    
+                    .lesson-tab-switcher::-webkit-scrollbar {
+                        display: none; /* Chrome/Safari */
+                    }
+                    
+                    .lesson-tab-button {
+                        min-width: 120px;
+                        padding: 16px 8px;
+                    }
+                    
+                    .lesson-tab-content-area {
+                        padding: 30px 20px;
+                    }
+                    
+                    .lesson-character-avatar {
+                        flex-direction: column;
+                        text-align: center;
+                        gap: 12px;
+                    }
+                    
+                    /* Adjust speech bubble arrow for vertical stack */
+                    .lesson-character-avatar > div:nth-child(2) > div {
+                        left: 50% !important;
+                        top: -8px !important;
+                        transform: translateX(-50%) !important;
+                        border-top: 0 !important;
+                        border-bottom: 8px solid #001F3F !important;
+                        border-left: 8px solid transparent !important;
+                        border-right: 8px solid transparent !important;
+                    }
+                    
+                    /* Final exam button wrapper */
+                    .mobile-stack-btn {
+                        padding: 16px 20px !important;
+                        font-size: 16px !important;
+                        white-space: normal !important;
+                        text-align: center;
+                        line-height: 1.4;
+                    }
                 }
             `}</style>
         </div>
