@@ -30,14 +30,22 @@ const transporter = nodemailer.createTransport({
     }
 })
 
+const verifyTransporter = () => {
+    return new Promise((resolve) => {
+        transporter.verify((error, success) => {
+            if (error) {
+                console.error('❌ Email SMTP connection failed:', error.message)
+                resolve({ success: false, error: error.message })
+            } else {
+                console.log('✅ Email SMTP server is ready to deliver messages')
+                resolve({ success: true })
+            }
+        })
+    })
+}
+
 // Verify connection configuration on startup
-transporter.verify((error, success) => {
-    if (error) {
-        console.error('❌ Email SMTP connection failed. Check your EMAIL_USER/EMAIL_PASS settings:', error.message)
-    } else {
-        console.log('✅ Email SMTP server is ready to deliver messages')
-    }
-})
+verifyTransporter()
 
 /**
  * Unified email sending function that provides standardized error handling
@@ -45,8 +53,13 @@ transporter.verify((error, success) => {
  */
 const sendEmail = async ({ to, subject, html, text, replyTo, attachments = [] }) => {
     try {
+        if (!emailUser || !emailPass) {
+            console.error('❌ Failed to send email: EMAIL_USER or EMAIL_PASS missing in environment variables.')
+            return { success: false, error: 'SMTP credentials missing in server environment.' }
+        }
+
         const info = await transporter.sendMail({
-            from: process.env.EMAIL_FROM || `"EduValues Support" <${process.env.EMAIL_USER || 'eduvalues123@gmail.com'}>`,
+            from: process.env.EMAIL_FROM || `"EduValues Support" <${emailUser}>`,
             to,
             replyTo,
             subject,
@@ -57,7 +70,7 @@ const sendEmail = async ({ to, subject, html, text, replyTo, attachments = [] })
         console.log('✅ Email sent successfully:', info.messageId)
         return { success: true, messageId: info.messageId }
     } catch (error) {
-        console.error('❌ Failed to send email:', error.message)
+        console.error('❌ Failed to send email:', error.message, error.code || '')
         return { success: false, error: error.message }
     }
 }
@@ -197,5 +210,6 @@ const emailAutomation = {
 }
 
 module.exports = {
-    emailAutomation
+    emailAutomation,
+    verifyTransporter
 }
