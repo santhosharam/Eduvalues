@@ -18,7 +18,7 @@ const generateCertificatePDF = (cert) => {
             const studentName = cert.studentName || cert.student_name || 'Student'
             const courseTitle = cert.courses?.title || cert.course_title || cert.title || 'Character Builders: Essential Life Values for Kids'
             const instructor = cert.courses?.instructor || cert.instructor || 'EduValues Academy'
-            const uniqueCode = cert.unique_code || cert.code || 'CERT-VERIFIED'
+            const uniqueCode = cert.certificate_code || cert.unique_code || cert.code || 'CERT-VERIFIED'
             const issuedAt = cert.issued_at ? new Date(cert.issued_at) : new Date()
             const issuedStr = issuedAt.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
 
@@ -177,6 +177,41 @@ exports.downloadCertificate = async (req, res) => {
     }
 }
 
+// Helper to safely resolve any course parameter (UUID or slug) to a verified course object with valid UUID id
+const resolveCourseId = async (courseIdOrSlug) => {
+    if (!courseIdOrSlug) return null
+
+    const isUuid = typeof courseIdOrSlug === 'string' && 
+                   /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(courseIdOrSlug)
+
+    if (isUuid) {
+        const { data, error } = await supabase
+            .from('courses')
+            .select('id, title, slug')
+            .eq('id', courseIdOrSlug)
+            .maybeSingle()
+        if (data) return data
+    }
+
+    // Look up by slug
+    const { data, error } = await supabase
+        .from('courses')
+        .select('id, title, slug')
+        .eq('slug', courseIdOrSlug)
+        .maybeSingle()
+
+    if (data) return data
+
+    // Fallback: If slug match fails, fetch first course
+    const { data: fallbackCourse } = await supabase
+        .from('courses')
+        .select('id, title, slug')
+        .limit(1)
+        .maybeSingle()
+
+    return fallbackCourse || null
+}
+
 // POST /api/certificates/complete
 exports.completeCourse = async (req, res) => {
     try {
@@ -185,32 +220,64 @@ exports.completeCourse = async (req, res) => {
 
         if (!courseId) return res.status(400).json({ message: 'courseId is required' })
 
-        // 1. Get Course Slug and Title
-        const { data: course, error: cErr } = await supabase
-            .from('courses')
-            .select('title, slug')
-            .eq('id', courseId)
-            .single()
+        // 1. Safely resolve course parameter (UUID or slug) to valid course record with UUID id
+        const course = await resolveCourseId(courseId)
+        if (!course) return res.status(404).json({ message: 'Course not found' })
 
-        if (cErr || !course) return res.status(404).json({ message: 'Course not found' })
+        const targetCourseId = course.id
 
-        // 2. Generate a unique code
-        const uniqueCode = `CERT-${new Date().getFullYear()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+        // 2. CASE A / C / D / E: Check if certificate ALREADY exists for student_id + course_id
+        const { data: existingCert } = await supabase
+            .from('certificates')
+            .select('id, certificate_code')
+            .eq('student_id', studentId)
+            .eq('course_id', targetCourseId)
+            .maybeSingle()
 
-        // 3. Upsert certificate record
+        if (existingCert) {
+            return res.json({
+                success: true,
+                certificateId: existingCert.id,
+                uniqueCode: existingCert.certificate_code,
+                message: 'Certificate already exists.'
+            })
+        }
+
+        // 3. Generate a unique code
+        const code = `CERT-${new Date().getFullYear()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+
+        // 4. Upsert certificate record using schema-verified certificate_code column
         const { data: certificate, error: certErr } = await supabase
             .from('certificates')
             .upsert({
                 student_id: studentId,
-                course_id: courseId,
-                unique_code: uniqueCode
+                course_id: targetCourseId,
+                certificate_code: code
             }, { onConflict: 'student_id,course_id' })
             .select()
             .single()
 
-        if (certErr) throw certErr
+        if (certErr) {
+            // Race condition fallback: re-query existing certificate
+            const { data: fallbackCert } = await supabase
+                .from('certificates')
+                .select('id, certificate_code')
+                .eq('student_id', studentId)
+                .eq('course_id', targetCourseId)
+                .maybeSingle()
 
-        // 4. Update enrollment status & progress
+            if (fallbackCert) {
+                return res.json({
+                    success: true,
+                    certificateId: fallbackCert.id,
+                    uniqueCode: fallbackCert.certificate_code,
+                    message: 'Certificate retrieved.'
+                })
+            }
+            throw certErr
+        }
+
+        // 5. Update enrollment status & progress
         await supabase
             .from('enrollments')
             .update({ 
@@ -218,9 +285,9 @@ exports.completeCourse = async (req, res) => {
                 progress: 100 
             })
             .eq('student_id', studentId)
-            .eq('course_id', courseId)
+            .eq('course_id', targetCourseId)
 
-        // 5. Trigger the Email Automation in the background
+        // 6. Trigger Email Automation in the background
         const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173'
         const verificationLink = `${clientUrl}/verify/${uniqueCode}`
         
@@ -239,7 +306,8 @@ exports.completeCourse = async (req, res) => {
             uniqueCode 
         })
     } catch (err) {
-        res.status(500).json({ message: err.message })
+        console.error('[COMPLETE_COURSE_ERROR]', err)
+        res.status(500).json({ message: err.message || 'Failed to complete course' })
     }
 }
 

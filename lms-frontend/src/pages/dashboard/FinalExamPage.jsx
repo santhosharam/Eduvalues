@@ -3,8 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import Navbar from '../../components/common/Navbar'
 import toast from 'react-hot-toast'
 import { Sparkles, Trophy, Award, Printer, Download, Mail, ArrowLeft, Loader2, Heart, CheckCircle, RefreshCcw, Compass } from 'lucide-react'
-import html2canvas from 'html2canvas'
-import { jsPDF } from 'jspdf'
+import { toPng } from 'html-to-image'
 import { supabase } from '../../supabaseClient';
 import { useAuth } from '../../context/AuthContext'
 import { getFinalExam } from '../../services/courseService'
@@ -43,7 +42,7 @@ export default function FinalExamPage() {
         handleResize(); // Initial measurement
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [submitted]); // Also re-measure when submitted state changes so the element is there
+    }, [submitted]);
 
     useEffect(() => {
         if (user?.name && !studentName) {
@@ -55,47 +54,15 @@ export default function FinalExamPage() {
         const fetchQuestions = async () => {
             setLoading(true)
             try {
-                // 1. Resolve UUID / Slug to get exact course data
-                const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(courseId);
-                let currentResolvedId = courseId;
-                let courseData = null;
-
-                if (isUuid) {
-                    const { data: cData, error: cErr } = await supabase
-                        .from('courses')
-                        .select('*')
-                        .eq('id', courseId)
-                        .single();
-                    if (!cErr) courseData = cData;
-                } else {
-                    const { data: cData, error: cErr } = await supabase
-                        .from('courses')
-                        .select('*')
-                        .eq('slug', courseId)
-                        .single();
-                    if (!cErr && cData) {
-                        courseData = cData;
-                        currentResolvedId = cData.id;
-                    }
+                const data = await getFinalExam(courseId)
+                if (data.questions) setQuestions(data.questions)
+                if (data.course) {
+                    setCourse(data.course)
+                    if (data.course.id) setResolvedId(data.course.id)
                 }
-
-                if (courseData) {
-                    setCourse(courseData);
-                    setResolvedId(currentResolvedId);
-                }
-
-                // 2. Fetch the questions using the resolved UUID via backend API (bypassing RLS)
-                const res = await getFinalExam(currentResolvedId);
-                const qData = res.questions || [];
-
-                if (!qData || qData.length < 20) {
-                    console.warn(`Only ${qData.length} exam questions found. Need 20.`);
-                }
-                
-                setQuestions(qData);
             } catch (err) {
-                toast.error('Could not load the final challenge! Check your connection.')
-                console.error('Final Exam Fetch Error:', err);
+                console.error('Error loading final exam questions:', err)
+                toast.error('Failed to load exam. Please refresh.')
             } finally {
                 setLoading(false)
             }
@@ -168,7 +135,7 @@ export default function FinalExamPage() {
         }
 
         if (!targetCourseId) {
-            throw new Error('Course ID reference could not be resolved.');
+            targetCourseId = courseId;
         }
 
         // 1. Check if certificate already exists in database
@@ -184,7 +151,7 @@ export default function FinalExamPage() {
             return certData.id;
         }
 
-        // 2. If certificate does not exist yet in DB, issue it via completion API (upsert)
+        // 2. Issue certificate via completeCourse API endpoint
         const completionRes = await completeCourse(targetCourseId);
         if (completionRes.data?.certificateId) {
             setCertificateId(completionRes.data.certificateId);
@@ -202,14 +169,11 @@ export default function FinalExamPage() {
 
         setActionLoading(true)
         try {
-            // 1. Calculate Score (case-insensitive to support both 'a' and 'A' formats)
             const calculatedScore = questions.filter(q => answers[q.id]?.toLowerCase() === q.correct_answer?.toLowerCase()).length
             setScore(calculatedScore)
             setSubmitted(true)
 
-            // 2. Passing requirement: 75% (15/20)
             if (calculatedScore >= 15 && questions.length >= 20) {
-                // Call course completion API (updates DB and triggers email automation)
                 const completionRes = await completeCourse(resolvedId)
                 if (completionRes.data?.certificateId) {
                     setCertificateId(completionRes.data.certificateId)
@@ -232,45 +196,34 @@ export default function FinalExamPage() {
     const handleDownload = async () => {
         setActionLoading(true)
         try {
-            const certId = await ensureCertificateId()
-            if (!certId) {
-                toast.error('Unable to find your certificate.')
+            await ensureCertificateId()
+
+            const node = certificateRef.current || document.getElementById('certificate-print-area')
+            if (!node) {
+                toast.error('Certificate preview is not ready. Please try again.')
                 return
             }
 
-            const element = document.getElementById('certificate-image-render')
-            if (!element) {
-                toast.error('Certificate is not ready. Please try again.')
-                return
-            }
-
-            const canvas = await html2canvas(element, {
-                width: 1122,
-                height: 793,
-                scale: 2,
-                useCORS: true,
-                allowTaint: false,
-                backgroundColor: '#ffffff',
-                logging: false
+            const dataUrl = await toPng(node, {
+                pixelRatio: 2,
+                cacheBust: true,
+                backgroundColor: '#ffffff'
             })
 
-            canvas.toBlob((blob) => {
-                if (!blob) {
-                    toast.error('Unable to create certificate image.')
-                    return
-                }
+            if (!dataUrl || !dataUrl.startsWith('data:image/png;base64,')) {
+                toast.error('Unable to create certificate image.')
+                return
+            }
 
-                const url = URL.createObjectURL(blob)
-                const link = document.createElement('a')
-                link.href = url
-                const sanitized = (studentName || user?.name || 'Student').replace(/[^a-zA-Z0-9_-]/g, '_')
-                link.download = `Certificate_${sanitized}.png`
-                document.body.appendChild(link)
-                link.click()
-                link.remove()
-                URL.revokeObjectURL(url)
-                toast.success('Certificate image downloaded successfully! 🖼️')
-            }, 'image/png')
+            const sanitized = (studentName || user?.name || 'Student').replace(/[^a-zA-Z0-9_-]/g, '_')
+            const link = document.createElement('a')
+            link.download = `EduValues-Certificate-${sanitized}.png`
+            link.href = dataUrl
+            document.body.appendChild(link)
+            link.click()
+            link.remove()
+
+            toast.success('Certificate image downloaded successfully! 🖼️')
         } catch (err) {
             console.error('Download error:', err)
             toast.error('Could not generate certificate image. Please try again.')
@@ -289,55 +242,19 @@ export default function FinalExamPage() {
             const certId = await ensureCertificateId()
             if (!certId) {
                 toast.error('Unable to find your certificate.')
-                setIsEmailing(false)
                 return
             }
 
-            const element = document.getElementById('certificate-image-render')
-            if (!element) {
-                toast.error('Certificate is not ready. Please try again.')
-                setIsEmailing(false)
-                return
+            const res = await emailCertificate(certId)
+            if (res.data?.success) {
+                toast.success(res.data.message || 'Certificate sent successfully to your registered email! 📧')
+            } else {
+                toast.error('Could not send the certificate.')
             }
-
-            const canvas = await html2canvas(element, {
-                width: 1122,
-                height: 793,
-                scale: 2,
-                useCORS: true,
-                allowTaint: false,
-                backgroundColor: '#ffffff',
-                logging: false
-            })
-
-            canvas.toBlob(async (blob) => {
-                if (!blob) {
-                    toast.error('Unable to create certificate image for email.')
-                    setIsEmailing(false)
-                    return
-                }
-
-                try {
-                    const formData = new FormData()
-                    const sanitized = (studentName || user?.name || 'Student').replace(/[^a-zA-Z0-9_-]/g, '_')
-                    formData.append('image', blob, `Certificate_${sanitized}.png`)
-
-                    const res = await emailCertificateImage(certId, formData)
-                    if (res.data?.success) {
-                        toast.success(res.data.message || 'Certificate image sent successfully to your email! 📧')
-                    } else {
-                        toast.error(res.data?.message || 'Could not send certificate email.')
-                    }
-                } catch (err) {
-                    console.error('Email certificate error:', err)
-                    toast.error(err.response?.data?.message || 'Something went wrong while sending the email.')
-                } finally {
-                    setIsEmailing(false)
-                }
-            }, 'image/png')
         } catch (err) {
             console.error('Email certificate error:', err)
-            toast.error('Something went wrong while capturing certificate image.')
+            toast.error(err.response?.data?.message || err.message || 'Something went wrong while sending the email.')
+        } finally {
             setIsEmailing(false)
         }
     }
