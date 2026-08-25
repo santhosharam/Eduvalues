@@ -3,17 +3,20 @@ const { emailAutomation } = require('../utils/emailService')
 // POST /api/contact
 exports.submitContactForm = async (req, res) => {
     try {
+        console.log('[CONTACT] request received')
         const { name, email, phone, message } = req.body
 
         if (!name || !name.trim()) {
-            return res.status(400).json({ success: false, message: 'Please provide your name.' })
+            return res.status(400).json({ success: false, message: 'Please provide all required fields.' })
         }
         if (!email || !email.trim() || !/\S+@\S+\.\S+/.test(email)) {
             return res.status(400).json({ success: false, message: 'Please provide a valid email address.' })
         }
         if (!message || !message.trim()) {
-            return res.status(400).json({ success: false, message: 'Please write a message before sending.' })
+            return res.status(400).json({ success: false, message: 'Please provide all required fields.' })
         }
+
+        console.log('[CONTACT] validation passed')
 
         const result = await emailAutomation.sendContactSubmission({
             name: name.trim(),
@@ -23,12 +26,12 @@ exports.submitContactForm = async (req, res) => {
         })
 
         if (result.success) {
-            res.json({ success: true, message: 'Message Sent! We will reach out to your email shortly.' })
+            res.json({ success: true, message: 'Your message has been sent successfully.' })
         } else {
             res.status(500).json({ success: false, message: 'Unable to send your message right now. Please try again.' })
         }
     } catch (err) {
-        console.error('[CONTACT_FORM_ERROR]', err)
+        console.error('[CONTACT_FORM_ERROR]', err?.message || err)
         res.status(500).json({ success: false, message: 'Unable to send your message right now. Please try again.' })
     }
 }

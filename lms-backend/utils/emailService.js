@@ -12,13 +12,18 @@ const {
 
 // Configuration for Nodemailer, adaptable for SMTP (e.g., Gmail) or transactional 
 // providers such as SendGrid/Resend.
+const emailHost = process.env.EMAIL_HOST || process.env.SMTP_HOST || 'smtp.gmail.com'
+const emailPort = parseInt(process.env.EMAIL_PORT || process.env.SMTP_PORT || '587', 10)
+const emailUser = process.env.EMAIL_USER || process.env.SMTP_USER || process.env.GMAIL_USER || 'eduvalues123@gmail.com'
+const emailPass = process.env.EMAIL_PASS || process.env.SMTP_PASS || process.env.GMAIL_PASS || process.env.EMAIL_PASSWORD || process.env.SMTP_PASSWORD
+
 const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-    port: process.env.EMAIL_PORT || 587,
-    secure: process.env.EMAIL_SECURE === 'true' || false,
+    host: emailHost,
+    port: emailPort,
+    secure: process.env.EMAIL_SECURE === 'true' || emailPort === 465,
     auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+        user: emailUser,
+        pass: emailPass
     },
     tls: {
         rejectUnauthorized: false
@@ -145,24 +150,49 @@ const emailAutomation = {
     sendContactSubmission: async ({ name, email, phone, message }) => {
         const contactEmail = 'eduvalues123@gmail.com'
         const dateStr = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
-        return await sendEmail({
+        
+        // Escape HTML to prevent executable markup injection
+        const escapeHtml = str => String(str || '').replace(/[&<>"']/g, m => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        })[m])
+
+        const safeName = escapeHtml(name)
+        const safeEmail = escapeHtml(email)
+        const safePhone = escapeHtml(phone)
+        const safeMessage = escapeHtml(message)
+
+        console.log('[CONTACT] attempting email delivery for:', safeEmail)
+
+        const result = await sendEmail({
             to: contactEmail,
             replyTo: email,
             subject: 'New Contact Form Submission - EduValues',
             html: `
                 <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
                     <h2 style="color: #001F3F; margin-bottom: 16px;">New Contact Message Received</h2>
-                    <p><strong>Name:</strong> ${name}</p>
-                    <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
-                    ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
+                    <p><strong>Name:</strong> ${safeName}</p>
+                    <p><strong>Email:</strong> <a href="mailto:${safeEmail}">${safeEmail}</a></p>
+                    ${safePhone ? `<p><strong>Phone:</strong> ${safePhone}</p>` : ''}
                     <p><strong>Date/Time:</strong> ${dateStr}</p>
                     <hr style="margin: 20px 0; border: none; border-top: 1px solid #e2e8f0;" />
                     <p><strong>Message:</strong></p>
-                    <p style="background: #f8fafc; padding: 16px; border-radius: 6px; white-space: pre-wrap;">${message}</p>
+                    <p style="background: #f8fafc; padding: 16px; border-radius: 6px; white-space: pre-wrap;">${safeMessage}</p>
                 </div>
             `,
             text: `New Contact Message from ${name} (${email})\nPhone: ${phone || 'N/A'}\nDate: ${dateStr}\n\nMessage:\n${message}`
         })
+
+        if (result.success) {
+            console.log('[CONTACT] email sent successfully')
+        } else {
+            console.error('[CONTACT] email delivery failed:', result.error)
+        }
+
+        return result
     }
 }
 

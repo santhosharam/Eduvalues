@@ -18,10 +18,10 @@ export default function Contact() {
             const res = await api.post('/contact', form)
             if (res.data?.success) {
                 setSent(true)
-                toast.success(res.data.message || 'Message Sent! We will reach out shortly.')
+                toast.success(res.data.message || 'Your message has been sent successfully.')
                 setForm({ name: '', email: '', phone: '', message: '' })
             } else {
-                toast.error(res.data?.message || 'Unable to send message. Please try again.')
+                toast.error(res.data?.message || 'Unable to send your message right now. Please try again.')
             }
         } catch (err) {
             console.error('Contact submit error:', err)
