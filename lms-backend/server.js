@@ -104,6 +104,9 @@ app.use((req, res, next) => {
             const razorpayKey = process.env.RAZORPAY_KEY_ID
             const razorpaySecret = process.env.RAZORPAY_KEY_SECRET
             
+            const emailUser = process.env.EMAIL_USER || process.env.SMTP_USER || process.env.GMAIL_USER
+            const emailPass = process.env.EMAIL_PASS || process.env.SMTP_PASS || process.env.GMAIL_PASS || process.env.EMAIL_PASSWORD || process.env.SMTP_PASSWORD
+
             res.json({
                 status: 'ok',
                 time: new Date(),
@@ -114,7 +117,9 @@ app.use((req, res, next) => {
                     SUPABASE_URL_configured: !!supabaseUrl,
                     SUPABASE_KEY_configured: !!supabaseKey,
                     RAZORPAY_KEY_configured: !!razorpayKey,
-                    RAZORPAY_KEY_SECRET_configured: !!razorpaySecret
+                    RAZORPAY_KEY_SECRET_configured: !!razorpaySecret,
+                    EMAIL_USER_configured: !!emailUser,
+                    EMAIL_PASS_configured: !!emailPass
                 }
             })
         })
