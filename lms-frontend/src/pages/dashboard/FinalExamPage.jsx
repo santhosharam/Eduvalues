@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import Navbar from '../../components/common/Navbar'
 import toast from 'react-hot-toast'
-import { Sparkles, Trophy, Award, Printer, Download, ArrowLeft, Loader2, Heart, CheckCircle, RefreshCcw, Compass } from 'lucide-react'
+import { Sparkles, Trophy, Award, Printer, Download, Mail, ArrowLeft, Loader2, Heart, CheckCircle, RefreshCcw, Compass } from 'lucide-react'
 import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
 import { supabase } from '../../supabaseClient';
@@ -317,36 +317,34 @@ export default function FinalExamPage() {
                             />
                         </div>
 
-                        <div style={{ display: 'flex', gap: 20, justifyContent: 'center', marginTop: 32 }} className="mobile-stack">
-                            <button onClick={handlePrint} className="btn-primary" style={{ height: 60, padding: '0 32px', display: 'flex', alignItems: 'center', gap: 10, background: '#001F3F', borderRadius: 30, boxShadow: '0 6px 0 #000c1a' }}>
+                        <div style={{ display: 'flex', gap: 20, justifyContent: 'center', alignItems: 'center', marginTop: 32 }} className="mobile-stack">
+                            <button onClick={handlePrint} className="btn-primary" style={{ height: 60, padding: '0 28px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, background: '#001F3F', borderRadius: 30, boxShadow: '0 6px 0 #000c1a', cursor: 'pointer' }}>
                                 <Printer size={20} /> Print Certificate
                             </button>
                             <button 
                                 onClick={handleDownload} 
                                 disabled={actionLoading}
                                 className="btn-primary" 
-                                style={{ height: 60, padding: '0 32px', display: 'flex', alignItems: 'center', gap: 10, background: '#1DD1A1', borderRadius: 30, boxShadow: '0 6px 0 #10ac84' }}
+                                style={{ height: 60, padding: '0 28px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, background: '#1DD1A1', borderRadius: 30, boxShadow: '0 6px 0 #10ac84', cursor: 'pointer' }}
                             >
                                 {actionLoading ? <Loader2 className="spin" size={20} /> : <Download size={20} />}
                                 {actionLoading ? 'Generating...' : 'Download Certificate'}
                             </button>
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <button 
-                                    onClick={handleEmailCertificate} 
-                                    disabled={isEmailing}
-                                    className="btn-primary" 
-                                    style={{ width: '100%', height: 60, padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, background: '#8B5CF6', borderRadius: 30, boxShadow: '0 6px 0 #7C3AED' }}
-                                >
-                                    {isEmailing ? <Loader2 className="spin" size={20} /> : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>}
-                                    {isEmailing ? 'Sending...' : 'Send Certificate to Email'}
-                                </button>
-                                {user?.email && (
-                                    <span style={{ fontSize: 12, color: '#64748b', marginTop: 8, fontWeight: 600 }}>
-                                        Certificate will be sent to {user.email.replace(/(.{1,2})(.*)(@.*)/, (m, p1, p2, p3) => p1 + '*'.repeat(p2.length) + p3)}
-                                    </span>
-                                )}
-                            </div>
+                            <button 
+                                onClick={handleEmailCertificate} 
+                                disabled={isEmailing}
+                                className="btn-primary" 
+                                style={{ height: 60, padding: '0 28px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, background: '#8B5CF6', borderRadius: 30, boxShadow: '0 6px 0 #7C3AED', cursor: 'pointer' }}
+                            >
+                                {isEmailing ? <Loader2 className="spin" size={20} /> : <Mail size={20} />}
+                                {isEmailing ? 'Sending...' : 'Send Certificate to Email'}
+                            </button>
                         </div>
+                        {user?.email && (
+                            <div style={{ fontSize: 13, color: '#64748b', marginTop: 14, fontWeight: 600, textAlign: 'center' }}>
+                                Certificate will be sent to <strong>{user.email.replace(/(.{1,2})(.*)(@.*)/, (m, p1, p2, p3) => p1 + '*'.repeat(Math.max(1, p2.length)) + p3)}</strong>
+                            </div>
+                        )}
                     </div>
 
                     {/* Certificate Preview */}
