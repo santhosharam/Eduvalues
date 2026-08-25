@@ -1,3 +1,5 @@
+const path = require('path')
+require('dotenv').config({ path: path.resolve(__dirname, '.env') })
 require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
@@ -97,19 +99,27 @@ app.use((req, res, next) => {
         // Health check
         app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date(), version: '2.0.0' }))
 
-        // Diagnostics endpoint to debug environment variables on the hosted server
+        // Diagnostics endpoint to debug environment & SMTP status on hosted server safely
+        const { getSmtpStatus } = require('./utils/emailService')
         app.get('/api/diagnose', (req, res) => {
             const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL
             const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY
             const razorpayKey = process.env.RAZORPAY_KEY_ID
             const razorpaySecret = process.env.RAZORPAY_KEY_SECRET
             
-            const emailUser = process.env.EMAIL_USER || process.env.SMTP_USER || process.env.GMAIL_USER
-            const emailPass = process.env.EMAIL_PASS || process.env.SMTP_PASS || process.env.GMAIL_PASS || process.env.EMAIL_PASSWORD || process.env.SMTP_PASSWORD
+            const smtpStatus = getSmtpStatus ? getSmtpStatus() : {}
 
             res.json({
                 status: 'ok',
                 time: new Date(),
+                smtp_configured: smtpStatus.configured || false,
+                smtp_verified: smtpStatus.verified || false,
+                smtp_host: smtpStatus.host || 'smtp.gmail.com',
+                smtp_port: smtpStatus.port || 587,
+                smtp_secure: smtpStatus.secure || false,
+                smtp_user_configured: smtpStatus.user_configured || false,
+                smtp_pass_configured: smtpStatus.pass_configured || false,
+                smtp_error: smtpStatus.error || null,
                 env: {
                     NODE_ENV: process.env.NODE_ENV,
                     VERCEL: process.env.VERCEL,
@@ -118,8 +128,8 @@ app.use((req, res, next) => {
                     SUPABASE_KEY_configured: !!supabaseKey,
                     RAZORPAY_KEY_configured: !!razorpayKey,
                     RAZORPAY_KEY_SECRET_configured: !!razorpaySecret,
-                    EMAIL_USER_configured: !!emailUser,
-                    EMAIL_PASS_configured: !!emailPass
+                    EMAIL_USER_configured: smtpStatus.user_configured || false,
+                    EMAIL_PASS_configured: smtpStatus.pass_configured || false
                 }
             })
         })
