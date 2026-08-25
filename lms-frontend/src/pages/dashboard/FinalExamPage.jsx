@@ -402,21 +402,7 @@ export default function FinalExamPage() {
                                 {actionLoading ? <Loader2 className="spin" size={20} /> : <Download size={20} />}
                                 {actionLoading ? 'Generating...' : 'Download Certificate'}
                             </button>
-                            <button 
-                                onClick={handleEmailCertificate} 
-                                disabled={isEmailing}
-                                className="btn-primary" 
-                                style={{ height: 60, padding: '0 28px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, background: '#8B5CF6', borderRadius: 30, boxShadow: '0 6px 0 #7C3AED', cursor: 'pointer' }}
-                            >
-                                {isEmailing ? <Loader2 className="spin" size={20} /> : <Mail size={20} />}
-                                {isEmailing ? 'Sending...' : 'Send Certificate to Email'}
-                            </button>
                         </div>
-                        {user?.email && (
-                            <div style={{ fontSize: 13, color: '#64748b', marginTop: 14, fontWeight: 600, textAlign: 'center' }}>
-                                Certificate will be sent to <strong>{user.email.replace(/(.{1,2})(.*)(@.*)/, (m, p1, p2, p3) => p1 + '*'.repeat(Math.max(1, p2.length)) + p3)}</strong>
-                            </div>
-                        )}
                     </div>
 
                     {/* Certificate Visible Preview Container */}
