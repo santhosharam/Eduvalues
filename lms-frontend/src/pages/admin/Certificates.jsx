@@ -38,11 +38,49 @@ export default function Certificates() {
         finally { setVerifying(false); }
     };
 
+    const handleDownloadCert = async (cert) => {
+        try {
+            toast.loading('Preparing PDF...', { id: 'admin-cert-dl' })
+            const res = await api.get(`/certificates/download/${cert.id}`, { responseType: 'blob' })
+            const blob = new Blob([res.data], { type: 'application/pdf' })
+            const url = window.URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = url
+            const name = cert.user?.name || 'Student'
+            link.setAttribute('download', `Certificate_${name.replace(/\s+/g, '_')}.pdf`)
+            document.body.appendChild(link)
+            link.click()
+            link.remove()
+            window.URL.revokeObjectURL(url)
+            toast.success('Certificate downloaded successfully!', { id: 'admin-cert-dl' })
+        } catch (err) {
+            console.error('[ADMIN_CERT_DOWNLOAD_ERROR]', err)
+            toast.error('Failed to download certificate', { id: 'admin-cert-dl' })
+        }
+    }
+
+    const handleEmailCert = async (cert) => {
+        try {
+            toast.loading('Sending certificate email...', { id: 'admin-cert-email' })
+            const res = await api.post(`/certificates/email/${cert.id}`)
+            if (res.data?.success) {
+                toast.success(res.data.message || 'Email dispatched successfully!', { id: 'admin-cert-email' })
+            } else {
+                toast.error('Failed to send email', { id: 'admin-cert-email' })
+            }
+        } catch (err) {
+            console.error('[ADMIN_CERT_EMAIL_ERROR]', err)
+            toast.error(err.response?.data?.message || 'Failed to send certificate email', { id: 'admin-cert-email' })
+        }
+    }
+
     const handleSearch = (e) => setSearchTerm(e.target.value);
 
     // Dynamic filtering for certificates list
     const filteredCertificates = certificates.filter(c =>
         c.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.user?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.courses?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         c.code?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -61,7 +99,7 @@ export default function Certificates() {
                     />
                     <input
                         type="text"
-                        placeholder="Search student or code..."
+                        placeholder="Search by student, email, course, or code..."
                         value={searchTerm}
                         onChange={handleSearch}
                         style={searchFieldStyle}
@@ -93,7 +131,7 @@ export default function Certificates() {
 
             {/* Issued Credentials Registry Grid */}
             <AdminTable
-                headers={['Metadata', 'Pathways', 'Issued Context', 'Verification Code']}
+                headers={['Metadata', 'Pathways', 'Issued Context', 'Verification Code', 'Actions']}
                 loading={loading}
                 data={filteredCertificates}
                 renderRow={(cert) => (
@@ -114,8 +152,8 @@ export default function Certificates() {
                                     {cert.user?.name?.charAt(0).toUpperCase()}
                                 </div>
                                 <div>
-                                    <div style={{ fontWeight: 800, color: '#fff', fontSize: 14 }}>{cert.user?.name}</div>
-                                    <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>ID: {cert.user?._id?.substring(0, 8)}</div>
+                                    <div style={{ fontWeight: 800, color: '#fff', fontSize: 14 }}>{cert.user?.name || 'Student'}</div>
+                                    <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>{cert.user?.email || 'N/A'}</div>
                                 </div>
                             </div>
                         </td>
@@ -138,15 +176,24 @@ export default function Certificates() {
                                 color: '#00A6C0',
                                 fontSize: 11,
                                 fontWeight: 800,
-                                fontFamily: 'monoscape, Courier New'
+                                fontFamily: 'monospace, Courier New'
                             }}>
                                 {cert.code}
                             </code>
                         </td>
                         <td style={{ padding: '20px 32px', textAlign: 'right' }}>
                             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-                                <button style={actionBtnStyle} title="Resend Notification"><Mail size={16} /></button>
-                                <button style={actionBtnStyle} title="Download Archive"><Download size={16} /></button>
+                                <a 
+                                    href={`/verify/${cert.code}`} 
+                                    target="_blank" 
+                                    rel="noreferrer"
+                                    style={actionBtnStyle} 
+                                    title="View Public Verification"
+                                >
+                                    <ExternalLink size={16} />
+                                </a>
+                                <button onClick={() => handleEmailCert(cert)} style={actionBtnStyle} title="Resend Notification"><Mail size={16} /></button>
+                                <button onClick={() => handleDownloadCert(cert)} style={actionBtnStyle} title="Download PDF"><Download size={16} /></button>
                             </div>
                         </td>
                     </>

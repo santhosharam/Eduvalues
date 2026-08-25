@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminStatsCard from '../../components/admin/AdminStatsCard';
-import { BookOpen, Users, CreditCard, DollarSign, Plus, ArrowRight, Activity } from 'lucide-react';
+import { BookOpen, Users, CreditCard, DollarSign, Plus, ArrowRight, Activity, Award } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Dashboard() {
@@ -67,6 +67,7 @@ export default function Dashboard() {
                         {[
                             { label: 'Create Course', to: '/staff-room/courses', icon: Plus, color: '#00A6C0', desc: 'Add new educational content' },
                             { label: 'View Students', to: '/staff-room/students', icon: Users, color: '#FF9F43', desc: 'Manage your active community' },
+                            { label: 'Manage Certificates', to: '/staff-room/certificates', icon: Award, color: '#8B5CF6', desc: 'Audit and verify credentials' },
                             { label: 'Monitor Payments', to: '/staff-room/payments', icon: CreditCard, color: '#1DD1A1', desc: 'Audit platform transactions' },
                             { label: 'System Settings', to: '/staff-room/settings', icon: BookOpen, color: '#FF6B6B', desc: 'Configure platform parameters' },
                         ].map((action, i) => (

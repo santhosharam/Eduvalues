@@ -38,11 +38,12 @@ transporter.verify((error, success) => {
  * Unified email sending function that provides standardized error handling
  * and fallback mechanisms for all platform communications.
  */
-const sendEmail = async ({ to, subject, html, text, attachments = [] }) => {
+const sendEmail = async ({ to, subject, html, text, replyTo, attachments = [] }) => {
     try {
         const info = await transporter.sendMail({
-            from: process.env.EMAIL_FROM || `"EduValues" <${process.env.EMAIL_USER}>`,
+            from: process.env.EMAIL_FROM || `"EduValues Support" <${process.env.EMAIL_USER || 'eduvalues123@gmail.com'}>`,
             to,
+            replyTo,
             subject,
             text,
             html,
@@ -105,16 +106,42 @@ const emailAutomation = {
     sendCertificateAttachment: async (userEmail, userName, pdfBuffer, uniqueCode) => {
         return await sendEmail({
             to: userEmail,
-            subject: `Your EduValues Course Certificate`,
-            html: `<p>Dear ${userName},</p><p>Congratulations on successfully completing your course with EduValues.</p><p>Please find your course certificate attached to this email.</p><p>Regards,<br>EduValues Team</p>`,
-            text: `Dear ${userName},\n\nCongratulations on successfully completing your course with EduValues.\n\nPlease find your course certificate attached to this email.\n\nRegards,\nEduValues Team`,
+            subject: `Your EduValues Course Certificate - ${uniqueCode}`,
+            html: `<div style="font-family: Arial, sans-serif; padding: 20px; color: #333;"><h2 style="color: #001F3F;">Congratulations, ${userName}! 🏆</h2><p>You have successfully completed your course on EduValues. Please find your official certificate attached to this email.</p><p style="margin-top: 20px; color: #64748b;">Verification Code: <strong>${uniqueCode}</strong></p><hr /><p style="font-size: 12px; color: #94a3b8;">EduValues LMS &bull; Character & Value Education</p></div>`,
+            text: `Dear ${userName},\n\nCongratulations on successfully completing your course with EduValues!\n\nPlease find your course certificate attached to this email.\n\nVerification Code: ${uniqueCode}\n\nRegards,\nEduValues Team`,
             attachments: [
                 {
-                    filename: `certificate-${uniqueCode}.pdf`,
+                    filename: `Certificate_${userName.replace(/\s+/g, '_')}.pdf`,
                     content: pdfBuffer,
                     contentType: 'application/pdf'
                 }
             ]
+        })
+    },
+
+    /**
+     * Automation trigger for contact form submissions.
+     */
+    sendContactSubmission: async ({ name, email, phone, message }) => {
+        const contactEmail = 'eduvalues123@gmail.com'
+        const dateStr = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+        return await sendEmail({
+            to: contactEmail,
+            replyTo: email,
+            subject: 'New Contact Form Submission - EduValues',
+            html: `
+                <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <h2 style="color: #001F3F; margin-bottom: 16px;">New Contact Message Received</h2>
+                    <p><strong>Name:</strong> ${name}</p>
+                    <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+                    ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
+                    <p><strong>Date/Time:</strong> ${dateStr}</p>
+                    <hr style="margin: 20px 0; border: none; border-top: 1px solid #e2e8f0;" />
+                    <p><strong>Message:</strong></p>
+                    <p style="background: #f8fafc; padding: 16px; border-radius: 6px; white-space: pre-wrap;">${message}</p>
+                </div>
+            `,
+            text: `New Contact Message from ${name} (${email})\nPhone: ${phone || 'N/A'}\nDate: ${dateStr}\n\nMessage:\n${message}`
         })
     }
 }

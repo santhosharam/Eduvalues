@@ -15,22 +15,23 @@ const generateCertificatePDF = (doc, cert, studentName) => {
     doc.fontSize(14).font('Helvetica').fillColor('#94a3b8').text('This certifies that', 0, currentY, { align: 'center' })
     
     currentY = doc.y + 10;
-    doc.fontSize(32).font('Helvetica-Bold').fillColor('#6366f1').text(studentName, 60, currentY, { align: 'center', width: doc.page.width - 120 })
+    doc.fontSize(32).font('Helvetica-Bold').fillColor('#6366f1').text(studentName || 'Student', 60, currentY, { align: 'center', width: doc.page.width - 120 })
     
-    currentY = doc.y + 20;
+    currentY = doc.y + 15;
     doc.fontSize(14).font('Helvetica').fillColor('#94a3b8').text('has successfully completed the course', 0, currentY, { align: 'center' })
     
     currentY = doc.y + 10;
-    doc.fontSize(22).font('Helvetica-Bold').fillColor('#f1f5f9').text(cert.courses.title, 60, currentY, { align: 'center', width: doc.page.width - 120 })
+    const courseTitle = cert?.courses?.title || cert?.title || 'Character Builders: Essential Life Values for Kids';
+    doc.fontSize(22).font('Helvetica-Bold').fillColor('#f1f5f9').text(courseTitle, 60, currentY, { align: 'center', width: doc.page.width - 120 })
 
     // Ensure bottom footer is pushed down properly but doesn't overflow page
-    const footerY = Math.max(doc.y + 40, 360);
-    const issuedStr = new Date(cert.issued_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
+    const footerY = Math.max(doc.y + 35, 480);
+    const issuedStr = new Date(cert?.issued_at || Date.now()).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
     
     // Print issued date on the left and verification code on the right
     doc.fontSize(12).font('Helvetica').fillColor('#64748b')
        .text(`Issued on: ${issuedStr}`, 80, footerY)
-       .text(`Verification Code: ${cert.unique_code}`, 80, footerY, { align: 'right', width: doc.page.width - 160 })
+       .text(`Verification Code: ${cert?.unique_code || 'CERT-VERIFIED'}`, 80, footerY, { align: 'right', width: doc.page.width - 160 })
 }
 
 // GET /api/certificates/my
@@ -95,16 +96,16 @@ exports.downloadCertificate = async (req, res) => {
 
         const doc = new PDFDocument({ size: 'A4', layout: 'landscape', margin: 60 })
 
+        const sanitizedName = studentName.replace(/[^a-zA-Z0-9_-]/g, '_')
         res.setHeader('Content-Type', 'application/pdf')
-        res.setHeader('Content-Disposition', `attachment; filename="certificate-${cert.unique_code}.pdf"`)
+        res.setHeader('Content-Disposition', `attachment; filename="Certificate_${sanitizedName}.pdf"`)
         doc.pipe(res)
 
         generateCertificatePDF(doc, cert, studentName)
 
         doc.end()
-
-        doc.end()
     } catch (err) {
+        console.error('[DOWNLOAD_CERTIFICATE_ERROR]', err)
         res.status(500).json({ message: err.message })
     }
 }

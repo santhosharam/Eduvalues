@@ -92,6 +92,7 @@ app.use((req, res, next) => {
         app.use('/api/reviews', require('./routes/reviewRoutes'))
         app.use('/api/admin', require('./routes/adminRoutes'))
         app.use('/api/blogs', require('./routes/blogRoutes'))
+        app.use('/api/contact', require('./routes/contactRoutes'))
 
         // Health check
         app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date(), version: '2.0.0' }))

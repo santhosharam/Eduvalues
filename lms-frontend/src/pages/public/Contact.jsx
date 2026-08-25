@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Send, CheckCircle, Pencil, Star, Sparkles, Mail } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { contactInfo } from '../../config/contactConfig'
+import api from '../../services/api'
 
 export default function Contact() {
     const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' })
@@ -13,10 +14,21 @@ export default function Contact() {
     const handleSubmit = async e => {
         e.preventDefault()
         setLoading(true)
-        await new Promise(r => setTimeout(r, 1200))
-        setSent(true)
-        setLoading(false)
-        toast.success('Thank you! We have received your message.')
+        try {
+            const res = await api.post('/contact', form)
+            if (res.data?.success) {
+                setSent(true)
+                toast.success(res.data.message || 'Message Sent! We will reach out shortly.')
+                setForm({ name: '', email: '', phone: '', message: '' })
+            } else {
+                toast.error(res.data?.message || 'Unable to send message. Please try again.')
+            }
+        } catch (err) {
+            console.error('Contact submit error:', err)
+            toast.error(err.response?.data?.message || 'Unable to send your message right now. Please try again.')
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (

@@ -122,17 +122,29 @@ export default function App() {
           {/* ── Protected (admin) ──────────────────── */}
           <Route element={<AdminRoute />}>
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/staff-room" element={<AdminDashboard />} />
             <Route path="/admin/courses" element={<ManageCourses />} />
+            <Route path="/staff-room/courses" element={<ManageCourses />} />
             <Route path="/admin/lessons" element={<ManageLessons />} />
+            <Route path="/staff-room/lessons" element={<ManageLessons />} />
             <Route path="/admin/comics" element={<ManageLessonContent />} />
+            <Route path="/staff-room/comics" element={<ManageLessonContent />} />
             <Route path="/admin/quiz" element={<ManageLessonContent />} />
+            <Route path="/staff-room/quiz" element={<ManageLessonContent />} />
             <Route path="/admin/lessons/:lessonId/comics" element={<ManageComics />} />
+            <Route path="/staff-room/lessons/:lessonId/comics" element={<ManageComics />} />
             <Route path="/admin/lessons/:lessonId/quiz" element={<ManageQuiz />} />
+            <Route path="/staff-room/lessons/:lessonId/quiz" element={<ManageQuiz />} />
             <Route path="/admin/courses/:courseId/exam" element={<ManageFinalExam />} />
+            <Route path="/staff-room/courses/:courseId/exam" element={<ManageFinalExam />} />
             <Route path="/admin/students" element={<ManageStudents />} />
+            <Route path="/staff-room/students" element={<ManageStudents />} />
             <Route path="/admin/payments" element={<ManagePayments />} />
+            <Route path="/staff-room/payments" element={<ManagePayments />} />
             <Route path="/admin/certificates" element={<AdminCertificates />} />
+            <Route path="/staff-room/certificates" element={<AdminCertificates />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
+            <Route path="/staff-room/settings" element={<AdminSettings />} />
           </Route>
 
           {/* ── 404 ────────────────────────────────── */}

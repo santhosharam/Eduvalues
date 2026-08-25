@@ -8,7 +8,7 @@ import { jsPDF } from 'jspdf'
 import { supabase } from '../../supabaseClient';
 import { useAuth } from '../../context/AuthContext'
 import { getFinalExam } from '../../services/courseService'
-import { completeCourse, emailCertificate } from '../../services/certificateService'
+import { completeCourse, emailCertificate, downloadCertificate } from '../../services/certificateService'
 
 export default function FinalExamPage() {
     const { courseId } = useParams()
@@ -164,82 +164,28 @@ export default function FinalExamPage() {
     }
 
     const handleDownload = async () => {
-        if (!certificateRef.current) return
+        if (!certificateId) {
+            toast.error('Certificate ID is missing. Please refresh the page.')
+            return
+        }
         
         setActionLoading(true)
         try {
-            // Wait a tiny bit for any state changes to settle
-            await new Promise(resolve => setTimeout(resolve, 500))
-            
-            const element = certificateRef.current
-            
-            // Backup original styles to restore after capture
-            const originalScrollY = window.scrollY;
-            const originalScrollX = window.scrollX;
-            const originalWidth = element.style.width;
-            const originalHeight = element.style.height;
-            const originalPosition = element.style.position;
-            const originalTop = element.style.top;
-            const originalLeft = element.style.left;
-            
-            // Force desktop A4 landscape dimensions temporarily for a high-quality capture
-            // This fixes mobile cropping where the container squishes the fixed-pixel fonts
-            element.style.width = '1122px';
-            element.style.height = '793px';
-            element.style.position = 'absolute';
-            element.style.top = '0';
-            element.style.left = '0';
-            
-            // Reset document scroll to avoid html2canvas offset bugs
-            window.scrollTo(0, 0);
-            
-            // Wait for DOM to update the dimensions
-            await new Promise(resolve => setTimeout(resolve, 100));
-            
-            // Get exact dimensions of the element now that it's fixed
-            const rect = element.getBoundingClientRect();
-            
-            const canvas = await html2canvas(element, {
-                scale: 2, // Higher quality
-                useCORS: true,
-                logging: false,
-                backgroundColor: '#ffffff',
-                x: rect.left,
-                y: rect.top,
-                width: rect.width,
-                height: rect.height,
-                scrollX: 0,
-                scrollY: 0,
-                windowWidth: document.documentElement.offsetWidth,
-                windowHeight: document.documentElement.offsetHeight
-            })
-            
-            // Restore original styles and scroll
-            element.style.width = originalWidth;
-            element.style.height = originalHeight;
-            element.style.position = originalPosition;
-            element.style.top = originalTop;
-            element.style.left = originalLeft;
-            window.scrollTo(originalScrollX, originalScrollY);
-            
-            const imgData = canvas.toDataURL('image/png')
-            const pdf = new jsPDF({
-                orientation: 'landscape',
-                unit: 'mm',
-                format: 'a4'
-            })
-            
-            const imgProps = pdf.getImageProperties(imgData)
-            const pdfWidth = pdf.internal.pageSize.getWidth()
-            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
-            
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
-            pdf.save(`Certificate_${studentName.replace(/\s+/g, '_') || 'Character_Builder'}.pdf`)
-            
+            const res = await downloadCertificate(certificateId)
+            const blob = new Blob([res.data], { type: 'application/pdf' })
+            const url = window.URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = url
+            const sanitized = (studentName || 'Student').replace(/\s+/g, '_')
+            link.setAttribute('download', `Certificate_${sanitized}.pdf`)
+            document.body.appendChild(link)
+            link.click()
+            link.remove()
+            window.URL.revokeObjectURL(url)
             toast.success('Certificate downloaded successfully! 📄')
         } catch (err) {
             console.error('Download error:', err)
-            toast.error('Could not generate PDF. Please try the Print option.')
+            toast.error('Could not download PDF. Please try again or use the Print option.')
         } finally {
             setActionLoading(false)
         }
