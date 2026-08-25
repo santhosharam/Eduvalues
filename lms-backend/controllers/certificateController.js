@@ -2,6 +2,37 @@ const supabase = require('../supabaseClient')
 const PDFDocument = require('pdfkit')
 const { emailAutomation } = require('../utils/emailService')
 
+// Helper function to draw the certificate on a PDFDocument
+const generateCertificatePDF = (doc, cert, studentName) => {
+    // Certificate Design Logic
+    doc.rect(0, 0, doc.page.width, doc.page.height).fill('#0f172a')
+    doc.rect(20, 20, doc.page.width - 40, doc.page.height - 40).lineWidth(3).strokeColor('#6366f1').stroke()
+    
+    doc.fontSize(11).font('Helvetica-Bold').fillColor('#818cf8').text('CERTIFICATE OF COMPLETION', 0, 55, { align: 'center' })
+    doc.fontSize(42).font('Helvetica-Bold').fillColor('#f1f5f9').text('EduValues', 0, 80, { align: 'center' })
+
+    let currentY = 160;
+    doc.fontSize(14).font('Helvetica').fillColor('#94a3b8').text('This certifies that', 0, currentY, { align: 'center' })
+    
+    currentY = doc.y + 10;
+    doc.fontSize(32).font('Helvetica-Bold').fillColor('#6366f1').text(studentName, 60, currentY, { align: 'center', width: doc.page.width - 120 })
+    
+    currentY = doc.y + 20;
+    doc.fontSize(14).font('Helvetica').fillColor('#94a3b8').text('has successfully completed the course', 0, currentY, { align: 'center' })
+    
+    currentY = doc.y + 10;
+    doc.fontSize(22).font('Helvetica-Bold').fillColor('#f1f5f9').text(cert.courses.title, 60, currentY, { align: 'center', width: doc.page.width - 120 })
+
+    // Ensure bottom footer is pushed down properly but doesn't overflow page
+    const footerY = Math.max(doc.y + 40, 360);
+    const issuedStr = new Date(cert.issued_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
+    
+    // Print issued date on the left and verification code on the right
+    doc.fontSize(12).font('Helvetica').fillColor('#64748b')
+       .text(`Issued on: ${issuedStr}`, 80, footerY)
+       .text(`Verification Code: ${cert.unique_code}`, 80, footerY, { align: 'right', width: doc.page.width - 160 })
+}
+
 // GET /api/certificates/my
 exports.getMyCertificates = async (req, res) => {
     try {
@@ -68,33 +99,9 @@ exports.downloadCertificate = async (req, res) => {
         res.setHeader('Content-Disposition', `attachment; filename="certificate-${cert.unique_code}.pdf"`)
         doc.pipe(res)
 
-        // Certificate Design Logic
-        doc.rect(0, 0, doc.page.width, doc.page.height).fill('#0f172a')
-        doc.rect(20, 20, doc.page.width - 40, doc.page.height - 40).lineWidth(3).strokeColor('#6366f1').stroke()
-        
-        doc.fontSize(11).font('Helvetica-Bold').fillColor('#818cf8').text('CERTIFICATE OF COMPLETION', 0, 55, { align: 'center' })
-        doc.fontSize(42).font('Helvetica-Bold').fillColor('#f1f5f9').text('EduValues', 0, 80, { align: 'center' })
+        generateCertificatePDF(doc, cert, studentName)
 
-        let currentY = 160;
-        doc.fontSize(14).font('Helvetica').fillColor('#94a3b8').text('This certifies that', 0, currentY, { align: 'center' })
-        
-        currentY = doc.y + 10;
-        doc.fontSize(32).font('Helvetica-Bold').fillColor('#6366f1').text(studentName, 60, currentY, { align: 'center', width: doc.page.width - 120 })
-        
-        currentY = doc.y + 20;
-        doc.fontSize(14).font('Helvetica').fillColor('#94a3b8').text('has successfully completed the course', 0, currentY, { align: 'center' })
-        
-        currentY = doc.y + 10;
-        doc.fontSize(22).font('Helvetica-Bold').fillColor('#f1f5f9').text(cert.courses.title, 60, currentY, { align: 'center', width: doc.page.width - 120 })
-
-        // Ensure bottom footer is pushed down properly but doesn't overflow page
-        const footerY = Math.max(doc.y + 40, 360);
-        const issuedStr = new Date(cert.issued_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
-        
-        // Print issued date on the left and verification code on the right
-        doc.fontSize(12).font('Helvetica').fillColor('#64748b')
-           .text(`Issued on: ${issuedStr}`, 80, footerY)
-           .text(`Verification Code: ${cert.unique_code}`, 80, footerY, { align: 'right', width: doc.page.width - 160 })
+        doc.end()
 
         doc.end()
     } catch (err) {
@@ -163,6 +170,51 @@ exports.completeCourse = async (req, res) => {
             certificateId: certificate.id, 
             uniqueCode 
         })
+    } catch (err) {
+        res.status(500).json({ message: err.message })
+    }
+}
+
+// POST /api/certificates/email/:id
+exports.emailCertificate = async (req, res) => {
+    try {
+        const { data: cert, error } = await supabase
+            .from('certificates')
+            .select('*, courses(title, instructor)')
+            .eq('id', req.params.id)
+            .single()
+
+        if (error || !cert) return res.status(404).json({ message: 'Certificate not found' })
+        
+        if (cert.student_id !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Not authorized' })
+        }
+
+        const { data: { user } } = await supabase.auth.admin.getUserById(cert.student_id)
+        const studentName = user?.user_metadata?.full_name || 'Student'
+        const studentEmail = user?.email || req.user.email
+
+        if (!studentEmail) {
+            return res.status(400).json({ message: 'User does not have an associated email' })
+        }
+
+        const doc = new PDFDocument({ size: 'A4', layout: 'landscape', margin: 60 })
+        const chunks = []
+        
+        doc.on('data', chunk => chunks.push(chunk))
+        doc.on('end', async () => {
+            const pdfBuffer = Buffer.concat(chunks)
+            const emailResult = await emailAutomation.sendCertificateAttachment(studentEmail, studentName, pdfBuffer, cert.unique_code)
+            
+            if (emailResult.success) {
+                res.json({ success: true, message: 'Certificate sent successfully to your registered email.' })
+            } else {
+                res.status(500).json({ success: false, message: 'Unable to send certificate. Please try again.' })
+            }
+        })
+
+        generateCertificatePDF(doc, cert, studentName)
+        doc.end()
     } catch (err) {
         res.status(500).json({ message: err.message })
     }

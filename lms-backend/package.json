@@ -26,6 +26,5 @@
     "pdfkit": "^0.17.2",
     "razorpay": "^2.9.6",
     "uuid": "^13.0.0"
-  },
-  "devDependencies": {}
+  }
 }

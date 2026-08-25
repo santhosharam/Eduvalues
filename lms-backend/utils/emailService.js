@@ -38,14 +38,15 @@ transporter.verify((error, success) => {
  * Unified email sending function that provides standardized error handling
  * and fallback mechanisms for all platform communications.
  */
-const sendEmail = async ({ to, subject, html, text }) => {
+const sendEmail = async ({ to, subject, html, text, attachments = [] }) => {
     try {
         const info = await transporter.sendMail({
             from: process.env.EMAIL_FROM || `"EduValues" <${process.env.EMAIL_USER}>`,
             to,
             subject,
             text,
-            html
+            html,
+            attachments
         })
         console.log('✅ Email sent successfully:', info.messageId)
         return { success: true, messageId: info.messageId }
@@ -95,6 +96,25 @@ const emailAutomation = {
             subject: `Congratulations on Completing ${courseName}! 🏆 | EduValues`,
             html: completionTemplate(userName, courseName, certificateLink),
             text: `Incredible job ${userName}! You've completed ${courseName}. View and download your certificate here: ${certificateLink}`
+        })
+    },
+
+    /**
+     * Automation trigger for emailing the PDF certificate attachment.
+     */
+    sendCertificateAttachment: async (userEmail, userName, pdfBuffer, uniqueCode) => {
+        return await sendEmail({
+            to: userEmail,
+            subject: `Your EduValues Course Certificate`,
+            html: `<p>Dear ${userName},</p><p>Congratulations on successfully completing your course with EduValues.</p><p>Please find your course certificate attached to this email.</p><p>Regards,<br>EduValues Team</p>`,
+            text: `Dear ${userName},\n\nCongratulations on successfully completing your course with EduValues.\n\nPlease find your course certificate attached to this email.\n\nRegards,\nEduValues Team`,
+            attachments: [
+                {
+                    filename: `certificate-${uniqueCode}.pdf`,
+                    content: pdfBuffer,
+                    contentType: 'application/pdf'
+                }
+            ]
         })
     }
 }

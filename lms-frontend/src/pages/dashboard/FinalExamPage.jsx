@@ -8,7 +8,7 @@ import { jsPDF } from 'jspdf'
 import { supabase } from '../../supabaseClient';
 import { useAuth } from '../../context/AuthContext'
 import { getFinalExam } from '../../services/courseService'
-import { completeCourse } from '../../services/certificateService'
+import { completeCourse, emailCertificate } from '../../services/certificateService'
 
 export default function FinalExamPage() {
     const { courseId } = useParams()
@@ -25,6 +25,8 @@ export default function FinalExamPage() {
     const certificateRef = useRef()
     const wrapperRef = useRef()
     const [previewScale, setPreviewScale] = useState(1)
+    const [certificateId, setCertificateId] = useState(null)
+    const [isEmailing, setIsEmailing] = useState(false)
 
     useEffect(() => {
         const handleResize = () => {
@@ -116,6 +118,7 @@ export default function FinalExamPage() {
                 if (certData) {
                     setSubmitted(true);
                     setScore(20); // Bypass quiz and show certificate
+                    setCertificateId(certData.id)
                 }
             } catch (err) {
                 console.error('Error checking certificate:', err);
@@ -141,7 +144,10 @@ export default function FinalExamPage() {
             // 2. Passing requirement: 75% (15/20)
             if (calculatedScore >= 15 && questions.length >= 20) {
                 // Call course completion API (updates DB and triggers email automation)
-                await completeCourse(resolvedId)
+                const completionRes = await completeCourse(resolvedId)
+                if (completionRes.data?.certificateId) {
+                    setCertificateId(completionRes.data.certificateId)
+                }
                 toast.success('CHALLENGE CONQUERED! You have earned your certificate! 🏆', { duration: 5000 })
             } else if (questions.length < 20) {
                 toast.error('This exam is not yet ready for certification (Needs 20 questions).');
@@ -243,6 +249,28 @@ export default function FinalExamPage() {
         window.print()
     }
 
+    const handleEmailCertificate = async () => {
+        if (!certificateId) {
+            toast.error('Certificate ID is missing. Please refresh the page.')
+            return
+        }
+
+        setIsEmailing(true)
+        try {
+            const res = await emailCertificate(certificateId)
+            if (res.data?.success) {
+                toast.success(res.data.message || 'Certificate sent successfully! 📧')
+            } else {
+                toast.error('Could not send the certificate.')
+            }
+        } catch (err) {
+            console.error('Email certificate error:', err)
+            toast.error(err.response?.data?.message || 'Something went wrong while sending the email.')
+        } finally {
+            setIsEmailing(false)
+        }
+    }
+
     if (loading) return (
         <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F8FAFB' }}>
             <Loader2 className="spin" size={48} color="#00A6C0" />
@@ -298,6 +326,22 @@ export default function FinalExamPage() {
                                 {actionLoading ? <Loader2 className="spin" size={20} /> : <Download size={20} />}
                                 {actionLoading ? 'Generating...' : 'Download Certificate'}
                             </button>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                <button 
+                                    onClick={handleEmailCertificate} 
+                                    disabled={isEmailing}
+                                    className="btn-primary" 
+                                    style={{ width: '100%', height: 60, padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, background: '#8B5CF6', borderRadius: 30, boxShadow: '0 6px 0 #7C3AED' }}
+                                >
+                                    {isEmailing ? <Loader2 className="spin" size={20} /> : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>}
+                                    {isEmailing ? 'Sending...' : 'Send Certificate to Email'}
+                                </button>
+                                {user?.email && (
+                                    <span style={{ fontSize: 12, color: '#64748b', marginTop: 8, fontWeight: 600 }}>
+                                        Certificate will be sent to {user.email.replace(/(.{1,2})(.*)(@.*)/, (m, p1, p2, p3) => p1 + '*'.repeat(p2.length) + p3)}
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </div>
 
