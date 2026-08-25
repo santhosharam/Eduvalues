@@ -682,7 +682,7 @@ export default function Home() {
                             {
                                 title: "Fun Daily Sharing Games to Play with Toddlers",
                                 cat: "Kids Activities",
-                                img: "/blog/dance.png",
+                                img: "/blog/toddlers-games.png",
                                 date: "Oct 8, 2025"
                             }
                         ].map((post, i) => (

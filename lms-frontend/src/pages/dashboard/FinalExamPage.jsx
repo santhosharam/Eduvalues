@@ -23,6 +23,25 @@ export default function FinalExamPage() {
     const [resolvedId, setResolvedId] = useState(courseId)
     const [course, setCourse] = useState(null)
     const certificateRef = useRef()
+    const wrapperRef = useRef()
+    const [previewScale, setPreviewScale] = useState(1)
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (wrapperRef.current) {
+                const availableWidth = wrapperRef.current.clientWidth;
+                // A4 landscape width is 1122
+                if (availableWidth < 1122) {
+                    setPreviewScale(availableWidth / 1122);
+                } else {
+                    setPreviewScale(1);
+                }
+            }
+        };
+        handleResize(); // Initial measurement
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [submitted]); // Also re-measure when submitted state changes so the element is there
 
     useEffect(() => {
         if (user?.name && !studentName) {
@@ -283,24 +302,38 @@ export default function FinalExamPage() {
                     </div>
 
                     {/* Certificate Preview */}
-                    <div
-                        ref={certificateRef}
-                        id="certificate-print-area"
-                        style={{
-                            background: '#fff',
-                            padding: 60,
-                            borderRadius: 0,
-                            border: '20px solid #001F3F',
-                            position: 'relative',
-                            textAlign: 'center',
-                            boxShadow: '0 20px 50px rgba(0,0,0,0.1)',
-                            aspectRatio: '1.414 / 1', // A4 Landscape aspect ratio
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'center',
-                            overflow: 'hidden'
+                    <div 
+                        ref={wrapperRef} 
+                        style={{ 
+                            width: '100%', 
+                            display: 'flex', 
+                            justifyContent: 'center', 
+                            overflow: 'hidden',
+                            height: previewScale < 1 ? 793 * previewScale : 'auto'
                         }}
                     >
+                        <div
+                            ref={certificateRef}
+                            id="certificate-print-area"
+                            style={{
+                                width: 1122,
+                                height: 793,
+                                background: '#fff',
+                                padding: 60,
+                                borderRadius: 0,
+                                border: '20px solid #001F3F',
+                                position: 'relative',
+                                textAlign: 'center',
+                                boxShadow: '0 20px 50px rgba(0,0,0,0.1)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                overflow: 'hidden',
+                                transform: `scale(${previewScale})`,
+                                transformOrigin: 'top center',
+                                flexShrink: 0
+                            }}
+                        >
                         {/* Decorative Borders */}
                         <div style={{ position: 'absolute', inset: 10, border: '2px solid #00A6C0' }} />
 
@@ -313,7 +346,7 @@ export default function FinalExamPage() {
 
                             <p style={{ fontSize: 20, color: '#64748b', fontStyle: 'italic', marginBottom: 10 }}>This is to certify that</p>
 
-                            <h2 style={{ fontSize: 56, fontWeight: 900, color: '#001F3F', borderBottom: '3px solid #F1F1F1', display: 'inline-block', minWidth: 400, paddingBottom: 10, marginBottom: 30, fontFamily: 'serif' }}>
+                            <h2 style={{ fontSize: 56, fontWeight: 900, color: '#001F3F', borderBottom: '3px solid #F1F1F1', display: 'inline-block', minWidth: 400, maxWidth: 900, paddingBottom: 10, marginBottom: 30, fontFamily: 'serif' }}>
                                 {studentName || 'Your Name'}
                             </h2>
 
@@ -341,6 +374,7 @@ export default function FinalExamPage() {
                             </div>
                         </div>
                     </div>
+                    </div>
                 </div>
 
                 <style>{`
@@ -354,6 +388,7 @@ export default function FinalExamPage() {
                             width: 100%;
                             border: 15px solid #001F3F !important;
                             box-shadow: none !important;
+                            transform: none !important;
                         }
                         .no-print { display: none !important; }
                     }
