@@ -232,9 +232,7 @@ export default function FinalExamPage() {
         }
     }
 
-    const handlePrint = () => {
-        window.print()
-    }
+
 
     const handleEmailCertificate = async () => {
         setIsEmailing(true)
@@ -390,9 +388,7 @@ export default function FinalExamPage() {
                         </div>
 
                         <div style={{ display: 'flex', gap: 20, justifyContent: 'center', alignItems: 'center', marginTop: 32 }} className="mobile-stack">
-                            <button onClick={handlePrint} className="btn-primary" style={{ height: 60, padding: '0 28px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, background: '#001F3F', borderRadius: 30, boxShadow: '0 6px 0 #000c1a', cursor: 'pointer' }}>
-                                <Printer size={20} /> Print Certificate
-                            </button>
+
                             <button 
                                 onClick={handleDownload} 
                                 disabled={actionLoading}
