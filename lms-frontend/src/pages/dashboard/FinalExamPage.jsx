@@ -414,29 +414,38 @@ export default function FinalExamPage() {
                             height: previewScale < 1 ? 793 * previewScale : 'auto'
                         }}
                     >
-                        <div
-                            ref={certificateRef}
-                            id="certificate-print-area"
-                            style={{
-                                width: 1122,
-                                height: 793,
-                                background: '#fff',
-                                padding: 60,
-                                borderRadius: 0,
-                                border: '20px solid #001F3F',
-                                position: 'relative',
-                                textAlign: 'center',
-                                boxShadow: '0 20px 50px rgba(0,0,0,0.1)',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'center',
-                                overflow: 'hidden',
-                                transform: `scale(${previewScale})`,
-                                transformOrigin: 'top center',
-                                flexShrink: 0,
-                                boxSizing: 'border-box'
-                            }}
-                        >
+                        <div style={{ 
+                            width: previewScale < 1 ? 1122 * previewScale : 1122, 
+                            height: previewScale < 1 ? 793 * previewScale : 793,
+                            position: 'relative',
+                            display: 'flex',
+                            justifyContent: 'center'
+                        }}>
+                            <div
+                                ref={certificateRef}
+                                id="certificate-print-area"
+                                style={{
+                                    width: 1122,
+                                    height: 793,
+                                    background: '#fff',
+                                    padding: 60,
+                                    borderRadius: 0,
+                                    border: '20px solid #001F3F',
+                                    position: previewScale < 1 ? 'absolute' : 'relative',
+                                    top: 0,
+                                    left: 0,
+                                    textAlign: 'center',
+                                    boxShadow: '0 20px 50px rgba(0,0,0,0.1)',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                    overflow: 'hidden',
+                                    transform: `scale(${previewScale})`,
+                                    transformOrigin: 'top left',
+                                    flexShrink: 0,
+                                    boxSizing: 'border-box'
+                                }}
+                            >
                             <div style={{ position: 'absolute', inset: 10, border: '2px solid #00A6C0' }} />
 
                             <div style={{ position: 'relative', zIndex: 1 }}>
@@ -504,7 +513,7 @@ export default function FinalExamPage() {
                         </div>
                     </div>
                 </div>
-
+            </div>
                 <style>{`
                     @media print {
                         body * { visibility: hidden; }
